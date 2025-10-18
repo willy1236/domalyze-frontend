@@ -1,5 +1,3 @@
-"use client"
-
 import { Button } from "@/components/ui/button"
 import { Bell, Settings, LogOut } from "lucide-react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -12,6 +10,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import type { DiscordUser } from "@/lib/auth"
+
+const base_api_url = process.env.NEXT_PUBLIC_BASE_API_URL;
 
 interface DashboardHeaderProps {
   user: DiscordUser
@@ -59,19 +59,14 @@ export function DashboardHeader({ user }: DashboardHeaderProps) {
               </DropdownMenuItem>
               <DropdownMenuItem>個人資料</DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem asChild>
-                <button 
-                  type="button" 
-                  className="w-full text-destructive cursor-pointer"
-                  onClick={() => {
-                    document.cookie = "jwt=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=.localhost;";
-                    window.location.href = "/";
-                  }}
-                >
-                  <LogOut className="w-4 h-4 mr-2" />
-                  登出
-                </button>
-              </DropdownMenuItem>
+              <form action={`${base_api_url}/logout`} method="GET">
+                <DropdownMenuItem asChild>
+                  <button type="submit" className="w-full text-destructive cursor-pointer">
+                    <LogOut className="w-4 h-4 mr-2" />
+                    登出
+                  </button>
+                </DropdownMenuItem>
+              </form>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
