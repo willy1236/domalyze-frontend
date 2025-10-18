@@ -198,10 +198,10 @@ export default function FeaturesPage() {
         <section className="container mx-auto px-4 py-20 text-center">
           <Badge className="mb-4 bg-primary/10 text-primary border-primary/20">完整功能介紹</Badge>
           <h1 className="text-5xl md:text-6xl font-bold mb-6 text-balance">
-            探索 <span className="text-primary">NexusBot</span> 的強大功能
+            探索 <span className="text-primary">Xingyu</span> 的強大功能
           </h1>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-            從自動化管理到 AI 聊天，從音樂播放到遊戲整合，NexusBot 提供您所需的一切功能，讓您的 Discord 伺服器更加出色
+            從自動化管理到 AI 聊天，從音樂播放到遊戲整合，Xingyu 提供您所需的一切功能，讓您的 Discord 伺服器更加出色
           </p>
         </section>
 
@@ -250,7 +250,7 @@ export default function FeaturesPage() {
           <Card className="p-12 bg-gradient-to-br from-primary/10 via-accent/10 to-primary/10 border-primary/20 text-center">
             <h2 className="text-4xl font-bold mb-4">準備好開始了嗎？</h2>
             <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-              立即邀請 NexusBot 到您的伺服器，體驗這些強大的功能
+              立即邀請 Xingyu 到您的伺服器，體驗這些強大的功能
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button size="lg" className="bg-primary hover:bg-primary/90 text-lg px-8">

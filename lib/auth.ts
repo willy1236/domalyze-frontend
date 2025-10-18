@@ -4,6 +4,7 @@ import { jwtVerify } from "jose"
 export interface DiscordUser {
   id: string
   username: string
+  avatar: string | null
 }
 
 // JWT 密鑰，應該從環境變數中獲取
@@ -13,15 +14,15 @@ const JWT_SECRET = new TextEncoder().encode(
 
 export async function getSession(): Promise<DiscordUser | null> {
   const cookieStore = await cookies()
-  const sessionCookie = cookieStore.get("jwt")
+  const jwt_cookie = cookieStore.get("jwt")
 
-  if (!sessionCookie) {
+  if (!jwt_cookie) {
     return null
   }
 
   try {
     // 驗證並解碼 JWT
-    const { payload } = await jwtVerify(sessionCookie.value, JWT_SECRET)
+    const { payload } = await jwtVerify(jwt_cookie.value, JWT_SECRET)
     
     // 從 JWT payload 直接取得 DiscordUser 資訊
     const user = payload as unknown as DiscordUser

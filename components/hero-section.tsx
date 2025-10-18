@@ -16,7 +16,7 @@ export function HeroSection() {
         </h1>
 
         <p className="text-xl text-muted-foreground mb-10 max-w-2xl mx-auto text-pretty leading-relaxed">
-          NexusBot 提供自動化管理、音樂播放、遊戲整合等多種功能，讓您的社群體驗更上一層樓
+          Xingyu 提供自動化管理、音樂播放、遊戲整合等多種功能，讓您的社群體驗更上一層樓
         </p>
 
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4">

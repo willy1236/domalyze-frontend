@@ -10,7 +10,7 @@ export function Footer() {
               <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-primary">
                 <Bot className="w-5 h-5 text-primary-foreground" />
               </div>
-              <span className="text-lg font-bold">NexusBot</span>
+              <span className="text-lg font-bold">Xingyu</span>
             </div>
             <p className="text-sm text-muted-foreground leading-relaxed">為 Discord 社群打造的全方位機器人解決方案</p>
           </div>
@@ -80,7 +80,7 @@ export function Footer() {
         </div>
 
         <div className="border-t border-border/50 mt-12 pt-8 text-center text-sm text-muted-foreground">
-          <p>© 2025 NexusBot. 版權所有。</p>
+          <p>© 2025 Xingyu. 版權所有。</p>
         </div>
       </div>
     </footer>

@@ -11,7 +11,7 @@ export function Header() {
             <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-primary">
               <Bot className="w-6 h-6 text-primary-foreground" />
             </div>
-            <span className="text-xl font-bold">NexusBot</span>
+            <span className="text-xl font-bold">Xingyu</span>
           </Link>
 
           <nav className="hidden md:flex items-center gap-6">

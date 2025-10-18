@@ -8,7 +8,7 @@ const _geist = Geist({ subsets: ["latin"] })
 const _geistMono = Geist_Mono({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "NexusBot - 強大的 Discord 機器人",
+  title: "Xingyu - 強大的 Discord 機器人",
   description: "為您的 Discord 伺服器注入強大功能",
   generator: "v0.app",
 }
