@@ -7,7 +7,7 @@ export function HeroSection() {
       <div className="max-w-4xl mx-auto text-center">
         <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 mb-6">
           <Sparkles className="w-4 h-4 text-primary" />
-          <span className="text-sm text-primary">現已支援 50,000+ 伺服器</span>
+          <span className="text-sm text-primary">不斷支援更多伺服器</span>
         </div>
 
         <h1 className="text-5xl md:text-7xl font-bold mb-6 text-balance">
@@ -16,7 +16,7 @@ export function HeroSection() {
         </h1>
 
         <p className="text-xl text-muted-foreground mb-10 max-w-2xl mx-auto text-pretty leading-relaxed">
-          Xingyu 提供自動化管理、音樂播放、遊戲整合等多種功能，讓您的社群體驗更上一層樓
+          星羽提供自動化管理、音樂播放、遊戲整合等多種功能，讓您的社群體驗更上一層樓
         </p>
 
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4">

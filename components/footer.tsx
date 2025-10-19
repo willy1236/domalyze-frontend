@@ -15,7 +15,7 @@ export function Footer() {
             <p className="text-sm text-muted-foreground leading-relaxed">為 Discord 社群打造的全方位機器人解決方案</p>
           </div>
 
-          <div>
+          {/*<div>
             <h4 className="font-semibold mb-4">產品</h4>
             <ul className="space-y-2 text-sm text-muted-foreground">
               <li>
@@ -34,9 +34,9 @@ export function Footer() {
                 </a>
               </li>
             </ul>
-          </div>
+          </div>*/}
 
-          <div>
+          {/*<div>
             <h4 className="font-semibold mb-4">資源</h4>
             <ul className="space-y-2 text-sm text-muted-foreground">
               <li>
@@ -55,23 +55,23 @@ export function Footer() {
                 </a>
               </li>
             </ul>
-          </div>
+          </div>*/}
 
           <div>
             <h4 className="font-semibold mb-4">社群</h4>
             <ul className="space-y-2 text-sm text-muted-foreground">
               <li>
-                <a href="#" className="hover:text-foreground transition-colors">
+                <a href="https://discord.gg/P4jqdcMxkH" className="hover:text-foreground transition-colors">
                   Discord
                 </a>
               </li>
               <li>
-                <a href="#" className="hover:text-foreground transition-colors">
-                  Twitter
+                <a href="https://linktr.ee/Xingyu016" className="hover:text-foreground transition-colors">
+                  Linktree
                 </a>
               </li>
               <li>
-                <a href="#" className="hover:text-foreground transition-colors">
+                <a href="https://github.com/willy1236/XingyuBot" className="hover:text-foreground transition-colors">
                   GitHub
                 </a>
               </li>

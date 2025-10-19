@@ -14,9 +14,9 @@ export function CTASection() {
             免費開始使用
             <ArrowRight className="ml-2 w-5 h-5" />
           </Button>
-          <Button size="lg" variant="outline" className="text-lg px-8 h-12 bg-transparent">
+          {/*<Button size="lg" variant="outline" className="text-lg px-8 h-12 bg-transparent">
             查看定價方案
-          </Button>
+          </Button>*/}
         </div>
       </div>
     </section>

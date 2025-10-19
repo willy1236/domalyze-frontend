@@ -1,21 +1,27 @@
 import { Card } from "@/components/ui/card"
-import { Shield, Music, Zap, Users, MessageSquare, Trophy } from "lucide-react"
+import { Shield, Music, Zap, Users, MessageSquare, Trophy, Coins, Heart, Dice6, Bell, Target, Settings, Pickaxe } from "lucide-react"
 
 const features = [
   {
     icon: Shield,
-    title: "自動化管理",
-    description: "智能反垃圾訊息、自動角色分配、進階權限管理系統",
+    title: "群組管理",
+    description: "跨群警告紀錄、語音與成員活動記錄",
+  },
+  {
+    icon: Bell,
+    title: "通知系統",
+    description: "地震、天氣、YouTube/Twitch/Twitter 推播",
+    color: "text-orange-500",
+  },
+  {
+    icon: Coins,
+    title: "經濟系統",
+    description: "虛擬貨幣儲值、賺錢與花費功能",
   },
   {
     icon: Music,
-    title: "音樂播放",
-    description: "高品質音樂串流、播放清單管理、支援多個音樂平台",
-  },
-  {
-    icon: Zap,
-    title: "自訂指令",
-    description: "建立專屬指令、自動回覆、靈活的觸發條件設定",
+    title: "音樂系統",
+    description: "播放 YouTube 音樂、音樂控制",
   },
   {
     icon: Users,
@@ -23,14 +29,32 @@ const features = [
     description: "歡迎訊息、等級系統、成員統計與活躍度追蹤",
   },
   {
-    icon: MessageSquare,
-    title: "AI 聊天",
-    description: "智能對話機器人、多語言支援、自然語言處理",
-  },
-  {
     icon: Trophy,
     title: "遊戲整合",
-    description: "遊戲統計查詢、排行榜系統、成就追蹤功能",
+    description: "整合 Osu / Riot / Steam / Apex 等資料",
+  },
+  {
+    icon: Heart,
+    title: "寵物系統",
+    description: "蒐集、培育與互動寵物",
+  },
+  {
+    icon: Dice6,
+    title: "賭盤系統",
+    description: "類似 Twitch 實況預測的賭盤機制",
+    color: "text-red-500",
+  },
+  {
+    icon: Settings,
+    title: "系統整合",
+    description: "整合 Twitch Chat Bot、玩家資料庫",
+    color: "text-indigo-500",
+  },
+  {
+    icon: Pickaxe,
+    title: "Minecraft 工具",
+    description: "私人功能：伺服器狀態與控制",
+    color: "text-emerald-500",
   },
 ]
 
@@ -38,7 +62,9 @@ export function FeaturesSection() {
   return (
     <section id="features" className="container mx-auto px-4 py-20">
       <div className="text-center mb-16">
-        <h2 className="text-4xl md:text-5xl font-bold mb-4">強大的功能集</h2>
+        {/*<h2 className="text-4xl md:text-5xl font-bold mb-4">強大的功能集</h2>*/}
+        <h2 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-indigo-200 via-purple-200 to-cyan-200 bg-clip-text text-transparent">強大的功能集</h2>
+        
         <p className="text-xl text-muted-foreground max-w-2xl mx-auto">一個機器人，滿足您所有需求</p>
       </div>
 
