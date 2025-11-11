@@ -80,7 +80,7 @@ export function Footer() {
         </div>
 
         <div className="border-t border-border/50 mt-12 pt-8 text-center text-sm text-muted-foreground">
-          <p>© 2025 Xingyu. 版權所有。</p>
+          <p>© 2025 沫序工作室 Moxu Studio. 版權所有。</p>
         </div>
       </div>
     </footer>
