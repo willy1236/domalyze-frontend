@@ -25,11 +25,11 @@ jobs:
           #
           # -f docker-compose.yml: 指定使用我們 checkout 下來的 compose 檔案
           # up -d:             在背景啟動服務
-          # --build nextjs-app:  強制 "只" 重建 nextjs-app 服務
+          # --build moxu-nextjs:  強制 "只" 重建 moxu-nextjs 服務
           #
-          # Docker 會偵測到 nextjs-app 的映像檔已更新，
+          # Docker 會偵測到 moxu-nextjs 的映像檔已更新，
           # 並自動停止舊容器，啟動一個使用新映像檔的新容器。
-          docker compose -f docker-compose.yml up -d --build nextjs-app
+          docker compose -f docker-compose.yml up -d --build moxu-nextjs
           
           echo "Deployment completed."
 
