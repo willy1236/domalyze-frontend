@@ -1,0 +1,43 @@
+version: '3.8'
+
+services:
+  # Next.js 應用程式服務
+  moxu-nextjs:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: moxu_nextjs_container
+    ports:
+      - "3000:3000" # 將主機的 3000 埠對應到容器的 3000 埠
+    restart: always
+    networks:
+      - cicd_network
+
+  # GitHub Actions Runner 服務
+  github-runner:
+    image: msyea/github-actions-runner:latest
+    container_name: github_runner_container
+    restart: always
+    environment:
+      # 【必填】替換成您的 GitHub 倉庫 URL
+      - REPO_URL=https://github.com/willy1236/moxu_frontend
+      # 【必填】從 .env 檔案讀取您的個人存取權杖 (PAT)
+      - ACCESS_TOKEN=${GITHUB_PAT}
+      # (可選) 為您的 runner 命名
+      - RUNNER_NAME=my-windows-docker-runner
+      # (可選) 為 runner 加上標籤，用於 workflow
+      - RUNNER_LABELS=self-hosted,windows,docker
+    volumes:
+      # ⚠️ 關鍵：掛載 Docker Socket
+      # 允許此容器控制主機的 Docker 服務
+      # 適用於在 Windows 上使用 Docker Desktop (WSL 2 後端)
+      - /var/run/docker.sock:/var/run/docker.sock
+
+      # 持久化 runner 的註冊資料，避免容器重啟後需要重新註冊
+      - ./runner-data:/home/docker/actions-runner
+    networks:
+      - cicd_network
+
+networks:
+  cicd_network:
+    driver: bridge

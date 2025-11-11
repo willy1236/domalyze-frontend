@@ -1,0 +1,40 @@
+name: Deploy Next.js to Self-Hosted Runner
+
+on:
+  push:
+    branches:
+      - main # 僅在 push 到 main 分支時觸發
+
+jobs:
+  build-and-deploy:
+    # 關鍵：指定此 job 必須在 self-hosted runner 上運行
+    runs-on: self-hosted
+
+    steps:
+      - name: 'Checkout Code'
+        # 步驟 1: 將最新的程式碼 checkout 到 runner 的工作區
+        uses: actions/checkout@v4
+
+      - name: 'Build and Restart Docker Compose Service'
+        # 步驟 2: 執行 docker compose 命令
+        run: |
+          echo "Running docker compose command to rebuild and deploy..."
+          
+          # 此命令在 runner 容器內執行，但透過掛載的 socket
+          # 它實際上是在控制 "主機" 的 Docker 服務。
+          #
+          # -f docker-compose.yml: 指定使用我們 checkout 下來的 compose 檔案
+          # up -d:             在背景啟動服務
+          # --build nextjs-app:  強制 "只" 重建 nextjs-app 服務
+          #
+          # Docker 會偵測到 nextjs-app 的映像檔已更新，
+          # 並自動停止舊容器，啟動一個使用新映像檔的新容器。
+          docker compose -f docker-compose.yml up -d --build nextjs-app
+          
+          echo "Deployment completed."
+
+      - name: 'Prune old Docker images'
+        # (可選) 步驟 3: 清理舊的、未被使用的 Docker 映像檔，釋放硬碟空間
+        if: always() # 無論上一步是否成功都執行
+        run: |
+          docker image prune -f
