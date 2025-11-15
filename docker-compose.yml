@@ -1,18 +1,21 @@
-version: '3.8'
-
 services:
   # Next.js 應用程式服務
   moxu-nextjs:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: moxu_nextjs_container
+    container_name: moxu_nextjs
     ports:
       - "3000:3000" # 將主機的 3000 埠對應到容器的 3000 埠
     restart: always
     networks:
       - cicd_network
+      - cfnet
 
 networks:
   cicd_network:
     driver: bridge
+
+  cfnet:
+    external: true
+    name: cfnet
