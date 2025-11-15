@@ -15,20 +15,26 @@ jobs:
         # 步驟 1: 將最新的程式碼 checkout 到 runner 的工作區
         uses: actions/checkout@v4
 
+      - name: 'Pull Latest Changes'
+        # 步驟 2: 拉取最新的 git 內容
+        run: |
+          echo "Pulling latest changes from repository..."
+          git pull origin main
+          
       - name: 'Build and Restart Docker Compose Service'
-        # 步驟 2: 執行 docker compose 命令
+        # 步驟 3: 執行 docker compose 命令
         run: |
           echo "Running docker compose command to rebuild and deploy..."
           
-          # 此命令在 runner 容器內執行，但透過掛載的 socket
+          # 此命令在 runner 容器內執行,但透過掛載的 socket
           # 它實際上是在控制 "主機" 的 Docker 服務。
           #
           # -f docker-compose.yml: 指定使用我們 checkout 下來的 compose 檔案
           # up -d:             在背景啟動服務
           # --build moxu-nextjs:  強制 "只" 重建 moxu-nextjs 服務
           #
-          # Docker 會偵測到 moxu-nextjs 的映像檔已更新，
-          # 並自動停止舊容器，啟動一個使用新映像檔的新容器。
+          # Docker 會偵測到 moxu-nextjs 的映像檔已更新,
+          # 並自動停止舊容器,啟動一個使用新映像檔的新容器。
           docker compose -f docker-compose.yml up -d --build moxu-nextjs
           
           echo "Deployment completed."
