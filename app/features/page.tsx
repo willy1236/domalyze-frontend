@@ -26,28 +26,47 @@ import {
   Gamepad2,
   CheckCircle2,
   Terminal,
+  Coins,
+  ClipboardList,
+  Store,
+  Banknote,
+  BellDot,
+  Wrench,
+  Dices,
+  CalendarDays,
+  Twitch,
+  Server,
+  BookUser,
+  Receipt,
 } from "lucide-react"
 
 const featureCategories = [
   {
     category: "自動化管理",
-    icon: Shield,
+    icon: Bot,
     color: "text-blue-400",
     bgColor: "bg-blue-500/10",
     features: [
       {
-        icon: Ban,
-        title: "跨群警告系統",
-        description: "自記錄並同步多個伺服器的用戶警告記錄。",
-        highlights: ["跨群聯動"],
-        commands: ["/warning", "/timeout", "/kick", "/ban"],
-      },
-      {
-        icon: UserCheck,
+        icon: BellDot,
         title: "通知系統",
         description: "成員異動、自動化通知和公告功能。",
         highlights: [],
         commands: ["/channel set"],
+      },
+      {
+        icon: UserCheck,
+        title: "社群通知",
+        description: "自動通知新影片與直播，確保不錯過任何資訊。",
+        highlights: [],
+        commands: ["/youtube", "/twitch", "/twitter"],
+      },
+      {
+        icon: Ban,
+        title: "跨群警告系統",
+        description: "記錄並同步多個伺服器的用戶警告記錄。",
+        highlights: ["跨群聯動"],
+        commands: ["/warning", "/timeout", "/kick", "/ban"],
       },
       {
         icon: Lock,
@@ -65,6 +84,100 @@ const featureCategories = [
       },
     ],
   },
+    {
+    category: "伺服器管理",
+    icon: Shield,
+    color: "text-pink-400",
+    bgColor: "bg-pink-500/10",
+    features: [
+      {
+        icon: Ban,
+        title: "跨群警告系統",
+        description: "記錄並同步多個伺服器的用戶警告記錄。",
+        highlights: ["跨群聯動"],
+        commands: ["/warning", "/timeout", "/kick", "/ban"],
+      },
+      {
+        icon: Lock,
+        title: "動態語音",
+        description: "減少不必要的語音頻道，讓伺服器更整潔。",
+        highlights: [],
+        commands: ["/channel voice"],
+      },
+      {
+        icon: MessageSquare,
+        title: "管理工具",
+        description: "各種管理指令和工具，提升管理效率",
+        highlights: [],
+        commands: ["/clean", "/poll", "/giveaway", "/ticket"],
+      },
+    ],
+  },
+  {
+    category: "成員與使用者管理",
+    icon: Users,
+    color: "text-green-400",
+    bgColor: "bg-green-500/10",
+    features: [
+      {
+        icon: BookUser,
+        title: "個人資料管理",
+        description: "自訂成員個人資料",
+        highlights: [],
+        commands: ["/ui"],
+      },
+      {
+        icon: BarChart3,
+        title: "等級與經驗系統",
+        description: "追蹤成員活躍度，透過等級系統獎勵活躍成員，提升社群參與度。（即將推出）",
+        highlights: ["經驗值計算", "等級獎勵", "排行榜"],
+        commands: [],
+      },
+      {
+        icon: Award,
+        title: "成員統計分析",
+        description: "詳細的成員活動統計，包含訊息數量、語音時長和參與度分析。（即將推出）",
+        highlights: ["活躍度追蹤", "圖表視覺化", "匯出報告"],
+        commands: [],
+      },
+    ],
+  },
+  {
+    category: "經濟系統",
+    icon: Coins,
+    color: "text-yellow-400",
+    bgColor: "bg-yellow-500/10",
+    features: [
+      {
+        icon: Banknote,
+        title: "貨幣系統",
+        description: "賺取、儲存和使用星塵",
+        highlights: [],
+        commands: ["/point"],
+      },
+      {
+        icon: Store,
+        title: "商店系統",
+        description: "購買角色、道具或特殊權限（即將推出）",
+        highlights: [],
+        commands: [],
+      },
+      {
+        icon: ClipboardList,
+        title: "任務系統",
+        description: "完成每日任務獲得獎勵（即將推出）",
+        highlights: [],
+        commands: [],
+      },
+      {
+        icon: Receipt,
+        title: "賭盤系統",
+        description: "類似Twitch預測的賭盤系統（維修中）",
+        highlights: [],
+        commands: ["/bet"],
+      }
+    ],
+  },
   {
     category: "音樂播放",
     icon: Music,
@@ -74,82 +187,17 @@ const featureCategories = [
       {
         icon: Volume2,
         title: "高品質音樂串流",
-        description: "享受無損音質的音樂播放體驗，支援多種音訊格式和串流品質選項。",
-        highlights: ["320kbps 音質", "低延遲播放", "穩定連線"],
+        description: "整合 YouTube 等主流音樂平台，一個指令播放所有音樂。",
+        highlights: ["高品質音效", "多平台支援", "穩定連線"],
         commands: [],
       },
       {
         icon: ListMusic,
         title: "播放清單管理",
-        description: "建立、儲存和分享您的播放清單，支援匯入和匯出功能。",
+        description: "建立、儲存和分享您的播放清單，支援匯入和匯出功能。（即將推出）",
         highlights: ["無限清單", "協作編輯", "快速搜尋"],
         commands: [],
-      },
-      {
-        icon: Radio,
-        title: "多平台支援",
-        description: "整合 YouTube、Spotify、SoundCloud 等主流音樂平台，一個指令播放所有音樂。",
-        highlights: ["YouTube", "Spotify", "SoundCloud"],
-        commands: [],
-      },
-    ],
-  },
-  {
-    category: "自訂指令",
-    icon: Zap,
-    color: "text-yellow-400",
-    bgColor: "bg-yellow-500/10",
-    features: [
-      {
-        icon: Code,
-        title: "建立專屬指令",
-        description: "使用簡單的介面建立自訂指令，無需編程知識即可打造獨特的機器人功能。",
-        highlights: ["視覺化編輯器", "變數支援", "條件邏輯"],
-        commands: [],
-      },
-      {
-        icon: MessageCircle,
-        title: "自動回覆系統",
-        description: "設定關鍵字觸發的自動回覆，提供即時資訊和常見問題解答。",
-        highlights: ["關鍵字觸發", "多重回覆", "嵌入訊息"],
-        commands: [],
-      },
-      {
-        icon: Bot,
-        title: "靈活觸發條件",
-        description: "設定複雜的觸發條件，包括時間、角色、頻道等多種參數組合。",
-        highlights: ["時間排程", "角色限制", "頻道過濾"],
-        commands: [],
-      },
-    ],
-  },
-  {
-    category: "成員管理",
-    icon: Users,
-    color: "text-green-400",
-    bgColor: "bg-green-500/10",
-    features: [
-      {
-        icon: Smile,
-        title: "歡迎訊息系統",
-        description: "為新成員提供溫馨的歡迎訊息，包含伺服器規則和重要資訊。",
-        highlights: ["自訂訊息", "圖片支援", "角色提及"],
-        commands: [],
-      },
-      {
-        icon: BarChart3,
-        title: "等級與經驗系統",
-        description: "追蹤成員活躍度，透過等級系統獎勵活躍成員，提升社群參與度。",
-        highlights: ["經驗值計算", "等級獎勵", "排行榜"],
-        commands: [],
-      },
-      {
-        icon: Award,
-        title: "成員統計分析",
-        description: "詳細的成員活動統計，包含訊息數量、語音時長和參與度分析。",
-        highlights: ["活躍度追蹤", "圖表視覺化", "匯出報告"],
-        commands: [],
-      },
+      }
     ],
   },
   {
@@ -163,21 +211,57 @@ const featureCategories = [
         title: "遊戲統計查詢",
         description: "查詢多款熱門遊戲的玩家統計資料，包含排名、勝率和詳細數據。",
         highlights: ["多遊戲支援", "即時數據", "歷史記錄"],
-        commands: [],
+        commands: ["/game", "/lol", "/apex", "/steam", "/dbd"],
       },
       {
         icon: Target,
         title: "排行榜系統",
-        description: "建立伺服器內的遊戲排行榜，追蹤成員表現並促進良性競爭。",
+        description: "建立伺服器內的遊戲排行榜，追蹤成員表現並促進良性競爭。（即將推出）",
         highlights: ["自動更新", "多種排序", "視覺化展示"],
         commands: [],
       },
       {
         icon: CheckCircle2,
         title: "成就追蹤功能",
-        description: "追蹤遊戲成就和里程碑，自動通知成員達成的成就。",
+        description: "追蹤遊戲成就和里程碑，自動通知成員達成的成就。（即將推出）",
         highlights: ["成就通知", "進度追蹤", "獎勵系統"],
         commands: [],
+      },
+    ],
+  },
+  {
+    category: "其他工具",
+    icon: Wrench,
+    color: "text-indigo-400",
+    bgColor: "bg-indigo-500/10",
+    features: [
+      {
+        icon: Dices,
+        title: "選擇",
+        description: "讓機器人幫您做出選擇。",
+        highlights: ["選項抽取", "成員選擇", "多次抽取"],
+        commands: ["/choice"],
+      },
+      {
+        icon: CalendarDays,
+        title: "紀念日",
+        description: "管理重要紀念日和事件。（即將推出）",
+        highlights: ["自訂紀念"],
+        commands: [],
+      },
+      {
+        icon: Twitch,
+        title: "Twitch 整合",
+        description: "管理與整合 Twitch 聊天室。",
+        highlights: ["聊天室管理", "跨平台整合"],
+        commands: [],
+      },
+      {
+        icon: Server,
+        title: "Minecraft 工具（私人功能）",
+        description: "即時監控與操控 Minecraft 伺服器",
+        highlights: ["伺服器狀態", "玩家管理", "指令執行"],
+        commands: ["/mcserver panel"],
       },
     ],
   },
@@ -266,7 +350,7 @@ export default function FeaturesPage() {
           <Card className="p-12 bg-gradient-to-br from-primary/10 via-accent/10 to-primary/10 border-primary/20 text-center">
             <h2 className="text-4xl font-bold mb-4">準備好開始了嗎？</h2>
             <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-              立即邀請 Xingyu 到您的伺服器，體驗這些強大的功能
+              立即邀請 星羽 到您的伺服器，體驗這些強大的功能
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button size="lg" className="bg-primary hover:bg-primary/90 text-lg px-8">
