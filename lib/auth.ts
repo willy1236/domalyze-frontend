@@ -30,12 +30,12 @@ export async function getSession(): Promise<DiscordUser | null> {
     return user
   } catch {
     // JWT 無效或已過期
-    await destroySession()
     return null
   }
 }
 
 export async function destroySession() {
+  "use server"
   const cookieStore = await cookies()
   cookieStore.delete("jwt")
 }
