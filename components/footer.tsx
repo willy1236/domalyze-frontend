@@ -66,7 +66,7 @@ export function Footer() {
                 </a>
               </li>
               <li>
-                <a href="https://linktr.ee/Xingyu016" className="hover:text-foreground transition-colors">
+                <a href="https://linktr.ee/Xingyu1016" className="hover:text-foreground transition-colors">
                   Linktree
                 </a>
               </li>
