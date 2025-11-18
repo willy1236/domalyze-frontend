@@ -15,12 +15,25 @@ jobs:
         # 步驟 1: 將最新的程式碼 checkout 到 runner 的工作區
         uses: actions/checkout@v4
 
-      - name: 'Pull Latest Changes'
-        # 步驟 2: 拉取最新的 git 內容
+      - name: 'Create .env file'
+        # 步驟 2: 建立 .env 檔案
+        # 強制使用 bash 以正確處理換行符號與編碼
+        shell: bash
         run: |
-          echo "Pulling latest changes from repository..."
-          git pull origin main
+          echo "Creating .env file from single GitHub Secret..."
           
+          # 直接將整個 Secret (PROJECT_ENV_FILE) 的內容寫入 .env
+          # 雙引號是必須的，這樣才能保留 Secret 內部的換行符號
+          echo "${{ secrets.PROJECT_ENV_FILE }}" > .env
+          
+          # 檢查檔案是否建立成功
+          if [ -f .env ]; then
+            echo ".env file created successfully."
+          else
+            echo "Error: .env file not created."
+            exit 1
+          fi
+
       - name: 'Build and Restart Docker Compose Service'
         # 步驟 3: 執行 docker compose 命令
         run: |
@@ -28,19 +41,12 @@ jobs:
           
           # 此命令在 runner 容器內執行,但透過掛載的 socket
           # 它實際上是在控制 "主機" 的 Docker 服務。
-          #
-          # -f docker-compose.yml: 指定使用我們 checkout 下來的 compose 檔案
-          # up -d:             在背景啟動服務
-          # --build moxu-nextjs:  強制 "只" 重建 moxu-nextjs 服務
-          #
-          # Docker 會偵測到 moxu-nextjs 的映像檔已更新,
-          # 並自動停止舊容器,啟動一個使用新映像檔的新容器。
           docker compose -f docker-compose.yml up -d --build moxu-nextjs
           
           echo "Deployment completed."
 
       - name: 'Prune old Docker images'
-        # (可選) 步驟 3: 清理舊的、未被使用的 Docker 映像檔，釋放硬碟空間
-        if: always() # 無論上一步是否成功都執行
+        # (可選) 步驟 4: 清理舊的、未被使用的 Docker 映像檔
+        if: always()
         run: |
           docker image prune -f
