@@ -2,7 +2,14 @@
 
 import { Bot, Home, Shield, Users, MessageSquare, Settings, BarChart3, Zap } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 
 const menuItems = [
   { icon: Home, label: "總覽", href: "#overview" },
@@ -14,8 +21,38 @@ const menuItems = [
   { icon: Settings, label: "設定", href: "#settings" },
 ]
 
+const servers = [
+  { id: "server-1", name: "🎮 遊戲伺服器" },
+  { id: "server-2", name: "💬 聊天伺服器" },
+  { id: "server-3", name: "📚 學習伺服器" },
+]
+
 export function DashboardSidebar() {
   const [activeItem, setActiveItem] = useState("總覽")
+  const [selectedServer, setSelectedServer] = useState("server-1")
+
+  // 當選擇的伺服器改變時執行
+  useEffect(() => {
+    console.log("伺服器已切換至:", selectedServer)
+    
+    // 在這裡可以執行以下操作:
+    // 1. 載入該伺服器的資料
+    // 2. 發送 API 請求
+    // 3. 更新其他相關狀態
+    
+    // 範例: 模擬載入伺服器資料
+    const loadServerData = async () => {
+      try {
+        // const response = await fetch(`/api/servers/${selectedServer}`)
+        // const data = await response.json()
+        console.log(`正在載入 ${selectedServer} 的資料...`)
+      } catch (error) {
+        console.error("載入伺服器資料失敗:", error)
+      }
+    }
+    
+    loadServerData()
+  }, [selectedServer]) // 依賴陣列:當 selectedServer 改變時觸發
 
   return (
     <aside className="w-64 border-r border-border/50 backdrop-blur-sm flex flex-col">
@@ -29,6 +66,21 @@ export function DashboardSidebar() {
             <p className="text-xs text-muted-foreground">管理面板</p>
           </div>
         </div>
+      </div>
+
+      <div className="p-4 border-b border-border/50">
+        <Select value={selectedServer} onValueChange={setSelectedServer}>
+          <SelectTrigger className="w-full">
+            <SelectValue placeholder="選擇伺服器" />
+          </SelectTrigger>
+          <SelectContent>
+            {servers.map((server) => (
+              <SelectItem key={server.id} value={server.id}>
+                {server.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       <nav className="flex-1 p-4 space-y-1">
