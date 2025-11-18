@@ -4,7 +4,11 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    
     container_name: moxu_nextjs
+    env_file:
+      - .env
+    
     ports:
       - "3000:3000" # 將主機的 3000 埠對應到容器的 3000 埠
     restart: always
