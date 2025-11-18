@@ -12,27 +12,37 @@ jobs:
 
     steps:
       - name: 'Checkout Code'
-        # 步驟 1: 將最新的程式碼 checkout 到 runner 的工作區
+        # 步驟 1: 將觸發此 workflow 的特定 commit 程式碼下載到 runner
         uses: actions/checkout@v4
 
       - name: 'Create .env file'
-        # 步驟 2: 建立 .env 檔案
-        # 強制使用 bash 以正確處理換行符號與編碼
-        shell: bash
+        # 步驟 2: 從單一 GitHub Secret 建立 .env 檔案
+        # 改用 powershell，因為您的 runner 是 Windows 環境
+        shell: powershell
         run: |
-          echo "Creating .env file from single GitHub Secret..."
+          Write-Output "Creating .env file from single GitHub Secret..."
           
-          # 直接將整個 Secret (PROJECT_ENV_FILE) 的內容寫入 .env
-          # 雙引號是必須的，這樣才能保留 Secret 內部的換行符號
-          echo "${{ secrets.PROJECT_ENV_FILE }}" > .env
+          # 取得 Secret 內容
+          $envContent = @"
+          ${{ secrets.PROJECT_ENV_FILE }}
+          "@
+          
+          # 定義檔案路徑
+          $filePath = ".env"
+          
+          # 關鍵：使用 .NET System.IO.File 寫入 UTF-8 (No BOM) 格式
+          # 如果直接用 PowerShell 的 > 或 Out-File，預設會有 BOM 或變成 UTF-16，導致 Docker 讀取失敗
+          $utf8NoBom = New-Object System.Text.UTF8Encoding $false
+          [System.IO.File]::WriteAllText($filePath, $envContent, $utf8NoBom)
           
           # 檢查檔案是否建立成功
-          if [ -f .env ]; then
-            echo ".env file created successfully."
-          else
-            echo "Error: .env file not created."
+          if (Test-Path $filePath) {
+            Write-Output ".env file created successfully."
+            Get-Item $filePath
+          } else {
+            Write-Error "Error: .env file not created."
             exit 1
-          fi
+          }
 
       - name: 'Build and Restart Docker Compose Service'
         # 步驟 3: 執行 docker compose 命令
