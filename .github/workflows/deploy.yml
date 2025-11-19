@@ -8,7 +8,7 @@ on:
 jobs:
   # CI：程式碼檢查 / Build 測試
   ci-checks:
-    name: Run Lint & Build (CI)
+    name: Run Type Check & Build (CI)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
