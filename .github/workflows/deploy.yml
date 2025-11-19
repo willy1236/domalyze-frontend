@@ -58,7 +58,7 @@ jobs:
           
           # 此命令在 runner 容器內執行,但透過掛載的 socket
           # 它實際上是在控制 "主機" 的 Docker 服務。
-          docker compose -f docker-compose.yml up -d --build moxu-nextjs
+          docker compose -f docker-compose.yml up -d --build nextjs
           
           echo "Deployment completed."
 
