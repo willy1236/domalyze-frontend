@@ -6,17 +6,54 @@ on:
       - main # 僅在 push 到 main 分支時觸發
 
 jobs:
+  # CI：程式碼檢查 / Build 測試
+  ci-checks:
+    name: Run Lint & Build (CI)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run ESLint
+        run: npm run lint
+
+      - name: TypeScript type-check
+        run: npm run type-check
+
+      - name: Test Next.js build
+        run: npm run build
+
   build-and-deploy:
     # 關鍵：指定此 job 必須在 self-hosted runner 上運行
     runs-on: self-hosted
+    needs: ci-checks
 
     steps:
       - name: 'Checkout Code'
         # 步驟 1: 將觸發此 workflow 的特定 commit 程式碼下載到 runner
         uses: actions/checkout@v4
 
+      - name: Remove old .env
+        # self-hosted runner 使用「持久化」資料夾，checkout 並不會刪除 Git 未追蹤的檔案。
+        shell: powershell
+        run: |
+          if (Test-Path ".env") {
+            Remove-Item ".env" -Force
+            Write-Output "Old .env removed."
+          }
+
+
       - name: 'Create .env file'
-        # 步驟 2: 從單一 GitHub Secret 建立 .env 檔案
+        # 步驟 3: 從單一 GitHub Secret 建立 .env 檔案
         # 改用 powershell，因為您的 runner 是 Windows 環境
         shell: powershell
         # [修正 1] 將 Secret 映射到環境變數，這是最穩定且安全的方式
@@ -52,7 +89,7 @@ jobs:
           }
 
       - name: 'Build and Restart Docker Compose Service'
-        # 步驟 3: 執行 docker compose 命令
+        # 步驟 4: 執行 docker compose 命令
         run: |
           echo "Running docker compose command to rebuild and deploy..."
           
@@ -63,7 +100,7 @@ jobs:
           echo "Deployment completed."
 
       - name: 'Prune old Docker images'
-        # (可選) 步驟 4: 清理舊的、未被使用的 Docker 映像檔
+        # (可選) 步驟 5: 清理舊的、未被使用的 Docker 映像檔
         if: always()
         run: |
           docker image prune -f
