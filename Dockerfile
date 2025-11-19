@@ -25,7 +25,7 @@ FROM node:18-alpine AS runner
 
 WORKDIR /app
 
-ENV NODE_ENV production
+ENV NODE_ENV=production
 
 # 建立非 root 使用者 (安全性考量)
 RUN addgroup --system --gid 1001 nodejs
@@ -43,10 +43,10 @@ COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 USER nextjs
 
 EXPOSE 3000
-ENV PORT 3000
+ENV PORT=3000
 
 # 如果不加這行，Next.js 預設只會監聽 localhost (127.0.0.1)，導致外部無法連線
-ENV HOSTNAME "0.0.0.0"
+ENV HOSTNAME="0.0.0.0"
 
 # Standalone 模式下，直接用 node 執行 server.js 即可，不需 npm start
 # Next.js 的 output: 'standalone' 模式，無論原始碼是 TS 還是 JS，永遠都會生成一個 server.js 檔案 作為啟動入口。

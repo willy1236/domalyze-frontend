@@ -1,11 +1,11 @@
 services:
   # Next.js 應用程式服務
-  moxu-nextjs:
+  nextjs:
     build:
       context: .
       dockerfile: Dockerfile
     
-    container_name: moxu_nextjs
+    container_name: nextjs
     env_file:
       - .env
     
