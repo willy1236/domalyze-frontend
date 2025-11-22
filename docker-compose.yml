@@ -5,7 +5,7 @@ services:
       context: .
       dockerfile: Dockerfile
     
-    container_name: nextjs
+    container_name: homepage-nextjs
     env_file:
       - .env
     
