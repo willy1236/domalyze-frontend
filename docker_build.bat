@@ -1,7 +1,7 @@
 @echo off
 chcp 65001
-set CONTAINER_NAME=moxu-nextjs-container
-set IMAGE_NAME=moxu-nextjs
+set CONTAINER_NAME=domalyze-nextjs-container
+set IMAGE_NAME=domalyze-nextjs
 set NETWORK_NAME=cfnet
 
 echo ========================================
