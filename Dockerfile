@@ -1,6 +1,6 @@
 # --- 階段 1: Builder (負責編譯) ---
 # 使用 AS builder 標記此階段
-FROM node:18-alpine AS builder
+FROM node:20-alpine AS builder
 
 WORKDIR /app
 
@@ -21,7 +21,7 @@ RUN npm run build
 
 # --- 階段 2: Runner (負責執行) ---
 # 這是最終會跑起來的輕量級映像檔
-FROM node:18-alpine AS runner
+FROM node:20-alpine AS runner
 
 WORKDIR /app
 
