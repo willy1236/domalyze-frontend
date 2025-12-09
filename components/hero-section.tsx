@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button"
 import { ArrowRight, Sparkles } from "lucide-react"
+import Link from "next/link"
 
 export function HeroSection() {
   return (
@@ -25,7 +26,7 @@ export function HeroSection() {
             <ArrowRight className="ml-2 w-5 h-5" />
           </Button>
           <Button size="lg" variant="outline" className="text-lg px-8 h-12 bg-transparent">
-            查看功能
+            <Link href="/features">查看功能</Link>
           </Button>
         </div>
 
