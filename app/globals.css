@@ -1,149 +1,37 @@
+/* globals.css */
+
+/* 1. 這是 Tailwind v4 的新核心寫法，一行搞定所有載入 */
 @import "tailwindcss";
-@import "tw-animate-css";
 
-@custom-variant dark (&:is(.dark *));
-
-:root {
-  /* Shifted hue from 265 to 280 for more purple tones */
-  --background: oklch(0.12 0.02 280);
-  --foreground: oklch(0.98 0.01 280);
-  --card: oklch(0.16 0.03 280);
-  --card-foreground: oklch(0.98 0.01 280);
-  --popover: oklch(0.16 0.03 280);
-  --popover-foreground: oklch(0.98 0.01 280);
-  --primary: oklch(0.65 0.25 280);
-  --primary-foreground: oklch(0.98 0.01 280);
-  --secondary: oklch(0.22 0.04 280);
-  --secondary-foreground: oklch(0.98 0.01 280);
-  --muted: oklch(0.22 0.04 280);
-  --muted-foreground: oklch(0.65 0.02 280);
-  --accent: oklch(0.55 0.22 295);
-  --accent-foreground: oklch(0.98 0.01 280);
-  --destructive: oklch(0.577 0.245 27.325);
-  --destructive-foreground: oklch(0.98 0.01 280);
-  --border: oklch(0.25 0.04 280);
-  --input: oklch(0.25 0.04 280);
-  --ring: oklch(0.65 0.25 280);
-  --chart-1: oklch(0.65 0.25 280);
-  --chart-2: oklch(0.55 0.22 295);
-  --chart-3: oklch(0.45 0.18 270);
-  --chart-4: oklch(0.75 0.15 285);
-  --chart-5: oklch(0.85 0.12 275);
-  --radius: 0.75rem;
-  --sidebar: oklch(0.12 0.02 280);
-  --sidebar-foreground: oklch(0.98 0.01 280);
-  --sidebar-primary: oklch(0.65 0.25 280);
-  --sidebar-primary-foreground: oklch(0.98 0.01 280);
-  --sidebar-accent: oklch(0.55 0.22 295);
-  --sidebar-accent-foreground: oklch(0.98 0.01 280);
-  --sidebar-border: oklch(0.25 0.04 280);
-  --sidebar-ring: oklch(0.65 0.25 280);
-}
-
-.dark {
-  /* Shifted hue from 265 to 280 for more purple tones */
-  --background: oklch(0.12 0.02 280);
-  --foreground: oklch(0.98 0.01 280);
-  --card: oklch(0.16 0.03 280);
-  --card-foreground: oklch(0.98 0.01 280);
-  --popover: oklch(0.16 0.03 280);
-  --popover-foreground: oklch(0.98 0.01 280);
-  --primary: oklch(0.65 0.25 280);
-  --primary-foreground: oklch(0.98 0.01 280);
-  --secondary: oklch(0.22 0.04 280);
-  --secondary-foreground: oklch(0.98 0.01 280);
-  --muted: oklch(0.22 0.04 280);
-  --muted-foreground: oklch(0.65 0.02 280);
-  --accent: oklch(0.55 0.22 295);
-  --accent-foreground: oklch(0.98 0.01 280);
-  --destructive: oklch(0.577 0.245 27.325);
-  --destructive-foreground: oklch(0.98 0.01 280);
-  --border: oklch(0.25 0.04 280);
-  --input: oklch(0.25 0.04 280);
-  --ring: oklch(0.65 0.25 280);
-  --chart-1: oklch(0.65 0.25 280);
-  --chart-2: oklch(0.55 0.22 295);
-  --chart-3: oklch(0.45 0.18 270);
-  --chart-4: oklch(0.75 0.15 285);
-  --chart-5: oklch(0.85 0.12 275);
-  --sidebar: oklch(0.12 0.02 280);
-  --sidebar-foreground: oklch(0.98 0.01 280);
-  --sidebar-primary: oklch(0.65 0.25 280);
-  --sidebar-primary-foreground: oklch(0.98 0.01 280);
-  --sidebar-accent: oklch(0.55 0.22 295);
-  --sidebar-accent-foreground: oklch(0.98 0.01 280);
-  --sidebar-border: oklch(0.25 0.04 280);
-  --sidebar-ring: oklch(0.65 0.25 280);
-}
-
-@theme inline {
-  --font-sans: "Geist", "Geist Fallback";
-  --font-mono: "Geist Mono", "Geist Mono Fallback";
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --color-card: var(--card);
-  --color-card-foreground: var(--card-foreground);
-  --color-popover: var(--popover);
-  --color-popover-foreground: var(--popover-foreground);
-  --color-primary: var(--primary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-secondary: var(--secondary);
-  --color-secondary-foreground: var(--secondary-foreground);
-  --color-muted: var(--muted);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-accent: var(--accent);
-  --color-accent-foreground: var(--accent-foreground);
-  --color-destructive: var(--destructive);
-  --color-destructive-foreground: var(--destructive-foreground);
-  --color-border: var(--border);
-  --color-input: var(--input);
-  --color-ring: var(--ring);
-  --color-chart-1: var(--chart-1);
-  --color-chart-2: var(--chart-2);
-  --color-chart-3: var(--chart-3);
-  --color-chart-4: var(--chart-4);
-  --color-chart-5: var(--chart-5);
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
-  --color-sidebar: var(--sidebar);
-  --color-sidebar-foreground: var(--sidebar-foreground);
-  --color-sidebar-primary: var(--sidebar-primary);
-  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-  --color-sidebar-accent: var(--sidebar-accent);
-  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-  --color-sidebar-border: var(--sidebar-border);
-  --color-sidebar-ring: var(--sidebar-ring);
-}
-
+/* 2. 專案的全域設定 (整合 Luna 風格) */
 @layer base {
-  * {
-    @apply border-border outline-ring/50;
-  }
-  body {
-    @apply bg-background text-foreground;
+  /* 設定預設字體與背景色 */
+  html {
+    font-family: "Noto Sans TC", system-ui, sans-serif;
+    /* 這裡使用我們之前規劃的深色背景，確保載入時不會閃白屏 */
+    background-color: #1E212B; 
+    color: #E0E0FF;
   }
 }
 
+/* 3. 自定義動畫與特效 (對應之前的設計) */
 @layer utilities {
-  .star-field {
-    background-image: radial-gradient(2px 2px at 20% 30%, white, transparent),
-      radial-gradient(2px 2px at 60% 70%, white, transparent), radial-gradient(1px 1px at 50% 50%, white, transparent),
-      radial-gradient(1px 1px at 80% 10%, white, transparent), radial-gradient(2px 2px at 90% 60%, white, transparent),
-      radial-gradient(1px 1px at 33% 80%, white, transparent), radial-gradient(1px 1px at 15% 90%, white, transparent);
-    background-size: 200% 200%;
-    background-position: 0% 0%;
-    animation: twinkle 20s ease-in-out infinite;
+  /* 玻璃擬態卡片特效 */
+  .glass-card {
+    @apply bg-[#2D3242]/60 backdrop-blur-md border border-[#B8B8E0]/10 transition-all duration-300;
+  }
+  
+  .glass-card:hover {
+    @apply -translate-y-1 border-[#B8B8E0]/40 shadow-lg shadow-[#9BA3D6]/20;
   }
 
-  @keyframes twinkle {
-    0%,
-    100% {
-      opacity: 1;
-    }
-    50% {
-      opacity: 0.5;
-    }
+  /* 文字月光暈染特效 */
+  .moon-glow {
+    text-shadow: 0 0 20px rgba(224, 224, 255, 0.3);
+  }
+
+  /* 背景漸層 */
+  .bg-mystic {
+    background: radial-gradient(circle at 50% 0%, #3a4259 0%, #1e212b 60%);
   }
 }

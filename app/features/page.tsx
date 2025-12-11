@@ -39,6 +39,7 @@ import {
   BookUser,
   Receipt,
 } from "lucide-react"
+import BackgroundBlobs from "@/components/background-blobs"
 
 const featureCategories = [
   {
@@ -275,6 +276,7 @@ export default function FeaturesPage() {
       <Header />
 
       <main className="relative">
+        <BackgroundBlobs />
         {/* Hero Section */}
         <section className="container mx-auto px-4 py-20 text-center">
           <Badge className="mb-4 bg-primary/10 text-primary border-primary/20">完整功能介紹</Badge>
@@ -347,7 +349,7 @@ export default function FeaturesPage() {
 
         {/* CTA Section */}
         <section className="container mx-auto px-4 py-20">
-          <Card className="p-12 bg-gradient-to-br from-primary/10 via-accent/10 to-primary/10 border-primary/20 text-center">
+          <Card className="p-12 bg-linear-to-br from-primary/10 via-accent/10 to-primary/10 border-primary/20 text-center">
             <h2 className="text-4xl font-bold mb-4">準備好開始了嗎？</h2>
             <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
               立即邀請 星羽 到您的伺服器，體驗這些強大的功能
