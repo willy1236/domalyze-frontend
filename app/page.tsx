@@ -2,7 +2,10 @@ import Link from "next/link";
 import { Music, Shield, Wand2, ArrowRight, BookOpen } from "lucide-react";
 import BackgroundBlobs from "@/components/background-blobs";
 import HomePageHeader from "@/components/homepage-header";
-
+import { Footer } from "@/components/footer"
+import { Card } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
 export default function Home() {
   return (
      <div className="flex flex-col relative overflow-hidden">
@@ -58,10 +61,7 @@ export default function Home() {
         </div>
       </main>
 
-      {/* 頁腳 Footer */}
-      <footer className="py-8 text-center text-gray-600 text-sm border-t border-[#2D3242]/50 mt-12 bg-[#15171E]/50 backdrop-blur-sm">
-        <p>&copy; 2025 Project Luna. All rights reserved.</p>
-      </footer>
+      <Footer />
     </div>
   );
 }

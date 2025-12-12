@@ -34,4 +34,9 @@
   .bg-mystic {
     background: radial-gradient(circle at 50% 0%, #3a4259 0%, #1e212b 60%);
   }
+
+  /* 淡色分隔線 */
+  .footer-divider {
+    border-color: rgba(184, 184, 224, 0.185);
+  }
 }
