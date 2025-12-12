@@ -16,7 +16,6 @@ const notoSans = Noto_Sans_TC({
 export const metadata: Metadata = {
   title: "星羽 - 您的得力助手",
   description: "為您的 Discord 伺服器注入強大功能",
-  generator: "v0.app",
 }
 
 export default function RootLayout({

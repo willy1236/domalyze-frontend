@@ -1,4 +1,4 @@
-import { Header } from "@/components/header"
+import HomePageHeader from "@/components/homepage-header";
 import { Footer } from "@/components/footer"
 import { Card } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -270,13 +270,10 @@ const featureCategories = [
 
 export default function FeaturesPage() {
   return (
-    <div className="min-h-screen bg-background">
-      <div className="fixed inset-0 star-field opacity-30 pointer-events-none" />
-
-      <Header />
-
+    <div className="min-h-screen bg-mystic">
+      <BackgroundBlobs/>
+      <HomePageHeader />
       <main className="relative">
-        <BackgroundBlobs />
         {/* Hero Section */}
         <section className="container mx-auto px-4 py-20 text-center">
           <Badge className="mb-4 bg-primary/10 text-primary border-primary/20">完整功能介紹</Badge>
