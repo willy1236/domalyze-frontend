@@ -40,6 +40,8 @@ import {
   Receipt,
 } from "lucide-react"
 import BackgroundBlobs from "@/components/background-blobs"
+import { FeatureCard } from "@/components/feature-card"
+import { cardStyles } from "@/lib/card-styles";
 
 const featureCategories = [
   {
@@ -271,12 +273,13 @@ const featureCategories = [
 export default function FeaturesPage() {
   return (
     <div className="min-h-screen bg-mystic">
-      <BackgroundBlobs/>
       <HomePageHeader />
+      <BackgroundBlobs/>
       <main className="relative">
         {/* Hero Section */}
+        
         <section className="container mx-auto px-4 py-20 text-center">
-          <Badge className="mb-4 bg-primary/10 text-primary border-primary/20">完整功能介紹</Badge>
+          <Badge className="mb-5 bg-primary/10 text-primary border-primary/20">完整功能介紹</Badge>
           <h1 className="text-5xl md:text-6xl font-bold mb-6 text-balance">
             探索 <span className="text-primary" >星羽</span> 的強大功能
           </h1>
@@ -301,65 +304,35 @@ export default function FeaturesPage() {
             {/* Feature Cards */}
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
               {category.features.map((feature, featureIndex) => (
-                <Card
+                <FeatureCard
                   key={featureIndex}
-                  className="p-6 bg-card/50 backdrop-blur-sm border-border/50 hover:border-primary/50 transition-all duration-300 hover:shadow-lg hover:shadow-primary/10 group"
-                >
-                  <div className={`flex items-center justify-center w-12 h-12 rounded-lg ${category.bgColor} mb-4`}>
-                    <feature.icon className={`w-6 h-6 ${category.color}`} />
-                  </div>
-                  <h3 className="text-xl font-semibold mb-3">{feature.title}</h3>
-                  <p className="text-muted-foreground leading-relaxed mb-4">{feature.description}</p>
-                  <div className="flex flex-wrap gap-2">
-                    {feature.highlights.map((highlight, highlightIndex) => (
-                      <Badge
-                        key={highlightIndex}
-                        variant="secondary"
-                        className="bg-secondary/50 text-secondary-foreground"
-                      >
-                        {highlight}
-                      </Badge>
-                    ))}
-                  </div>
-                  <div className="flex items-center space-x-2 mb-3">
-                    <Terminal className="w-4 h-4 text-indigo-400" />
-                    <span className="text-sm font-medium text-indigo-200">常用指令</span>
-                  </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
-                    {feature.commands.map((command, cmdIndex) => (
-                      <Badge
-                        key={cmdIndex}
-                        variant="secondary"
-                        className="bg-slate-800/50 text-indigo-200 border-indigo-800/30 font-mono text-xs p-2"
-                      >
-                        <Code className="w-3 h-3 mr-1" />
-                        {command}
-                      </Badge>
-                    ))}
-                  </div>
-                </Card>
+                  icon={<feature.icon className={`w-6 h-6 ${category.color}`} />}
+                  title={feature.title}
+                  desc={feature.description}
+                  highlights={feature.highlights}
+                  commands={feature.commands}
+                  bgColor={category.bgColor}
+                  color={category.color}
+                />
               ))}
-            
             </div>
           </section>
         ))}
 
         {/* CTA Section */}
-        <section className="container mx-auto px-4 py-20">
-          <Card className="p-12 bg-linear-to-br from-primary/10 via-accent/10 to-primary/10 border-primary/20 text-center">
-            <h2 className="text-4xl font-bold mb-4">準備好開始了嗎？</h2>
-            <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-              立即邀請 星羽 到您的伺服器，體驗這些強大的功能
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button size="lg" className="bg-primary hover:bg-primary/90 text-lg px-8">
-                邀請機器人
-              </Button>
-              <Button size="lg" variant="outline" className="text-lg px-8 bg-transparent">
-                查看文檔
-              </Button>
-            </div>
-          </Card>
+        <section className="glass-card container mx-auto px-4 py-20 p-12 bg-linear-to-br border-primary/20 text-center rounded-2xl">
+          <h2 className="text-4xl font-bold mb-4">準備好開始了嗎？</h2>
+          <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
+            立即邀請 星羽 到您的伺服器，體驗這些強大的功能
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Button size="lg" className="bg-primary hover:bg-primary/90 text-lg px-8">
+              邀請機器人
+            </Button>
+            <Button size="lg" variant="outline" className="text-lg px-8 bg-transparent">
+              查看文檔
+            </Button>
+          </div>
         </section>
       </main>
 

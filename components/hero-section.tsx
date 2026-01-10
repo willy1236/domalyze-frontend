@@ -1,42 +1,42 @@
-import { Button } from "@/components/ui/button"
-import { ArrowRight, Sparkles } from "lucide-react"
 import Link from "next/link"
+import { ArrowRight, BookOpen } from "lucide-react"
+import BackgroundBlobs from "@/components/background-blobs"
 
 export function HeroSection() {
   return (
-    <section className="container mx-auto px-4 py-20 md:py-32">
-      <div className="max-w-4xl mx-auto text-center">
-        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 mb-6">
-          <Sparkles className="w-4 h-4 text-primary" />
-          <span className="text-sm text-primary">不斷支援更多伺服器</span>
-        </div>
+    <main className="grow flex flex-col items-center justify-center text-center px-4 relative z-10 py-20">
+      <BackgroundBlobs />
 
-        <h1 className="text-5xl md:text-7xl font-bold mb-6 text-balance">
-          為您的 Discord 伺服器
-          <span className="block text-primary mt-2">注入強大功能</span>
+      <div className="max-w-3xl mx-auto space-y-8">
+        <h1 className="text-5xl md:text-7xl font-bold text-[#E0E0FF] moon-glow leading-tight tracking-tight">
+          寂靜夜空中的
+          <br />
+          <span className="text-[#9BA3D6] inline-block mt-2">全能助手</span>
         </h1>
 
-        <p className="text-xl text-muted-foreground mb-10 max-w-2xl mx-auto text-pretty leading-relaxed">
-          星羽提供自動化管理、音樂播放、遊戲整合等多種功能，讓您的社群體驗更上一層樓
+        <p className="text-lg md:text-xl text-gray-400 max-w-2xl mx-auto leading-relaxed font-light">
+          簡單、優雅且強大。整合音樂播放、伺服器管理與趣味互動，
+          <br className="hidden md:block" />
+          將神秘的氛圍帶入您的 Discord 社群。
         </p>
 
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-          <Button size="lg" className="bg-primary hover:bg-primary/90 text-lg px-8 h-12">
-            立即邀請
-            <ArrowRight className="ml-2 w-5 h-5" />
-          </Button>
-          <Button size="lg" variant="outline" className="text-lg px-8 h-12 bg-transparent">
-            <Link href="/features">查看功能</Link>
-          </Button>
-        </div>
-
-        <div className="mt-16 relative">
-          <div className="absolute inset-0 bg-primary/20 blur-3xl rounded-full" />
-          <div className="relative rounded-xl border border-border/50 bg-card/50 backdrop-blur-sm p-8 shadow-2xl">
-            <img src="/discord-bot-dashboard-interface-with-dark-theme.jpg" alt="Bot Dashboard" className="w-full rounded-lg" />
-          </div>
+        <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
+          <Link
+            href="#"
+            className="group bg-[#E0E0FF] text-[#1E212B] px-8 py-3 rounded-full font-bold hover:shadow-[0_0_25px_rgba(224,224,255,0.4)] transition-all duration-300 flex items-center justify-center gap-2"
+          >
+            立即開始
+            <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+          </Link>
+          <Link
+            href="#"
+            className="group border border-[#4A5475] text-[#9BA3D6] px-8 py-3 rounded-full font-bold hover:bg-[#4A5475]/20 hover:border-[#9BA3D6] transition-all duration-300 flex items-center justify-center gap-2"
+          >
+            <BookOpen className="w-4 h-4" />
+            查看文檔
+          </Link>
         </div>
       </div>
-    </section>
+    </main>
   )
 }

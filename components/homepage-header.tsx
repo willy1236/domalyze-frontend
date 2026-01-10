@@ -15,7 +15,7 @@ export default function HomePageHeader() {
           <Moon className="w-8 h-8 text-[#E0E0FF] fill-[#E0E0FF]/20 group-hover:fill-[#E0E0FF] transition-all duration-500" />
           <div className="absolute inset-0 bg-[#E0E0FF] blur-xl opacity-0 group-hover:opacity-40 transition-opacity duration-500" />
         </div>
-        <span className="text-xl font-bold tracking-[0.2em] text-[#E0E0FF]">LUNA</span>
+        <span className="text-xl font-bold tracking-[0.2em] text-[#E0E0FF]">Xingyu</span>
       </Link>
       
       <div className="hidden md:flex gap-8 text-sm font-medium text-gray-400">
