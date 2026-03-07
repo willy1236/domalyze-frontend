@@ -1,24 +1,20 @@
 import { Header } from "@/components/header"
-import { HeroSection } from "@/components/hero-section"
-import { FeaturesSection } from "@/components/features-section"
-import { StatsSection } from "@/components/stats-section"
-import { CTASection } from "@/components/cta-section"
 import { Footer } from "@/components/footer"
+import { HeroSection, HomeFeaturesSection, PerformanceSection, HomeInviteSection } from "@/components/home"
 
 export default function Home() {
   return (
-    <div className="relative min-h-screen">
-      <div className="star-field fixed inset-0 opacity-30 pointer-events-none" />
-      <div className="relative z-10">
-        <Header />
-        <main>
-          <HeroSection />
-          <FeaturesSection />
-          {/*<StatsSection />*/}
-          <CTASection />
-        </main>
-        <Footer />
-      </div>
-    </div>
+    <main>
+      <div className="noise-overlay dark:opacity-[0.1] opacity-[0.05]"></div>
+      <div className="celestial-dust"></div>
+      <div className="fixed inset-0 pointer-events-none z-0 opacity-30 dark:opacity-[0.4] bg-size-[150px_150px] bg-constellation"></div>
+      
+      <Header />
+      <HeroSection />
+      <HomeFeaturesSection />
+      <PerformanceSection />
+      <HomeInviteSection />
+      <Footer />
+    </main>
   )
 }

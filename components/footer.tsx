@@ -1,86 +1,28 @@
-import { Bot } from "lucide-react"
+"use client"
 
 export function Footer() {
   return (
-    <footer className="border-t border-border/50 mt-20">
-      <div className="container mx-auto px-4 py-12">
-        <div className="grid md:grid-cols-4 gap-8">
-          <div>
-            <div className="flex items-center gap-2 mb-4">
-              <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-primary">
-                <Bot className="w-5 h-5 text-primary-foreground" />
-              </div>
-              <span className="text-lg font-bold">Xingyu</span>
-            </div>
-            <p className="text-sm text-muted-foreground leading-relaxed">為 Discord 社群打造的全方位機器人解決方案</p>
-          </div>
-
-          {/*<div>
-            <h4 className="font-semibold mb-4">產品</h4>
-            <ul className="space-y-2 text-sm text-muted-foreground">
-              <li>
-                <a href="#" className="hover:text-foreground transition-colors">
-                  功能
-                </a>
-              </li>
-              <li>
-                <a href="#" className="hover:text-foreground transition-colors">
-                  定價
-                </a>
-              </li>
-              <li>
-                <a href="#" className="hover:text-foreground transition-colors">
-                  更新日誌
-                </a>
-              </li>
-            </ul>
-          </div>*/}
-
-          {/*<div>
-            <h4 className="font-semibold mb-4">資源</h4>
-            <ul className="space-y-2 text-sm text-muted-foreground">
-              <li>
-                <a href="#" className="hover:text-foreground transition-colors">
-                  文檔
-                </a>
-              </li>
-              <li>
-                <a href="#" className="hover:text-foreground transition-colors">
-                  API
-                </a>
-              </li>
-              <li>
-                <a href="#" className="hover:text-foreground transition-colors">
-                  支援
-                </a>
-              </li>
-            </ul>
-          </div>*/}
-
-          <div>
-            <h4 className="font-semibold mb-4">社群</h4>
-            <ul className="space-y-2 text-sm text-muted-foreground">
-              <li>
-                <a href="https://discord.gg/P4jqdcMxkH" className="hover:text-foreground transition-colors">
-                  Discord
-                </a>
-              </li>
-              <li>
-                <a href="https://linktr.ee/Xingyu1016" className="hover:text-foreground transition-colors">
-                  Linktree
-                </a>
-              </li>
-              <li>
-                <a href="https://github.com/willy1236/XingyuBot" className="hover:text-foreground transition-colors">
-                  GitHub
-                </a>
-              </li>
-            </ul>
-          </div>
-        </div>
-
-        <div className="border-t border-border/50 mt-12 pt-8 text-center text-sm text-muted-foreground">
-          <p>© 2025 析域工作室 Domalyze Studio. 版權所有。</p>
+    <footer className="bg-background-light dark:bg-background-dark border-t border-champagne/30 py-16 relative overflow-hidden">
+      <div className="absolute inset-0 bg-constellation opacity-30 pointer-events-none"></div>
+      <div className="absolute inset-0 bg-linear-to-t from-primary/20 to-transparent pointer-events-none"></div>
+      <div className="max-w-7xl mx-auto px-6 lg:px-12 flex flex-col items-center gap-10 relative z-10">
+        <a href="/" className="text-2xl font-serif tracking-[0.3em] text-champagne uppercase flex items-center gap-3 drop-shadow-[0_0_10px_rgba(196,208,232,0.4)] hover:opacity-80 transition-opacity">
+          <span className="text-silver text-sm">✦</span> Xingyu <span className="text-silver text-sm">✦</span>
+        </a>
+        <div className="w-24 h-px bg-linear-to-r from-transparent via-silver/50 to-transparent"></div>
+        <nav className="flex gap-10 text-xs tracking-[0.2em] uppercase text-gray-400">
+          <a className="hover:text-gray-900 dark:hover:text-white transition-colors flex items-center gap-2" href="/">
+            <span className="text-[8px] opacity-70">✧</span> 首頁
+          </a>
+          <a className="hover:text-gray-900 dark:hover:text-white transition-colors flex items-center gap-2" href="/features">
+            <span className="text-[8px] opacity-70">✧</span> 功能
+          </a>
+          <a className="hover:text-gray-900 dark:hover:text-white transition-colors flex items-center gap-2" href="#">
+            <span className="text-[8px] opacity-70">✧</span> 隱私權政策
+          </a>
+        </nav>
+        <div className="text-xs tracking-wider text-gray-600 font-light mt-4">
+          © 2026 星羽 Discord 機器人 (Xingyu Bot)。保留所有權利。
         </div>
       </div>
     </footer>
