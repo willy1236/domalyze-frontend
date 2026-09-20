@@ -1,5 +1,7 @@
 "use client"
 
+import { SeiuCard, SeiuStarredList } from "@/components/seiu"
+
 interface CoreAdvantageItem {
   title: string
   emoji: string
@@ -12,21 +14,13 @@ interface CoreAdvantageCardProps {
 
 export function CoreAdvantageCard({ advantage }: CoreAdvantageCardProps) {
   return (
-    <div className="relative bg-background-light/80 dark:bg-background-dark/40 p-8 rounded-lg backdrop-blur-md border border-silver/10">
-      <div className="absolute -left-1 top-0 w-px h-12 bg-champagne shadow-[0_0_10px_var(--color-champagne)]"></div>
-      <h3 className="font-serif text-2xl text-gray-900 dark:text-white mb-6">
+    <SeiuCard tone="surface" className="relative">
+      {/* 左上角那道短線，沿用原本的「停點」記號 */}
+      <span className="absolute -left-px top-0 h-12 w-0.5 bg-seiu-accent" />
+      <h3 className="mb-6 text-2xl text-seiu-ink">
         {advantage.emoji} {advantage.title}
       </h3>
-      <ul className="space-y-3 text-sm font-light text-gray-500 dark:text-gray-400">
-        {advantage.items.map((item, index) => (
-          <li key={index} className="flex items-start">
-            <span className="text-champagne mr-3 mt-0.5 text-xs drop-shadow-[0_0_5px_rgba(196,208,232,0.8)]">
-              ✦
-            </span>
-            {item}
-          </li>
-        ))}
-      </ul>
-    </div>
+      <SeiuStarredList items={advantage.items} />
+    </SeiuCard>
   )
 }

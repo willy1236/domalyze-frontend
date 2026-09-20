@@ -1,20 +1,27 @@
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
-import { HeroSection, HomeFeaturesSection, PerformanceSection, HomeInviteSection } from "@/components/home"
+import { SeiuRoot } from "@/components/seiu"
+import {
+  HeroSection,
+  HomeFeaturesSection,
+  PerformanceSection,
+  HomeInviteSection,
+} from "@/components/home"
 
 export default function Home() {
   return (
-    <main>
-      <div className="noise-overlay dark:opacity-[0.1] opacity-[0.05]"></div>
-      <div className="celestial-dust"></div>
-      <div className="fixed inset-0 pointer-events-none z-0 opacity-30 dark:opacity-[0.4] bg-size-[150px_150px] bg-constellation"></div>
-      
-      <Header />
-      <HeroSection />
-      <HomeFeaturesSection />
-      <PerformanceSection />
-      <HomeInviteSection />
-      <Footer />
-    </main>
+    // SeiuRoot 鋪底色、兩團光暈與會眨的星空層，取代原本三層手刻背景。
+    <SeiuRoot>
+      <main>
+        <div className="noise-overlay opacity-[0.05] dark:opacity-[0.1]" />
+
+        <Header />
+        <HeroSection />
+        <HomeFeaturesSection />
+        <PerformanceSection />
+        <HomeInviteSection />
+        <Footer />
+      </main>
+    </SeiuRoot>
   )
 }

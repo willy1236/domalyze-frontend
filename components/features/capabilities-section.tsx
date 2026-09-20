@@ -1,5 +1,6 @@
 "use client"
 
+import { SeiuDivider, SeiuGridBackdrop, SeiuMonogram } from "@/components/seiu"
 import { CoreAdvantageCard } from "./core-advantage-card"
 
 interface CoreAdvantageItem {
@@ -14,27 +15,22 @@ interface CapabilitiesSectionProps {
 
 export function CapabilitiesSection({ advantages }: CapabilitiesSectionProps) {
   return (
-    <section className="py-32 relative overflow-hidden border-b border-silver/20">
-      <div className="corner-monogram bottom-10 left-10 opacity-[0.05]">X</div>
-      <div className="absolute inset-0 pointer-events-none z-0">
-        <div className="geometric-lines"></div>
-        <div className="metallic-circle w-150 h-150 top-1/2 left-[20%] transform -translate-y-1/2 opacity-20"></div>
-      </div>
+    <section className="relative overflow-hidden border-b border-seiu-edge-soft py-32">
+      <SeiuGridBackdrop />
+      <SeiuMonogram letter="X" className="bottom-10 left-10 right-auto" />
 
-      <div className="max-w-7xl mx-auto px-6 lg:px-12 relative z-10">
-        <div className="text-center mb-16">
-          <span className="text-champagne tracking-[0.25em] uppercase text-xs font-medium mb-4 block drop-shadow-[0_0_8px_rgba(196,208,232,0.5)]">
+      <div className="relative z-10 mx-auto max-w-7xl px-6 lg:px-12">
+        <div className="mb-16 text-center">
+          <span className="mb-4 block animate-seiu-sparkle text-xl text-seiu-accent-ink">
             ✦
           </span>
-          <h2 className="font-serif text-3xl md:text-5xl text-gray-900 dark:text-white mb-6">
-            核心優勢
-          </h2>
-          <div className="w-16 h-px bg-linear-to-r from-transparent via-champagne to-transparent mx-auto"></div>
+          <h2 className="mb-6 text-3xl text-seiu-ink md:text-5xl">核心優勢</h2>
+          <SeiuDivider className="mx-auto max-w-xs" />
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-12 mt-12">
-          {advantages.map((advantage, index) => (
-            <CoreAdvantageCard key={index} advantage={advantage} />
+        <div className="mt-12 grid grid-cols-1 gap-12 md:grid-cols-2">
+          {advantages.map((advantage) => (
+            <CoreAdvantageCard key={advantage.title} advantage={advantage} />
           ))}
         </div>
       </div>

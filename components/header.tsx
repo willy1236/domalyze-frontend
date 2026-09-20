@@ -1,53 +1,66 @@
 "use client"
 
-import { useTheme } from "next-themes"
 import { Moon, Sun } from "lucide-react"
-import { useEffect, useState } from "react"
+import {
+  SeiuIconButton,
+  SeiuLinkButton,
+  useSeiuTheme,
+} from "@/components/seiu"
+
+const NAV_LINKS = [
+  { href: "/features", label: "功能" },
+  { href: "#performance", label: "平台" },
+  { href: "#preorder", label: "邀請" },
+]
 
 export function Header() {
-  const { theme, setTheme } = useTheme()
-  const [mounted, setMounted] = useState(false)
-
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setMounted(true)
-  }, [])
+  const { dark, toggle } = useSeiuTheme()
 
   return (
-    <header className="top-0 left-0 w-full z-40 border-b border-champagne/30 dark:border-champagne/20 relative">
-      <div className="absolute inset-x-0 bottom-0 h-px bg-linear-to-r from-transparent via-silver/40 to-transparent"></div>
-      <div className="max-w-7xl mx-auto px-6 lg:px-12 h-24 flex items-center justify-between">
-        <a href="/" className="text-2xl font-serif tracking-widest text-primary uppercase flex items-center gap-2 hover:opacity-80 transition-opacity">
-          <span className="text-champagne text-lg drop-shadow-[0_0_8px_rgba(196,208,232,0.6)]">✦</span> Xingyu
+    <header className="relative left-0 top-0 z-40 w-full border-b border-seiu-edge-soft">
+      <div className="seiu-dotted absolute inset-x-0 bottom-0 h-0.5" />
+      <div className="mx-auto flex h-24 max-w-7xl items-center justify-between px-6 lg:px-12">
+        <a
+          href="/"
+          className="flex items-center gap-2 text-2xl tracking-[0.18em] text-seiu-ink transition-opacity hover:opacity-80"
+        >
+          <span className="animate-seiu-sparkle text-lg text-seiu-accent-ink">
+            ✦
+          </span>{" "}
+          Xingyu
         </a>
-        <nav className="hidden md:flex items-center">
-          <div className="nav-item flex items-center">
-            <a className="text-sm tracking-[0.2em] uppercase text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors" href="/features">功能</a>
-            <span className="nav-separator"></span>
-          </div>
-          <div className="nav-item flex items-center ml-6">
-            <a className="text-sm tracking-[0.2em] uppercase text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors" href="#performance">架構</a>
-            <span className="nav-separator"></span>
-          </div>
-          <div className="nav-item flex items-center ml-6">
-            <a className="text-sm tracking-[0.2em] uppercase text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors" href="#commands">指令</a>
-          </div>
+
+        <nav className="hidden items-center gap-6 md:flex">
+          {NAV_LINKS.map((link, i) => (
+            <div key={link.href} className="flex items-center gap-6">
+              <a
+                href={link.href}
+                className="text-sm tracking-[0.2em] text-seiu-label transition-colors hover:text-seiu-ink"
+              >
+                {link.label}
+              </a>
+              {i < NAV_LINKS.length - 1 && (
+                <span className="text-xs text-seiu-muted">✧</span>
+              )}
+            </div>
+          ))}
         </nav>
-        <div className="flex items-center space-x-6">
-          <button 
-            className="text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors" 
-            onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+
+        <div className="flex items-center gap-6">
+          <SeiuIconButton
+            onClick={toggle}
+            aria-label={dark ? "切換為亮色模式" : "切換為夜間模式"}
           >
-            {mounted && theme === 'dark' ? (
-              <Sun className="w-5 h-5" />
-            ) : (
-              <Moon className="w-5 h-5" />
-            )}
-          </button>
-          <a className="hidden sm:inline-block border border-champagne/40 text-champagne px-6 py-2.5 text-xs tracking-[0.2em] uppercase hover:bg-champagne hover:text-background-dark transition-all duration-300 relative group" href="#preorder">
-            <span className="absolute inset-0 bg-champagne/20 scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-300"></span>
-            <span className="relative z-10">邀請</span>
-          </a>
+            {dark ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+          </SeiuIconButton>
+          <SeiuLinkButton
+            href="#preorder"
+            variant="mint"
+            size="sm"
+            className="hidden sm:inline-flex"
+          >
+            邀請
+          </SeiuLinkButton>
         </div>
       </div>
     </header>

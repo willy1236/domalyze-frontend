@@ -1,6 +1,7 @@
 "use client"
 
 import { LucideIcon } from "lucide-react"
+import { SeiuMonogram } from "@/components/seiu"
 import { FeatureCard } from "./feature-card"
 
 interface FeaturesData {
@@ -15,13 +16,13 @@ interface FeaturesGridProps {
 
 export function FeaturesGrid({ features }: FeaturesGridProps) {
   return (
-    <section className="py-32 bg-surface-light/30 dark:bg-surface-dark/60 relative border-b border-silver/20 backdrop-blur-md">
-      <div className="corner-monogram top-10 right-10 opacity-[0.05]">Y</div>
-      <div className="max-w-7xl mx-auto px-6 lg:px-12 relative z-10">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {features.map((feature, index) => (
+    <section className="relative border-b border-seiu-edge-soft bg-seiu-soft py-32 backdrop-blur-[18px]">
+      <SeiuMonogram letter="Y" className="bottom-auto right-10 top-10" />
+      <div className="relative z-10 mx-auto max-w-7xl px-6 lg:px-12">
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+          {features.map((feature) => (
             <FeatureCard
-              key={index}
+              key={feature.title}
               icon={feature.icon}
               title={feature.title}
               description={feature.description}

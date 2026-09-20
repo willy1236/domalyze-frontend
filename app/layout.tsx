@@ -33,8 +33,9 @@ const ysabeau = Ysabeau_Infant({
 })
 
 export const metadata: Metadata = {
-  title: "星羽 Discord 機器人 - 頂級社群管理",
-  description: "體驗 Discord 社群管理的巔峰之作。",
+  title: "星羽 Xingyu｜Discord 社群機器人",
+  description:
+    "把 Discord、Twitch、LINE 和遊戲資料收在同一個伺服器裡。跨群警告紀錄、開台推播、中央氣象署地震通知，以及六個遊戲平台的戰績查詢。",
 }
 
 export default function RootLayout({

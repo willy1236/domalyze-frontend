@@ -1,27 +1,40 @@
 "use client"
 
+import { SeiuDivider } from "@/components/seiu"
+
+const LINKS = [
+  { href: "/", label: "首頁" },
+  { href: "/features", label: "功能" },
+  { href: "#", label: "隱私權政策" },
+]
+
 export function Footer() {
   return (
-    <footer className="bg-background-light dark:bg-background-dark border-t border-champagne/30 py-16 relative overflow-hidden">
-      <div className="absolute inset-0 bg-constellation opacity-30 pointer-events-none"></div>
-      <div className="absolute inset-0 bg-linear-to-t from-primary/20 to-transparent pointer-events-none"></div>
-      <div className="max-w-7xl mx-auto px-6 lg:px-12 flex flex-col items-center gap-10 relative z-10">
-        <a href="/" className="text-2xl font-serif tracking-[0.3em] text-champagne uppercase flex items-center gap-3 drop-shadow-[0_0_10px_rgba(196,208,232,0.4)] hover:opacity-80 transition-opacity">
-          <span className="text-silver text-sm">✦</span> Xingyu <span className="text-silver text-sm">✦</span>
+    <footer className="seiu-glass-panel relative overflow-hidden border-x-0 border-b-0 py-16">
+      <div className="relative z-10 mx-auto flex max-w-7xl flex-col items-center gap-10 px-6 lg:px-12">
+        <a
+          href="/"
+          className="flex items-center gap-3 text-2xl tracking-[0.3em] text-seiu-on-panel transition-opacity hover:opacity-80"
+        >
+          <span className="text-sm text-[#C8EAFF]">✦</span> Xingyu{" "}
+          <span className="text-sm text-[#C8EAFF]">✦</span>
         </a>
-        <div className="w-24 h-px bg-linear-to-r from-transparent via-silver/50 to-transparent"></div>
-        <nav className="flex gap-10 text-xs tracking-[0.2em] uppercase text-gray-400">
-          <a className="hover:text-gray-900 dark:hover:text-white transition-colors flex items-center gap-2" href="/">
-            <span className="text-[8px] opacity-70">✧</span> 首頁
-          </a>
-          <a className="hover:text-gray-900 dark:hover:text-white transition-colors flex items-center gap-2" href="/features">
-            <span className="text-[8px] opacity-70">✧</span> 功能
-          </a>
-          <a className="hover:text-gray-900 dark:hover:text-white transition-colors flex items-center gap-2" href="#">
-            <span className="text-[8px] opacity-70">✧</span> 隱私權政策
-          </a>
+
+        <SeiuDivider className="w-24" />
+
+        <nav className="flex gap-10 text-xs tracking-[0.2em] text-seiu-panel-body">
+          {LINKS.map((link) => (
+            <a
+              key={link.label}
+              href={link.href}
+              className="flex items-center gap-2 transition-colors hover:text-seiu-on-panel"
+            >
+              <span className="text-[8px] opacity-70">✧</span> {link.label}
+            </a>
+          ))}
         </nav>
-        <div className="text-xs tracking-wider text-gray-600 font-light mt-4">
+
+        <div className="mt-4 font-infant text-xs tracking-[0.14em] text-seiu-panel-muted">
           © 2026 星羽 Discord 機器人 (Xingyu Bot)。保留所有權利。
         </div>
       </div>
