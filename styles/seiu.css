@@ -1,0 +1,266 @@
+/* 星羽元件庫 — 設計語彙層
+ * 來源：Claude Design「星羽網頁元件庫設計」v5
+ * 淺色與深色兩套從同一組變數長出來；深色跟著 next-themes 的 .dark class 走。
+ */
+
+:root {
+  --seiu-bg: #E8F0FA;
+  --seiu-glow1: rgba(255, 255, 255, .75);
+  --seiu-glow2: rgba(200, 234, 255, .5);
+
+  --seiu-surface: rgba(252, 253, 255, .62);
+  --seiu-soft: rgba(252, 253, 255, .74);
+  --seiu-edge: rgba(255, 255, 255, .72);
+  --seiu-edge-soft: rgba(98, 73, 184, .1);
+
+  --seiu-star1: #8E86C8;
+  --seiu-star2: #5FA8D3;
+  --seiu-star3: #B9AEE6;
+
+  --seiu-field: #EDF3FC;
+  --seiu-field2: #E5EEF9;
+  --seiu-chip: #D9E7F8;
+  --seiu-lav: #D3CCEE;
+
+  --seiu-ink: #16294F;
+  --seiu-body: #2E4874;
+  --seiu-label: #2C5A93;
+  --seiu-muted: #4E648A;
+  --seiu-dash: #C3D6EC;
+
+  --seiu-accent: #DDD4F8;
+  --seiu-accent-ink: #584391;
+  --seiu-on-accent: #2A2059;
+  --seiu-mint: #C8EAFF;
+  --seiu-on-mint: #123A52;
+  --seiu-gold: #C9A24B;
+
+  --seiu-panel: rgba(22, 41, 79, .86);
+  --seiu-on-panel: #FCFDFF;
+  --seiu-panel-body: #B8CDE9;
+  --seiu-panel-muted: #AEC4E3;
+
+  --seiu-shadow: rgba(98, 73, 184, .14);
+  --seiu-shadow2: rgba(98, 73, 184, .3);
+
+  --seiu-ok-bg: #DCEEF6;
+  --seiu-ok-ink: #1F6078;
+  --seiu-warn-bg: #F8EED6;
+  --seiu-warn-ink: #6F5518;
+  --seiu-err-bg: #F7E6E9;
+  --seiu-err-ink: #7B3644;
+  --seiu-gold-bg: #F3E3BE;
+  --seiu-gold-ink: #6F5518;
+
+  --seiu-skel: #E0EAF6;
+  --seiu-hl: #C8EAFF;
+  --seiu-stars: .6;
+}
+
+.dark {
+  --seiu-bg: #02060E;
+  --seiu-glow1: rgba(30, 72, 142, .12);
+  --seiu-glow2: rgba(22, 58, 122, .14);
+
+  --seiu-surface: rgba(12, 20, 38, .58);
+  --seiu-soft: rgba(10, 17, 33, .78);
+  --seiu-edge: rgba(184, 205, 233, .13);
+  --seiu-edge-soft: rgba(184, 205, 233, .08);
+
+  --seiu-star1: #FCFDFF;
+  --seiu-star2: #C8EAFF;
+  --seiu-star3: #BDB6F2;
+
+  --seiu-field: #16243F;
+  --seiu-field2: #1B2C4C;
+  --seiu-chip: #23385E;
+  --seiu-lav: #13203A;
+
+  --seiu-ink: #EAF2FD;
+  --seiu-body: #C0D3ED;
+  --seiu-label: #9CC5ED;
+  --seiu-muted: #8BA2C4;
+  --seiu-dash: #2C4162;
+
+  --seiu-accent: #BDB6F2;
+  --seiu-accent-ink: #CFC8FA;
+  --seiu-on-accent: #141030;
+  --seiu-mint: #C8EAFF;
+  --seiu-on-mint: #0B2B3D;
+
+  --seiu-panel: rgba(18, 33, 60, .8);
+  --seiu-on-panel: #F6FAFF;
+  --seiu-panel-body: #B8CDE9;
+  --seiu-panel-muted: #AEC4E3;
+
+  --seiu-shadow: rgba(0, 0, 0, .34);
+  --seiu-shadow2: rgba(0, 0, 0, .46);
+
+  --seiu-ok-bg: #153E4E;
+  --seiu-ok-ink: #A5DCF2;
+  --seiu-warn-bg: #4A3C18;
+  --seiu-warn-ink: #F1DDA8;
+  --seiu-err-bg: #4A262E;
+  --seiu-err-ink: #F2C2CA;
+  --seiu-gold-bg: #5E4B20;
+  --seiu-gold-ink: #F3E3BE;
+
+  --seiu-skel: #17263F;
+  --seiu-hl: #144459;
+  --seiu-stars: .85;
+}
+
+/* 讓 Tailwind 產出 bg-seiu-accent / text-seiu-body 這類 utility。 */
+@theme inline {
+  --color-seiu-bg: var(--seiu-bg);
+  --color-seiu-glow1: var(--seiu-glow1);
+  --color-seiu-glow2: var(--seiu-glow2);
+  --color-seiu-surface: var(--seiu-surface);
+  --color-seiu-soft: var(--seiu-soft);
+  --color-seiu-edge: var(--seiu-edge);
+  --color-seiu-edge-soft: var(--seiu-edge-soft);
+  --color-seiu-field: var(--seiu-field);
+  --color-seiu-field2: var(--seiu-field2);
+  --color-seiu-chip: var(--seiu-chip);
+  --color-seiu-lav: var(--seiu-lav);
+  --color-seiu-ink: var(--seiu-ink);
+  --color-seiu-body: var(--seiu-body);
+  --color-seiu-label: var(--seiu-label);
+  --color-seiu-muted: var(--seiu-muted);
+  --color-seiu-dash: var(--seiu-dash);
+  --color-seiu-accent: var(--seiu-accent);
+  --color-seiu-accent-ink: var(--seiu-accent-ink);
+  --color-seiu-on-accent: var(--seiu-on-accent);
+  --color-seiu-mint: var(--seiu-mint);
+  --color-seiu-on-mint: var(--seiu-on-mint);
+  --color-seiu-gold: var(--seiu-gold);
+  --color-seiu-panel: var(--seiu-panel);
+  --color-seiu-on-panel: var(--seiu-on-panel);
+  --color-seiu-panel-body: var(--seiu-panel-body);
+  --color-seiu-panel-muted: var(--seiu-panel-muted);
+  --color-seiu-ok-bg: var(--seiu-ok-bg);
+  --color-seiu-ok-ink: var(--seiu-ok-ink);
+  --color-seiu-warn-bg: var(--seiu-warn-bg);
+  --color-seiu-warn-ink: var(--seiu-warn-ink);
+  --color-seiu-err-bg: var(--seiu-err-bg);
+  --color-seiu-err-ink: var(--seiu-err-ink);
+  --color-seiu-gold-bg: var(--seiu-gold-bg);
+  --color-seiu-gold-ink: var(--seiu-gold-ink);
+  --color-seiu-skel: var(--seiu-skel);
+  --color-seiu-hl: var(--seiu-hl);
+
+  --font-kai: var(--font-lxgw), "LXGW WenKai TC", serif;
+  --font-infant: var(--font-ysabeau), "Ysabeau Infant", serif;
+
+  /* 圓角不對稱，右下角收得小一點，像手繪的收筆。 */
+  --radius-blob-xs: 9px 9px 9px 3px;
+  --radius-blob-sm: 16px 16px 16px 5px;
+  --radius-blob: 18px 18px 18px 6px;
+  --radius-blob-md: 22px 22px 22px 7px;
+  --radius-blob-lg: 26px 26px 26px 8px;
+  --radius-blob-xl: 32px 32px 32px 10px;
+  --radius-blob-2xl: 40px 40px 40px 12px;
+
+  --animate-seiu-spin: seiu-spin 1s linear infinite;
+  --animate-seiu-rise: seiu-rise .26s ease both;
+  --animate-seiu-float: seiu-float 5s ease-in-out infinite;
+  --animate-seiu-twinkle: seiu-twinkle 7s ease-in-out infinite;
+  --animate-seiu-sparkle: seiu-sparkle 3.4s ease-in-out infinite;
+}
+
+@keyframes seiu-spin { to { transform: rotate(360deg); } }
+@keyframes seiu-spin-rev { to { transform: rotate(-360deg); } }
+@keyframes seiu-orbit { to { transform: rotate(360deg); } }
+@keyframes seiu-rise { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes seiu-float { 0%, 100% { transform: translateY(0) rotate(-4deg); } 50% { transform: translateY(-9px) rotate(2deg); } }
+@keyframes seiu-twinkle { 0%, 100% { opacity: var(--seiu-stars); } 45% { opacity: calc(var(--seiu-stars) * .45); } }
+@keyframes seiu-sparkle { 0%, 100% { transform: scale(1) rotate(0deg); opacity: .85; } 50% { transform: scale(1.18) rotate(18deg); opacity: 1; } }
+@keyframes seiu-shimmer { 0% { background-position: -220px 0; } 100% { background-position: 320px 0; } }
+
+@layer components {
+  /* 毛玻璃：設計稿裡每張卡片共用的底。 */
+  .seiu-glass {
+    background: var(--seiu-surface);
+    backdrop-filter: blur(18px) saturate(1.35);
+    -webkit-backdrop-filter: blur(18px) saturate(1.35);
+    border: 1px solid var(--seiu-edge);
+  }
+  .seiu-glass-soft {
+    background: var(--seiu-soft);
+    backdrop-filter: blur(18px) saturate(1.35);
+    -webkit-backdrop-filter: blur(18px) saturate(1.35);
+    border: 1px solid var(--seiu-edge);
+  }
+  .seiu-glass-panel {
+    background: var(--seiu-panel);
+    backdrop-filter: blur(18px) saturate(1.35);
+    -webkit-backdrop-filter: blur(18px) saturate(1.35);
+    border: 1px solid var(--seiu-edge-soft);
+  }
+}
+
+@layer utilities {
+  /* 標題底下那道手繪螢光筆。 */
+  .seiu-marker {
+    background: linear-gradient(transparent 62%, var(--seiu-hl) 62%, var(--seiu-hl) 94%, transparent 94%);
+  }
+  .seiu-marker-lg {
+    background: linear-gradient(transparent 58%, var(--seiu-hl) 58%, var(--seiu-hl) 92%, transparent 92%);
+  }
+  /* 分隔線用的虛點。 */
+  .seiu-dotted {
+    background-image: radial-gradient(circle, var(--seiu-dash) 0 1.5px, transparent 2px);
+    background-size: 9px 2px;
+  }
+  .seiu-shimmer {
+    background: linear-gradient(90deg, var(--seiu-skel) 0%, var(--seiu-field) 40%, var(--seiu-skel) 80%);
+    background-size: 320px 100%;
+    animation: seiu-shimmer 1.5s linear infinite;
+  }
+}
+
+/* 統一的焦點環：只在鍵盤操作時出現。 */
+.seiu-root :focus-visible {
+  outline: 2.5px solid var(--seiu-accent-ink);
+  outline-offset: 3px;
+  border-radius: 8px;
+}
+
+/* 連結的預設色放在 base layer，讓自己帶 text-* 的元素（例如 SeiuLinkButton）蓋得過去。 */
+@layer base {
+  .seiu-root a { color: var(--seiu-accent-ink); text-decoration: none; }
+  .seiu-root a:hover { color: var(--seiu-ink); }
+}
+
+.seiu-root ::selection { background: var(--seiu-mint); color: var(--seiu-on-mint); }
+
+/* 星塵濃度滑桿 */
+.seiu-range {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 8px;
+  border-radius: 99px;
+  background: linear-gradient(90deg, var(--seiu-accent), var(--seiu-mint));
+  outline: none;
+}
+.seiu-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--seiu-surface);
+  backdrop-filter: blur(18px) saturate(1.35);
+  border: 3px solid var(--seiu-accent-ink);
+  box-shadow: 0 3px 10px var(--seiu-shadow2);
+  cursor: pointer;
+}
+.seiu-range::-moz-range-thumb {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--seiu-surface);
+  border: 3px solid var(--seiu-accent-ink);
+  box-shadow: 0 3px 10px var(--seiu-shadow2);
+  cursor: pointer;
+}
