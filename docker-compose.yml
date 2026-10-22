@@ -4,9 +4,12 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      secrets:
+        - env
     
+    # 預設讀 repo 內的 .env；部署端可用 DOMALYZE_FRONTEND_ENV_FILE 指到其他路徑（如 /etc 下的檔案）
     env_file:
-      - .env
+      - ${DOMALYZE_FRONTEND_ENV_FILE:-.env}
     
     ports:
       - "3000:3000" # 將主機的 3000 埠對應到容器的 3000 埠
@@ -22,3 +25,7 @@ networks:
   cfnet:
     external: true
     name: cfnet
+
+secrets:
+  env:
+    file: ${DOMALYZE_FRONTEND_ENV_FILE:-.env}

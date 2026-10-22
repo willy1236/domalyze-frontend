@@ -12,12 +12,10 @@ RUN npm ci
 # 複製所有程式碼
 COPY . .
 
-# [核心修改] 將 .env 複製進去，讓 npm run build 可以讀取 NEXT_PUBLIC_ 變數
-# 注意：此檔案只存在於 builder 階段，不會被帶入最終的生產環境映像檔中 (如果是多階段建置)
-COPY .env .env
-
 # 開始建置 (這時候 Next.js 會將 NEXT_PUBLIC_ 變數燒錄進靜態檔)
-RUN npm run build
+# env 檔以 build secret 掛成 /app/.env，只在這個 RUN 期間存在，不會留在任何映像層；
+# 來源由 docker-compose.yml 的 secrets.env 決定，可放在 build context 之外
+RUN --mount=type=secret,id=env,target=/app/.env npm run build
 
 # --- 階段 2: Runner (負責執行) ---
 # 這是最終會跑起來的輕量級映像檔
