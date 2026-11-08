@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react"
 import Link from "next/link"
-import { dashboardFetch } from "@/lib/dashboard-api"
+import { API_BASE, dashboardFetch } from "@/lib/dashboard-api"
 
 interface GuildItem {
   id: string
@@ -15,7 +15,17 @@ interface GuildLists {
   not_invited: GuildItem[]
 }
 
-const INVITE_URL = process.env.NEXT_PUBLIC_BOT_INVITE_URL || ""
+const NOTICES: Record<string, string> = {
+  need_manage_channels: "星羽已加入伺服器，但你沒有該伺服器的「管理頻道」權限，無法設定通知。請伺服器管理員授予權限後再進入。",
+  invite_pending: "星羽已加入伺服器，但清單還沒更新，請稍後按「重新整理」。",
+}
+
+/** 邀請入口：整頁導向授權，完成後回到後台。guildId 省略時由使用者在 Discord 頁面選擇伺服器。 */
+function inviteUrl(guildId?: string): string {
+  const params = new URLSearchParams({ origin: window.location.origin })
+  if (guildId) params.set("guild_id", guildId)
+  return `${API_BASE}/to/dashboard-invite?${params.toString()}`
+}
 
 const buttonClass =
   "border border-champagne/40 text-champagne px-4 py-2 text-xs tracking-widest uppercase hover:bg-champagne hover:text-background-dark transition-colors disabled:opacity-50 disabled:pointer-events-none"
@@ -52,7 +62,7 @@ function GuildRow({ guild, invited }: { guild: GuildItem; invited: boolean }) {
           {content}
         </Link>
       ) : (
-        <a href={INVITE_URL} target="_blank" rel="noopener noreferrer" className={className}>
+        <a href={inviteUrl(guild.id)} className={className}>
           {content}
         </a>
       )}
@@ -80,6 +90,19 @@ export default function DashboardPage() {
   const [lists, setLists] = useState<GuildLists | null>(null)
   const [loading, setLoading] = useState(true)
   const [failed, setFailed] = useState(false)
+  const [notice, setNotice] = useState<string | null>(null)
+
+  // 邀請完成後帶 ?notice=，顯示一次後從網址移除
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    const key = params.get("notice")
+    if (key && NOTICES[key]) setNotice(NOTICES[key])
+    if (key) {
+      params.delete("notice")
+      const query = params.toString()
+      window.history.replaceState(null, "", window.location.pathname + (query ? `?${query}` : ""))
+    }
+  }, [])
 
   const load = useCallback(async (refresh: boolean, signal?: AbortSignal) => {
     setLoading(true)
@@ -113,6 +136,12 @@ export default function DashboardPage() {
         </button>
       </div>
 
+      {notice && (
+        <p role="status" className="border border-champagne/30 px-4 py-3 mb-6">
+          {notice}
+        </p>
+      )}
+
       {failed && (
         <p className="text-gray-500 dark:text-gray-400 mb-6">無法載入伺服器清單，請稍後按「重新整理」再試。</p>
       )}
@@ -129,11 +158,9 @@ export default function DashboardPage() {
           <p className="text-gray-500 dark:text-gray-400 mb-4">
             沒有可管理的伺服器。管理頻道通知需要「管理頻道」權限，邀請星羽需要「管理伺服器」權限。
           </p>
-          {INVITE_URL && (
-            <a href={INVITE_URL} target="_blank" rel="noopener noreferrer" className={`${buttonClass} inline-block`}>
-              邀請星羽
-            </a>
-          )}
+          <a href={inviteUrl()} className={`${buttonClass} inline-block`}>
+            邀請星羽
+          </a>
         </div>
       )}
     </section>
