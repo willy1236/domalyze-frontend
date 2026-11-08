@@ -15,7 +15,7 @@ export function DashboardHeader({ user }: { user: DashboardUser }) {
   async function logout() {
     setBusy(true)
     try {
-      await dashboardFetch("/dashboard/logout", { method: "POST" })
+      await dashboardFetch("/dashboard/logout", { method: "POST" }, { sessionExpiredIsOk: true })
       // 登出後可能換帳號登入：丟棄殘留暫存，並記下這個帳號供回來時比對
       discardDrafts()
       try {

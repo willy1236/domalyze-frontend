@@ -33,6 +33,8 @@ export interface DashboardFetchOptions {
   signal?: AbortSignal
   /** 收到 session_expired 時不顯示提示、直接導向登入（layout 載入時用） */
   silentSessionExpired?: boolean
+  /** 收到 session_expired 視同成功（登出用）：不提示、不導向，回傳 undefined */
+  sessionExpiredIsOk?: boolean
 }
 
 export class DashboardApiError extends Error {
@@ -162,6 +164,7 @@ export async function dashboardFetch<T = unknown>(
   switch (code) {
     case "session_expired":
     case "reauth_required":
+      if (code === "session_expired" && options.sessionExpiredIsOk) return undefined as T
       if (!(code === "session_expired" && options.silentSessionExpired)) {
         window.alert(
           code === "session_expired"
