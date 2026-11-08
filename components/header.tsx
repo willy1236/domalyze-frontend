@@ -33,7 +33,7 @@ export function Header() {
             <a className="text-sm tracking-[0.2em] uppercase text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors" href="#commands">指令</a>
           </div>
         </nav>
-        <div className="flex items-center space-x-6">
+        <div className="flex items-center space-x-4 sm:space-x-6">
           <button 
             className="text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors" 
             onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
@@ -44,6 +44,7 @@ export function Header() {
               <Moon className="w-5 h-5" />
             )}
           </button>
+          <a className="text-xs sm:text-sm tracking-[0.2em] uppercase text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors whitespace-nowrap" href="/dashboard">管理後台</a>
           <a className="hidden sm:inline-block border border-champagne/40 text-champagne px-6 py-2.5 text-xs tracking-[0.2em] uppercase hover:bg-champagne hover:text-background-dark transition-all duration-300 relative group" href="#preorder">
             <span className="absolute inset-0 bg-champagne/20 scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-300"></span>
             <span className="relative z-10">邀請</span>
