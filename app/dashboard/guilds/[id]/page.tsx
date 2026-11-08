@@ -62,14 +62,14 @@ export default function GuildPage() {
           <nav aria-label="區塊" className="mt-5 flex gap-2 lg:flex-col lg:gap-1 text-sm">
             <a
               href="#channel-notifies"
-              className={`flex items-baseline justify-between gap-3 rounded-md border border-primary/20 dark:border-champagne/25 px-3 py-1.5 hover:bg-primary/5 dark:hover:bg-champagne/10 lg:border-transparent ${linkClass}`}
+              className={`flex items-baseline justify-between gap-3 rounded-md border border-primary/20 dark:border-champagne/25 px-3 py-1.5 hover:bg-primary/5 dark:hover:bg-champagne/10 lg:border-transparent lg:dark:border-transparent ${linkClass}`}
             >
               頻道通知
               <span className="tabular-nums text-gray-600 dark:text-gray-400">{channelCount}</span>
             </a>
             <a
               href="#community-notifies"
-              className={`flex items-baseline justify-between gap-3 rounded-md border border-primary/20 dark:border-champagne/25 px-3 py-1.5 hover:bg-primary/5 dark:hover:bg-champagne/10 lg:border-transparent ${linkClass}`}
+              className={`flex items-baseline justify-between gap-3 rounded-md border border-primary/20 dark:border-champagne/25 px-3 py-1.5 hover:bg-primary/5 dark:hover:bg-champagne/10 lg:border-transparent lg:dark:border-transparent ${linkClass}`}
             >
               社群推播
               <span className="tabular-nums text-gray-600 dark:text-gray-400">{communityCount}</span>
