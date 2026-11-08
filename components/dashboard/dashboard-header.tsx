@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { dashboardFetch } from "@/lib/dashboard-api"
+import { LAST_USER_KEY, dashboardFetch, discardDrafts } from "@/lib/dashboard-api"
 
 export interface DashboardUser {
   id: string
@@ -16,6 +16,13 @@ export function DashboardHeader({ user }: { user: DashboardUser }) {
     setBusy(true)
     try {
       await dashboardFetch("/dashboard/logout", { method: "POST" })
+      // 登出後可能換帳號登入：丟棄殘留暫存，並記下這個帳號供回來時比對
+      discardDrafts()
+      try {
+        sessionStorage.setItem(LAST_USER_KEY, user.id)
+      } catch {
+        // sessionStorage 不可用時略過換帳號偵測
+      }
       window.location.href = "/"
     } catch {
       setBusy(false)

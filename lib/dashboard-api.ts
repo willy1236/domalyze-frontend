@@ -6,6 +6,23 @@ export const API_BASE = process.env.NEXT_PUBLIC_BASE_API_URL ?? ""
 /** 換帳號偵測用：導向登入前存下目前的 Discord user ID */
 export const LAST_USER_KEY = "dashboard:last-user-id"
 
+/** T-04 的暫存介面與換帳號偵測共用的 sessionStorage 前綴 */
+export const DRAFT_PREFIX = "dashboard:draft"
+
+/** 丟棄所有表單暫存（換帳號、登出時用） */
+export function discardDrafts(): void {
+  try {
+    const keys: string[] = []
+    for (let i = 0; i < sessionStorage.length; i++) {
+      const k = sessionStorage.key(i)
+      if (k && k.startsWith(DRAFT_PREFIX)) keys.push(k)
+    }
+    keys.forEach((k) => sessionStorage.removeItem(k))
+  } catch {
+    // sessionStorage 不可用時略過
+  }
+}
+
 export interface DashboardHooks {
   beforeLoginRedirect?: () => void
   onNoPermission?: () => void

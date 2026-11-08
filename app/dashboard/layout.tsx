@@ -3,19 +3,7 @@
 import { useEffect, useState } from "react"
 import { usePathname, useRouter } from "next/navigation"
 import { DashboardHeader, type DashboardUser } from "@/components/dashboard/dashboard-header"
-import { LAST_USER_KEY, dashboardFetch, setDashboardUserId } from "@/lib/dashboard-api"
-
-// 與 T-04 暫存介面共用的 sessionStorage 前綴；換帳號時全部丟棄
-const DRAFT_PREFIX = "dashboard:draft"
-
-function discardDrafts() {
-  const keys: string[] = []
-  for (let i = 0; i < sessionStorage.length; i++) {
-    const k = sessionStorage.key(i)
-    if (k && k.startsWith(DRAFT_PREFIX)) keys.push(k)
-  }
-  keys.forEach((k) => sessionStorage.removeItem(k))
-}
+import { LAST_USER_KEY, dashboardFetch, discardDrafts, setDashboardUserId } from "@/lib/dashboard-api"
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter()
