@@ -52,6 +52,8 @@ export function CommunityNotifySection({ guildId, items, onChanged, headerAction
   const [form, setForm] = useState<CommunityFormDraft | null>(restoreForm)
   const [formId, setFormId] = useState(0)
   const open = (draft: CommunityFormDraft) => {
+    // 同時只開一個表單：換掉前先確認，免得不小心丟掉未存的輸入
+    if (form && !window.confirm("目前開啟的表單尚未儲存，確定要換成另一個嗎？")) return
     setForm(draft)
     setFormId((n) => n + 1)
   }

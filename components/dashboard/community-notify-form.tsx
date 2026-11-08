@@ -209,22 +209,24 @@ export function CommunityNotifyForm({ guildId, items, initial, onClose, onChange
     }
   }
 
-  async function save(against: { key: string; original: ChannelNotifyValues } | null) {
+  /** against 有值是修改；否則新增 createKeys（預設為勾選的種類） */
+  async function save(against: { key: string; original: ChannelNotifyValues } | null, createKeys: string[] = checked) {
     if (!account) return
     begin()
-    const withMessage = against ? typeOf(against.key).hasMessage : hasMessage
+    const createTypes = createKeys.map(typeOf)
+    const withMessage = against ? typeOf(against.key).hasMessage : createTypes.length > 0 && createTypes.every((t) => t.hasMessage)
     const mine = currentValues(withMessage)
     try {
       const result = against
         ? await updateCommunityNotify(guildId, against.key, account.account_id, mine, against.original)
-        : await createCommunityNotifies(guildId, platform, account.account_id, checked, mine)
+        : await createCommunityNotifies(guildId, platform, account.account_id, createKeys, mine)
       afterSave(result)
     } catch (e) {
       const problem = parseCommunityProblem(e)
       if (problem?.kind === "conflict" && against) {
         setConflict({ current: problem.current, mine, key: against.key })
       } else if (problem?.kind === "already_exists") {
-        const only = checked.length === 1 ? checked[0] : null
+        const only = createKeys.length === 1 ? createKeys[0] : null
         if (only && problem.current[only]) {
           // 只勾了一種：比照頻道通知顯示衝突提示，覆蓋時改走修改
           setConflict({ current: problem.current[only], mine, key: only })
@@ -435,21 +437,11 @@ export function CommunityNotifyForm({ guildId, items, initial, onClose, onChange
             void save({ key: conflict.key, original: latest })
           }}
           onRecreate={() => {
+            // 對方刪掉這筆：以這一種重新新增，錯誤處理與一般新增相同
             setEditKey(null)
             setBase(null)
             setChecked([conflict.key])
-            void (async () => {
-              if (!account) return
-              begin()
-              try {
-                afterSave(await createCommunityNotifies(guildId, platform, account.account_id, [conflict.key], conflict.mine))
-              } catch (e) {
-                console.error("recreate community notify failed", e)
-                setNotice("重新新增失敗，請稍後再試。")
-              } finally {
-                setBusy(false)
-              }
-            })()
+            void save(null, [conflict.key])
           }}
         />
       )}

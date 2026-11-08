@@ -39,6 +39,8 @@ export function ChannelNotifySection({ guildId, items, onChanged, headerActions 
   const [formId, setFormId] = useState(0)
 
   const open = (type: ChannelNotifyType, original: ChannelNotifyValues | null) => {
+    // 同時只開一個表單：換掉前先確認，免得不小心丟掉未存的輸入
+    if (form && !window.confirm("目前開啟的表單尚未儲存，確定要換成另一個嗎？")) return
     setForm({ type, original })
     setFormId((n) => n + 1)
   }
