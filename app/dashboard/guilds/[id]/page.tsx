@@ -33,7 +33,6 @@ export default function GuildPage() {
     return () => controller.abort()
   }, [load])
 
-  const isEmpty = lists !== null && lists.channel_notifies.length === 0 && lists.community_notifies.length === 0
 
   return (
     <section>
@@ -61,11 +60,6 @@ export default function GuildPage() {
 
       {lists && (
         <>
-          {isEmpty && (
-            <p className="border border-champagne/30 px-4 py-6 mb-10 text-gray-500 dark:text-gray-400">
-              這個伺服器還沒有設定任何通知。
-            </p>
-          )}
           <ChannelNotifySection items={lists.channel_notifies} />
           <CommunityNotifySection items={lists.community_notifies} />
         </>
