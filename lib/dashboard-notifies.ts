@@ -25,6 +25,10 @@ export interface NotifyItem {
   message?: string | null
   /** 該筆目前的值，T-04 的衝突比對原始值 */
   values: Record<string, string | null>
+  /** 是否提供測試通知；定時通知為 false */
+  testable?: boolean
+  /** 測試通知的剩餘冷卻秒數 */
+  cooldown?: number
   /** 社群推播的對象帳號 */
   account?: { id: string; display_name: string; username: string }
 }

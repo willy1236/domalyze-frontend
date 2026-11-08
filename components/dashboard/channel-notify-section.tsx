@@ -7,6 +7,7 @@ import type { NotifyItem } from "@/lib/dashboard-notifies"
 import { CHANNEL_DRAFT_KEY, ChannelNotifyForm, type ChannelFormDraft } from "./channel-notify-form"
 import { NotifyRow } from "./notify-item"
 import { selectClass } from "./select-class"
+import { TestNotifyButton } from "./test-notify-button"
 
 interface OpenForm {
   type: ChannelNotifyType
@@ -104,16 +105,19 @@ export function ChannelNotifySection({ guildId, items, onChanged, headerActions 
               key={item.key}
               item={item}
               actions={
-                <button
-                  type="button"
-                  className={buttonClass}
-                  onClick={() => {
-                    const type = CHANNEL_NOTIFY_TYPES.find((t) => t.key === item.key)
-                    if (type) open(type, item.values)
-                  }}
-                >
-                  編輯
-                </button>
+                <div className="flex flex-col items-end gap-2">
+                  <button
+                    type="button"
+                    className={buttonClass}
+                    onClick={() => {
+                      const type = CHANNEL_NOTIFY_TYPES.find((t) => t.key === item.key)
+                      if (type) open(type, item.values)
+                    }}
+                  >
+                    編輯
+                  </button>
+                  <TestNotifyButton guildId={guildId} item={item} onChanged={onChanged} />
+                </div>
               }
             />
           ))}

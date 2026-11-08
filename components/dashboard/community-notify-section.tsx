@@ -11,6 +11,7 @@ import {
   type CommunityFormDraft,
 } from "./community-notify-form"
 import { NotifyRow } from "./notify-item"
+import { TestNotifyButton } from "./test-notify-button"
 
 const buttonClass =
   "border border-champagne/40 text-champagne px-3 py-1.5 text-xs tracking-widest uppercase hover:bg-champagne hover:text-background-dark transition-colors disabled:opacity-60"
@@ -100,9 +101,12 @@ export function CommunityNotifySection({ guildId, items, onChanged, headerAction
                     key={item.key}
                     item={item}
                     actions={
-                      <button type="button" className={buttonClass} onClick={() => open(editCommunityDraft(item))}>
-                        編輯
-                      </button>
+                      <div className="flex flex-col items-end gap-2">
+                        <button type="button" className={buttonClass} onClick={() => open(editCommunityDraft(item))}>
+                          編輯
+                        </button>
+                        <TestNotifyButton guildId={guildId} item={item} onChanged={onChanged} />
+                      </div>
                     }
                   />
                 ))}
