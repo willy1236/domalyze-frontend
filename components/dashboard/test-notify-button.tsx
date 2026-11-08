@@ -4,9 +4,6 @@ import { useEffect, useState } from "react"
 import { DashboardApiError, dashboardFetch } from "@/lib/dashboard-api"
 import type { NotifyItem } from "@/lib/dashboard-notifies"
 
-/** 與後端 notify_cooldown.COOLDOWN_SECONDS 一致，只用在發送成功後的倒數 */
-const COOLDOWN_SECONDS = 60
-
 const buttonClass =
   "border border-primary/30 dark:border-champagne/30 text-primary dark:text-silver px-3 py-1.5 text-xs tracking-widest uppercase hover:bg-primary hover:text-white dark:hover:bg-champagne dark:hover:text-background-dark transition-colors disabled:opacity-60 disabled:hover:bg-transparent disabled:cursor-not-allowed tabular-nums"
 
@@ -58,7 +55,7 @@ export function TestNotifyButton({ guildId, item, onChanged }: Props) {
     setBusy(true)
     setError(null)
     try {
-      await dashboardFetch(`/dashboard/guilds/${guildId}/notifies/test`, {
+      const res = await dashboardFetch<{ cooldown: number }>(`/dashboard/guilds/${guildId}/notifies/test`, {
         method: "POST",
         json: {
           kind: item.key.startsWith("community:") ? "community" : "channel",
@@ -66,10 +63,10 @@ export function TestNotifyButton({ guildId, item, onChanged }: Props) {
           account_id: item.account?.id,
         },
       })
-      startCooldown(COOLDOWN_SECONDS)
+      startCooldown(res.cooldown)
     } catch (e) {
       if (e instanceof DashboardApiError && e.code === "cooldown") {
-        startCooldown(Number(e.body?.retry_after) || COOLDOWN_SECONDS)
+        startCooldown(Number(e.body?.retry_after) || 60)
       } else if (e instanceof DashboardApiError && e.code === "conflict") {
         setError("這筆通知已被刪除，請重新整理。")
         onChanged()
