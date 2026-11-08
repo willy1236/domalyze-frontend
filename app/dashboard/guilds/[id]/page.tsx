@@ -101,7 +101,7 @@ export default function GuildPage() {
         {lists && (
           <div className="space-y-14 motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-2 motion-safe:duration-500">
             <ChannelNotifySection guildId={id} items={lists.channel_notifies} onChanged={() => void load()} />
-            <CommunityNotifySection items={lists.community_notifies} />
+            <CommunityNotifySection guildId={id} items={lists.community_notifies} onChanged={() => void load()} />
           </div>
         )}
       </div>
