@@ -52,6 +52,9 @@ export function TestNotifyButton({ guildId, item, onChanged }: Props) {
   }
 
   const send = async () => {
+    const target = item.account ? `${item.name}（${item.account.display_name}）` : item.name
+    const channel = item.channel.name ? `#${item.channel.name}` : item.channel.id
+    if (!window.confirm(`要在 ${channel} 發送一則「${target}」的測試通知嗎？`)) return
     setBusy(true)
     setError(null)
     try {
