@@ -9,6 +9,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const router = useRouter()
   const pathname = usePathname()
   const [user, setUser] = useState<DashboardUser | null>(null)
+  const [failed, setFailed] = useState(false)
 
   useEffect(() => {
     const controller = new AbortController()
@@ -32,11 +33,27 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       .catch((e) => {
         if (controller.signal.aborted) return
         console.error("load /dashboard/me failed", e)
+        setFailed(true)
       })
     return () => controller.abort()
     // 只在掛載時載入一次；pathname 變動不重新驗證
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+
+  if (failed) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center gap-4 px-4 text-center">
+        <p>無法載入後台，請稍後再試。</p>
+        <button
+          type="button"
+          onClick={() => window.location.reload()}
+          className="border border-champagne/40 text-champagne px-4 py-2 text-xs tracking-widest uppercase hover:bg-champagne hover:text-background-dark transition-colors"
+        >
+          重新整理
+        </button>
+      </div>
+    )
+  }
 
   if (!user) {
     return <div className="min-h-screen" aria-busy="true" />
