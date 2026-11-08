@@ -10,8 +10,8 @@
   --color-champagne: #C4D0E8;
   --color-silver: #E0E5F0;
 
-  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
-  --font-serif: var(--font-playfair), ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
+  --font-sans: var(--font-inter), var(--font-lxgw), ui-sans-serif, system-ui, sans-serif;
+  --font-serif: var(--font-playfair), var(--font-lxgw), ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
 
   --background-image-hero-gradient: linear-gradient(to bottom right, var(--tw-gradient-stops));
   --background-image-constellation: radial-gradient(1.5px 1.5px at 20px 30px, #ffffff, rgba(0,0,0,0)), radial-gradient(1px 1px at 40px 70px, #e0e5f0, rgba(0,0,0,0)), radial-gradient(2px 2px at 50px 160px, #ffffff, rgba(0,0,0,0)), radial-gradient(1px 1px at 90px 40px, #c4d0e8, rgba(0,0,0,0)), radial-gradient(1.5px 1.5px at 130px 80px, #ffffff, rgba(0,0,0,0)), radial-gradient(1px 1px at 160px 120px, #ffffff, rgba(0,0,0,0));

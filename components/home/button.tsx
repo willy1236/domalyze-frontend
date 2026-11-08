@@ -25,9 +25,9 @@ export function HomeButton({
   }
 
   const variants = {
-    primary: "inline-flex items-center bg-surface-light/60 dark:bg-surface-dark/60 border border-champagne/40 text-champagne backdrop-blur-md px-8 py-4 text-xs tracking-[0.25em] uppercase hover:bg-champagne hover:text-background-dark transition-all duration-300 shadow-[0_0_25px_rgba(196,208,232,0.2)] relative overflow-hidden group",
-    secondary: "inline-flex items-center bg-surface-light dark:bg-surface-dark border border-champagne/50 text-champagne px-8 py-4 uppercase tracking-[0.2em] text-xs hover:bg-champagne hover:text-background-dark transition-colors whitespace-nowrap rounded-sm relative z-10 shadow-[0_0_15px_rgba(196,208,232,0.1)]",
-    text: "inline-flex items-center text-champagne uppercase tracking-[0.2em] text-xs border-b border-champagne/40 pb-1 hover:border-champagne hover:text-gray-900 dark:hover:text-white transition-colors drop-shadow-[0_0_8px_rgba(196,208,232,0.3)]"
+    primary: "inline-flex items-center bg-surface-light/60 dark:bg-surface-dark/60 border border-primary/30 dark:border-champagne/40 text-primary dark:text-champagne backdrop-blur-md px-8 py-4 text-xs tracking-[0.25em] uppercase hover:bg-primary hover:text-white dark:hover:bg-champagne dark:hover:text-background-dark transition-all duration-300 shadow-[0_0_25px_rgba(196,208,232,0.2)] relative overflow-hidden group",
+    secondary: "inline-flex items-center bg-surface-light dark:bg-surface-dark border border-primary/30 dark:border-champagne/50 text-primary dark:text-champagne px-8 py-4 uppercase tracking-[0.2em] text-xs hover:bg-primary hover:text-white dark:hover:bg-champagne dark:hover:text-background-dark transition-colors whitespace-nowrap rounded-sm relative z-10 shadow-[0_0_15px_rgba(196,208,232,0.1)]",
+    text: "inline-flex items-center text-primary dark:text-champagne uppercase tracking-[0.2em] text-xs border-b border-primary/30 dark:border-champagne/40 pb-1 hover:border-champagne hover:text-gray-900 dark:hover:text-white transition-colors drop-shadow-[0_0_8px_rgba(196,208,232,0.3)]"
   }
 
   const buttonClass = `${variants[variant]} ${className}`

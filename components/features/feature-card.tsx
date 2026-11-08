@@ -14,7 +14,7 @@ export function FeatureCard({ icon: Icon, title, description }: FeatureCardProps
       <div className="absolute inset-0 bg-linear-to-b from-champagne/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
 
       {/* Icon */}
-      <div className="mb-6 text-champagne relative z-10 drop-shadow-[0_0_10px_rgba(196,208,232,0.3)]">
+      <div className="mb-6 text-primary dark:text-champagne relative z-10 drop-shadow-[0_0_10px_rgba(196,208,232,0.3)]">
         <Icon className="w-10 h-10 font-light" strokeWidth={1} />
       </div>
 

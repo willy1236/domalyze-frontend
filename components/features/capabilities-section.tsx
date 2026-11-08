@@ -1,12 +1,6 @@
 "use client"
 
-import { CoreAdvantageCard } from "./core-advantage-card"
-
-interface CoreAdvantageItem {
-  title: string
-  emoji: string
-  items: string[]
-}
+import { CoreAdvantageCard, type CoreAdvantageItem } from "./core-advantage-card"
 
 interface CapabilitiesSectionProps {
   advantages: CoreAdvantageItem[]
@@ -23,7 +17,7 @@ export function CapabilitiesSection({ advantages }: CapabilitiesSectionProps) {
 
       <div className="max-w-7xl mx-auto px-6 lg:px-12 relative z-10">
         <div className="text-center mb-16">
-          <span className="text-champagne tracking-[0.25em] uppercase text-xs font-medium mb-4 block drop-shadow-[0_0_8px_rgba(196,208,232,0.5)]">
+          <span className="text-primary dark:text-champagne tracking-[0.25em] uppercase text-xs font-medium mb-4 block drop-shadow-[0_0_8px_rgba(196,208,232,0.5)]">
             ✦
           </span>
           <h2 className="font-serif text-3xl md:text-5xl text-gray-900 dark:text-white mb-6">

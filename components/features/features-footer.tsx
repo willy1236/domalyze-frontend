@@ -6,7 +6,7 @@ export function FeaturesFooter() {
       <div className="absolute inset-0 bg-constellation opacity-30 pointer-events-none"></div>
       <div className="absolute inset-0 bg-linear-to-t from-primary/20 to-transparent pointer-events-none"></div>
       <div className="max-w-7xl mx-auto px-6 lg:px-12 flex flex-col items-center gap-10 relative z-10">
-        <a href="/" className="text-2xl font-serif tracking-[0.3em] text-champagne uppercase flex items-center gap-3 drop-shadow-[0_0_10px_rgba(196,208,232,0.4)] hover:opacity-80 transition-opacity">
+        <a href="/" className="text-2xl font-serif tracking-[0.3em] text-primary dark:text-champagne uppercase flex items-center gap-3 drop-shadow-[0_0_10px_rgba(196,208,232,0.4)] hover:opacity-80 transition-opacity">
           <span className="text-silver text-sm">✦</span> Xingyu <span className="text-silver text-sm">✦</span>
         </a>
         <div className="w-24 h-px bg-linear-to-r from-transparent via-silver/50 to-transparent"></div>

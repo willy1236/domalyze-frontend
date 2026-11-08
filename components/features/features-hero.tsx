@@ -9,17 +9,17 @@ export function FeaturesHero() {
 
       <div className="max-w-7xl mx-auto px-6 lg:px-12 w-full relative z-10">
         <div className="text-center mb-16">
-          <span className="text-champagne tracking-[0.25em] uppercase text-xs font-medium mb-6 flex items-center justify-center">
-            <span className="mr-2 opacity-80">✧</span> 完整功能列表 <span className="ml-2 opacity-80">✧</span>
+          <span className="text-primary dark:text-champagne tracking-[0.25em] uppercase text-xs font-medium mb-6 flex items-center justify-center">
+            <span className="mr-2 opacity-80">✧</span> 完整功能清單 <span className="ml-2 opacity-80">✧</span>
           </span>
           <h1 className="font-serif text-5xl lg:text-7xl leading-[1.1] mb-8 text-gray-900 dark:text-white relative drop-shadow-[0_10px_30px_rgba(0,0,0,0.5)]">
-            精選 <br />
-            <span className="italic text-gray-400 dark:text-gray-300 drop-shadow-[0_0_15px_rgba(255,255,255,0.2)]">功能集成</span>
+            星羽目前 <br />
+            <span className="text-gray-400 dark:text-gray-300 drop-shadow-[0_0_15px_rgba(255,255,255,0.2)]">支援的功能</span>
           </h1>
-          <p className="text-lg text-gray-500 dark:text-gray-400 max-w-2xl mx-auto font-light leading-relaxed border-l border-r border-champagne/40 px-6 py-4 relative bg-background-dark/5 dark:bg-background-dark/40 backdrop-blur-md rounded-lg shadow-lg">
+          <p className="text-lg text-gray-500 dark:text-gray-400 max-w-2xl mx-auto font-light leading-relaxed border-l border-r border-primary/30 dark:border-champagne/40 px-6 py-4 relative bg-background-dark/5 dark:bg-background-dark/40 backdrop-blur-md rounded-lg shadow-lg">
             <span className="absolute -left-px top-0 w-px h-8 bg-champagne shadow-[0_0_10px_var(--color-champagne)]"></span>
             <span className="absolute -right-px top-0 w-px h-8 bg-champagne shadow-[0_0_10px_var(--color-champagne)]"></span>
-            為您的 Discord 社群提供無與倫比的管理體驗。
+            以下皆為現行版本已實際運作的功能。標示為開發中的項目，行為與細節仍可能調整。
           </p>
         </div>
       </div>

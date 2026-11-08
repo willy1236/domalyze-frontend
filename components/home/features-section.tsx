@@ -12,18 +12,18 @@ interface FeatureItem {
 const features: FeatureItem[] = [
   {
     icon: Sparkles,
-    title: "伺服器管理",
-    description: "全面的伺服器管理工具，讓您輕鬆掌控社群運作。實時監控、自動化工作流、權限管理一應俱全，提升運營效率。"
+    title: "版務與紀錄",
+    description: "警告紀錄可跨伺服器共用，Ticket 私人頻道即時開設，動態語音房無人時自動回收。設定過程中會逐項回報尚缺的權限。"
   },
   {
     icon: Fingerprint,
-    title: "多平台整合",
-    description: "無縫整合多個平台與服務，打破數據孤島。支援跨平台同步、統一的訊息流管理與智慧化的事件觸發機制。"
+    title: "自動通知",
+    description: "Twitch 開台、新影片與新剪輯，YouTube 新片，X 貼文，以及中央氣象署的地震與天氣警特報。每種通知各自指定發送頻道。"
   },
   {
     icon: ArrowRightLeft,
-    title: "私人客製化",
-    description: "完全根據您的需求客製化每一個細節。從介面風格到功能邏輯，皆可根據品牌特色與社群文化靈活調整。"
+    title: "遊戲與音樂",
+    description: "LOL、osu!、Apex、Dead by Daylight 與 Steam 的玩家資料查詢，LOL 另可統計最近對戰中所有玩家的牌位分布。音樂歌單綁定於雲端帳號，更換 Discord 帳號後依然保留。"
   }
 ]
 
@@ -33,8 +33,8 @@ export function HomeFeaturesSection() {
       <div className="corner-monogram top-10 right-10 opacity-[0.05]">X</div>
       <div className="max-w-7xl mx-auto px-6 lg:px-12 relative z-10">
         <div className="text-center mb-24 relative">
-          <span className="text-champagne text-xl opacity-70 block mb-4 drop-shadow-[0_0_8px_rgba(196,208,232,0.5)]">✦</span>
-          <h2 className="font-serif text-3xl md:text-5xl text-gray-900 dark:text-white mb-6">功能集合</h2>
+          <span className="text-primary dark:text-champagne text-xl opacity-70 block mb-4 drop-shadow-[0_0_8px_rgba(196,208,232,0.5)]">✦</span>
+          <h2 className="font-serif text-3xl md:text-5xl text-gray-900 dark:text-white mb-6">核心功能</h2>
           <div className="w-16 h-px bg-linear-to-r from-transparent via-champagne to-transparent mx-auto"></div>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-16">
@@ -43,7 +43,7 @@ export function HomeFeaturesSection() {
             return (
               <div key={index} className="group relative p-8 border border-transparent hover:border-champagne/20 transition-colors duration-500 bg-background-light/50 dark:bg-background-dark/20 backdrop-blur-sm">
                 <div className="absolute inset-0 bg-linear-to-b from-champagne/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                <div className="mb-6 text-champagne relative z-10 drop-shadow-[0_0_10px_rgba(196,208,232,0.3)]">
+                <div className="mb-6 text-primary dark:text-champagne relative z-10 drop-shadow-[0_0_10px_rgba(196,208,232,0.3)]">
                   <Icon className="w-10 h-10 font-light" strokeWidth={1} />
                 </div>
                 <h3 className="font-serif text-xl mb-4 text-gray-900 dark:text-white relative z-10 star-glyph">{feature.title}</h3>
@@ -55,7 +55,7 @@ export function HomeFeaturesSection() {
           })}
         </div>
         <div className="text-center mt-16">
-          <HomeButton href="/features">探索全部功能</HomeButton>
+          <HomeButton href="/features">查看完整功能</HomeButton>
         </div>
       </div>
     </section>
