@@ -3,7 +3,8 @@
 import { useEffect, useState } from "react"
 import { usePathname, useRouter } from "next/navigation"
 import { DashboardHeader, type DashboardUser } from "@/components/dashboard/dashboard-header"
-import { LAST_USER_KEY, dashboardFetch, discardDrafts, setDashboardUserId } from "@/lib/dashboard-api"
+import { LAST_USER_KEY, dashboardFetch, discardDrafts, setDashboardHooks, setDashboardUserId } from "@/lib/dashboard-api"
+import { createDraftHooks } from "@/lib/dashboard-draft"
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter()
@@ -16,6 +17,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     dashboardFetch<DashboardUser>("/dashboard/me", {}, { signal: controller.signal, silentSessionExpired: true })
       .then((me) => {
         setDashboardUserId(me.id)
+        setDashboardHooks(createDraftHooks(me.id))
         let switched = false
         try {
           const last = sessionStorage.getItem(LAST_USER_KEY)
