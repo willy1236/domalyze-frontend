@@ -15,7 +15,9 @@ COPY . .
 # 開始建置 (這時候 Next.js 會將 NEXT_PUBLIC_ 變數燒錄進靜態檔)
 # env 檔以 build secret 掛成 /app/.env，只在這個 RUN 期間存在，不會留在任何映像層；
 # 來源由 docker-compose.yml 的 secrets.env 決定，可放在 build context 之外
-RUN --mount=type=secret,id=env,target=/app/.env npm run build
+# secret 的內容不計入 layer 快取鍵，改了 env 檔會沿用舊產物；ENV_HASH 由部署端傳入 env 檔的雜湊，值變了這一層才會重建
+ARG ENV_HASH=""
+RUN --mount=type=secret,id=env,target=/app/.env : "$ENV_HASH" && npm run build
 
 # --- 階段 2: Runner (負責執行) ---
 # 這是最終會跑起來的輕量級映像檔

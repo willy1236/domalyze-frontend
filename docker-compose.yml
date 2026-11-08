@@ -4,6 +4,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      args:
+        ENV_HASH: ${DOMALYZE_FRONTEND_ENV_HASH:-}
       secrets:
         - env
     
