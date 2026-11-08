@@ -1,20 +1,22 @@
+import type { ReactNode } from "react"
 import type { NotifyItem } from "@/lib/dashboard-notifies"
-import { NotifyItemCard } from "./notify-item"
+import { NotifyRow } from "./notify-item"
 
-export function ChannelNotifySection({ items }: { items: NotifyItem[] }) {
+export function ChannelNotifySection({ items, headerActions }: { items: NotifyItem[]; headerActions?: ReactNode }) {
   return (
-    <section className="mb-10">
-      <h2 className="text-sm tracking-widest uppercase text-gray-500 dark:text-gray-400 mb-3">
-        頻道通知（{items.length}）
-      </h2>
+    <section id="channel-notifies" className="scroll-mt-6">
+      <header className="flex items-baseline justify-between gap-3 border-b border-primary/20 dark:border-champagne/25 pb-2">
+        <h2 className="font-serif text-2xl text-primary dark:text-silver">
+          頻道通知 <span className="text-base text-gray-600 dark:text-gray-400 tabular-nums">{items.length}</span>
+        </h2>
+        {headerActions}
+      </header>
       {items.length === 0 ? (
-        <p className="border border-champagne/30 px-4 py-6 text-gray-500 dark:text-gray-400">
-          還沒有設定任何頻道通知。
-        </p>
+        <p className="py-8 text-gray-600 dark:text-gray-400">還沒有設定任何頻道通知。</p>
       ) : (
-        <ul className="grid gap-3 md:grid-cols-2">
+        <ul className="divide-y divide-primary/10 dark:divide-champagne/10">
           {items.map((item) => (
-            <NotifyItemCard key={item.key} item={item} />
+            <NotifyRow key={item.key} item={item} />
           ))}
         </ul>
       )}

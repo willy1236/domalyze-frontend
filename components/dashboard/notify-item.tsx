@@ -1,59 +1,64 @@
 import type { ReactNode } from "react"
 import type { NotifyItem } from "@/lib/dashboard-notifies"
+import { ArrowIcon, AtIcon, HashIcon, WarnIcon } from "./icons"
 
-function Field({ label, children }: { label: string; children: ReactNode }) {
+const muted = "text-gray-600 dark:text-gray-400"
+
+function Problem({ reason }: { reason: string }) {
   return (
-    <div className="flex gap-2 text-sm min-w-0">
-      <dt className="text-gray-500 dark:text-gray-400 shrink-0">{label}</dt>
-      <dd className="min-w-0 break-words">{children}</dd>
-    </div>
+    <p className="mt-1 flex items-start gap-1.5 text-sm text-red-700 dark:text-red-300">
+      <WarnIcon className="mt-0.5 shrink-0" width={15} height={15} />
+      <span>{reason}</span>
+    </p>
   )
 }
 
-function Invalid({ reason }: { reason: string }) {
-  return <span className="block text-xs text-red-500 dark:text-red-400">失效：{reason}</span>
-}
-
-/** 唯讀的一筆通知；T-06、T-07 之後在這張卡片外加操作按鈕 */
-export function NotifyItemCard({ item, actions }: { item: NotifyItem; actions?: ReactNode }) {
-  const { channel, role, message, account } = item
-  const invalid = channel.invalid !== null || (role?.invalid ?? null) !== null
+/** 一筆通知的一行：種類在左，「頻道 → 身分組」的投遞路徑與自訂文字在右。T-06、T-07 從 actions 放操作按鈕。 */
+export function NotifyRow({ item, actions }: { item: NotifyItem; actions?: ReactNode }) {
+  const { channel, role, message } = item
   return (
-    <li className={`border px-4 py-3 ${invalid ? "border-red-500/50" : "border-champagne/30"}`}>
-      <div className="flex items-start justify-between gap-3 mb-2">
+    <li className="py-5 flex items-start gap-4">
+      <div className="min-w-0 flex-1 grid gap-x-8 gap-y-2 sm:grid-cols-[11rem_1fr]">
+        <h3 className="font-serif text-lg leading-snug text-primary dark:text-silver break-words">{item.name}</h3>
+
         <div className="min-w-0">
-          <h3 className="font-serif break-words">{item.name}</h3>
-          {account && (
-            <p className="text-sm text-gray-500 dark:text-gray-400 break-all">
-              {account.display_name}（{account.username}）
-            </p>
-          )}
-        </div>
-        {actions}
-      </div>
-      <dl className="grid gap-1">
-        <Field label="頻道">
-          {channel.name ? `#${channel.name}` : <span className="break-all">{channel.id}</span>}
-          {channel.invalid && <Invalid reason={channel.invalid} />}
-        </Field>
-        {role !== undefined && (
-          <Field label="身分組">
-            {role === null ? (
-              "未設定"
-            ) : (
+          <p className="flex flex-wrap items-center gap-x-2 gap-y-1">
+            <span className="inline-flex items-center gap-1.5 min-w-0">
+              <HashIcon className={`shrink-0 ${muted}`} />
+              {channel.name ? (
+                <span className="break-all">{channel.name}</span>
+              ) : (
+                <span className={`break-all ${muted}`}>{channel.id}</span>
+              )}
+            </span>
+            {role !== undefined && (
               <>
-                {role.name ? `@${role.name}` : <span className="break-all">{role.id}</span>}
-                {role.invalid && <Invalid reason={role.invalid} />}
+                <ArrowIcon className={`shrink-0 ${muted}`} width={14} height={14} />
+                {role === null ? (
+                  <span className={muted}>不 tag 身分組</span>
+                ) : (
+                  <span className="inline-flex items-center gap-1.5 min-w-0">
+                    <AtIcon className={`shrink-0 ${muted}`} />
+                    <span className={`break-all ${role.name ? "" : muted}`}>{role.name ?? role.id}</span>
+                  </span>
+                )}
               </>
             )}
-          </Field>
-        )}
-        {message !== undefined && (
-          <Field label="自訂文字">
-            {message ? <span className="whitespace-pre-wrap">{message}</span> : "未設定"}
-          </Field>
-        )}
-      </dl>
+          </p>
+          {channel.invalid && <Problem reason={`頻道：${channel.invalid}`} />}
+          {role?.invalid && <Problem reason={`身分組：${role.invalid}`} />}
+
+          {message !== undefined &&
+            (message ? (
+              <p className="mt-3 rounded-md bg-primary/5 dark:bg-champagne/5 px-3 py-2 text-sm whitespace-pre-wrap break-words">
+                {message}
+              </p>
+            ) : (
+              <p className={`mt-2 text-sm ${muted}`}>使用預設文字</p>
+            ))}
+        </div>
+      </div>
+      {actions}
     </li>
   )
 }
