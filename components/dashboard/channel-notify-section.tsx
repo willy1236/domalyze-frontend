@@ -63,7 +63,7 @@ export function ChannelNotifySection({ guildId, items, onChanged, headerActions 
           </label>
           <Select
             id="add-channel-notify"
-            className="w-auto max-w-[14rem]"
+            className="max-w-[14rem]"
             value=""
             onChange={(e) => choose(e.target.value)}
           >
