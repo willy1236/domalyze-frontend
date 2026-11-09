@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react"
 import Link from "next/link"
 import { API_BASE, dashboardFetch } from "@/lib/dashboard-api"
+import { Button, LinkButton } from "@/components/ui"
 
 interface GuildItem {
   id: string
@@ -26,9 +27,6 @@ function inviteUrl(guildId?: string): string {
   if (guildId) params.set("guild_id", guildId)
   return `${API_BASE}/to/dashboard-invite?${params.toString()}`
 }
-
-const buttonClass =
-  "border border-champagne/40 text-champagne px-4 py-2 text-xs tracking-widest uppercase hover:bg-champagne hover:text-background-dark transition-colors disabled:opacity-50 disabled:pointer-events-none"
 
 function GuildIcon({ guild }: { guild: GuildItem }) {
   if (guild.icon_url) {
@@ -131,9 +129,14 @@ export default function DashboardPage() {
     <section>
       <div className="flex items-center justify-between gap-3 mb-6">
         <h1 className="text-2xl font-serif">伺服器</h1>
-        <button type="button" className={buttonClass} disabled={loading} onClick={() => void load(true)}>
+        <Button
+          type="button"
+          className="disabled:opacity-50 disabled:pointer-events-none"
+          disabled={loading}
+          onClick={() => void load(true)}
+        >
           {loading ? "載入中…" : "重新整理"}
-        </button>
+        </Button>
       </div>
 
       {notice && (
@@ -158,9 +161,9 @@ export default function DashboardPage() {
           <p className="text-gray-500 dark:text-gray-400 mb-4">
             沒有可管理的伺服器。管理頻道通知需要「管理頻道」權限，邀請星羽需要「管理伺服器」權限。
           </p>
-          <a href={inviteUrl()} className={`${buttonClass} inline-block`}>
+          <LinkButton href={inviteUrl()} variant="outline">
             邀請星羽
-          </a>
+          </LinkButton>
         </div>
       )}
     </section>

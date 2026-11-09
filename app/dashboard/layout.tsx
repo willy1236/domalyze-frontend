@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react"
 import { usePathname, useRouter } from "next/navigation"
 import { DashboardHeader, type DashboardUser } from "@/components/dashboard/dashboard-header"
+import { Button } from "@/components/ui"
 import { LAST_USER_KEY, dashboardFetch, discardDrafts, setDashboardHooks, setDashboardUserId } from "@/lib/dashboard-api"
 import { createDraftHooks } from "@/lib/dashboard-draft"
 
@@ -46,13 +47,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     return (
       <div className="min-h-screen flex flex-col items-center justify-center gap-4 px-4 text-center">
         <p>無法載入後台，請稍後再試。</p>
-        <button
-          type="button"
-          onClick={() => window.location.reload()}
-          className="border border-champagne/40 text-champagne px-4 py-2 text-xs tracking-widest uppercase hover:bg-champagne hover:text-background-dark transition-colors"
-        >
+        <Button type="button" onClick={() => window.location.reload()}>
           重新整理
-        </button>
+        </Button>
       </div>
     )
   }
