@@ -1,4 +1,5 @@
 import type { ReactNode } from "react"
+import { Button } from "@/components/ui"
 import { WarnIcon } from "./icons"
 
 export type ConflictValues = Record<string, string | null>
@@ -62,14 +63,14 @@ export function ConflictNotice({ current, mine, format = defaultFormat, onOverwr
         {current && <Column title="最新版本" values={current} format={format} />}
         <Column title="你的輸入" values={mine} format={format} />
       </div>
-      <button
+      <Button
         type="button"
         disabled={busy}
         onClick={() => (current ? onOverwrite(current) : onRecreate?.())}
-        className="mt-4 border border-champagne/40 text-champagne px-4 py-2 text-xs tracking-widest uppercase hover:bg-champagne hover:text-background-dark transition-colors disabled:opacity-60"
+        className="mt-4"
       >
         {deleted ? "重新新增" : "以我的內容覆蓋"}
-      </button>
+      </Button>
     </div>
   )
 }

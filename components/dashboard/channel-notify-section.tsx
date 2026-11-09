@@ -4,9 +4,9 @@ import { useState, type ReactNode } from "react"
 import { CHANNEL_NOTIFY_TYPES, type ChannelNotifyType, type ChannelNotifyValues } from "@/lib/dashboard-channel-notifies"
 import { consumeDraft } from "@/lib/dashboard-draft"
 import type { NotifyItem } from "@/lib/dashboard-notifies"
+import { Button, Select } from "@/components/ui"
 import { CHANNEL_DRAFT_KEY, ChannelNotifyForm, type ChannelFormDraft } from "./channel-notify-form"
 import { NotifyRow } from "./notify-item"
-import { selectClass } from "./select-class"
 import { TestNotifyButton } from "./test-notify-button"
 
 interface OpenForm {
@@ -22,9 +22,6 @@ interface Props {
   onChanged: () => void
   headerActions?: ReactNode
 }
-
-const buttonClass =
-  "border border-champagne/40 text-champagne px-3 py-1.5 text-xs tracking-widest uppercase hover:bg-champagne hover:text-background-dark transition-colors disabled:opacity-60"
 
 /** 從 reauth 或 session 過期回來時，還原導向前未送出的表單 */
 function restoreForm(): OpenForm | null {
@@ -64,9 +61,9 @@ export function ChannelNotifySection({ guildId, items, onChanged, headerActions 
           <label htmlFor="add-channel-notify" className="sr-only">
             新增頻道通知
           </label>
-          <select
+          <Select
             id="add-channel-notify"
-            className={`${selectClass} w-auto max-w-[14rem]`}
+            className="w-auto max-w-[14rem]"
             value=""
             onChange={(e) => choose(e.target.value)}
           >
@@ -77,7 +74,7 @@ export function ChannelNotifySection({ guildId, items, onChanged, headerActions 
                 {items.some((i) => i.key === t.key) ? "（已設定）" : ""}
               </option>
             ))}
-          </select>
+          </Select>
           {headerActions}
         </div>
       </header>
@@ -106,16 +103,16 @@ export function ChannelNotifySection({ guildId, items, onChanged, headerActions 
               item={item}
               actions={
                 <div className="flex flex-col items-end gap-2">
-                  <button
+                  <Button
                     type="button"
-                    className={buttonClass}
+                    size="sm"
                     onClick={() => {
                       const type = CHANNEL_NOTIFY_TYPES.find((t) => t.key === item.key)
                       if (type) open(type, item.values)
                     }}
                   >
                     編輯
-                  </button>
+                  </Button>
                   <TestNotifyButton guildId={guildId} item={item} onChanged={onChanged} />
                 </div>
               }

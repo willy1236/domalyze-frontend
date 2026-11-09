@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { LAST_USER_KEY, dashboardFetch, discardDrafts } from "@/lib/dashboard-api"
+import { Button } from "@/components/ui"
 
 export interface DashboardUser {
   id: string
@@ -49,14 +50,15 @@ export function DashboardHeader({ user }: { user: DashboardUser }) {
             className="w-8 h-8 rounded-full shrink-0"
           />
           <span className="text-sm truncate max-w-32 sm:max-w-64">{user.name}</span>
-          <button
+          <Button
             type="button"
             onClick={logout}
             disabled={busy}
-            className="shrink-0 border border-champagne/40 text-champagne px-3 py-1.5 text-xs tracking-widest uppercase hover:bg-champagne hover:text-background-dark transition-colors disabled:opacity-50"
+            size="sm"
+            className="shrink-0 disabled:opacity-50"
           >
             登出
-          </button>
+          </Button>
         </div>
       </div>
     </header>

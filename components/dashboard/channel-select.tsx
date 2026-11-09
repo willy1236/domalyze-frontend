@@ -1,5 +1,5 @@
 import type { ChannelOption } from "@/lib/dashboard-options"
-import { selectClass } from "./select-class"
+import { Select } from "@/components/ui"
 
 interface Props {
   id?: string
@@ -14,9 +14,8 @@ interface Props {
 export function ChannelSelect({ id, options, value, onChange, disabled }: Props) {
   const missing = value !== null && options !== null && !options.some((o) => o.id === value)
   return (
-    <select
+    <Select
       id={id}
-      className={selectClass}
       value={value ?? ""}
       disabled={disabled || options === null}
       onChange={(e) => onChange(e.target.value || null)}
@@ -34,6 +33,6 @@ export function ChannelSelect({ id, options, value, onChange, disabled }: Props)
           ))}
         </>
       )}
-    </select>
+    </Select>
   )
 }

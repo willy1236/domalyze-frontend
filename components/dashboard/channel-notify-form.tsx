@@ -12,6 +12,7 @@ import {
 import { registerDraft } from "@/lib/dashboard-draft"
 import { useNotifyOptions } from "@/lib/dashboard-options"
 import { useNotifyPreview } from "@/lib/dashboard-preview"
+import { Button, Textarea } from "@/components/ui"
 import { ChannelSelect } from "./channel-select"
 import { ConflictNotice } from "./conflict-notice"
 import { WarnIcon } from "./icons"
@@ -43,8 +44,6 @@ interface Props {
 }
 
 const labelClass = "block text-sm text-gray-600 dark:text-gray-400 mb-1"
-const buttonClass =
-  "border border-champagne/40 text-champagne px-4 py-2 text-xs tracking-widest uppercase hover:bg-champagne hover:text-background-dark transition-colors disabled:opacity-60"
 
 function FieldError({ reason }: { reason?: string }) {
   if (!reason) return null
@@ -200,14 +199,13 @@ export function ChannelNotifyForm({ guildId, type, original, restored, onClose, 
           <label htmlFor="notify-message" className={labelClass}>
             自訂文字（留空使用預設文字，可用 {"{member}"} 代表成員）
           </label>
-          <textarea
+          <Textarea
             id="notify-message"
             rows={3}
             maxLength={2000}
             value={message}
             disabled={busy}
             onChange={(e) => setMessage(e.target.value)}
-            className="w-full min-w-0 rounded-md border border-gray-300 dark:border-gray-600 bg-transparent px-3 py-2 text-sm disabled:opacity-60"
           />
           <FieldError reason={fieldErrors.message} />
         </div>
@@ -242,21 +240,22 @@ export function ChannelNotifyForm({ guildId, type, original, restored, onClose, 
       )}
 
       <div className="flex flex-wrap items-center gap-3">
-        <button type="submit" disabled={busy || channelId === null} className={buttonClass}>
+        <Button type="submit" disabled={busy || channelId === null}>
           儲存
-        </button>
-        <button type="button" disabled={busy} onClick={onClose} className={buttonClass}>
+        </Button>
+        <Button type="button" disabled={busy} onClick={onClose}>
           取消
-        </button>
+        </Button>
         {base !== null && (
-          <button
+          <Button
             type="button"
             disabled={busy}
             onClick={() => void remove()}
-            className="ml-auto border border-red-700/50 dark:border-red-300/50 text-red-700 dark:text-red-300 px-4 py-2 text-xs tracking-widest uppercase hover:bg-red-700 hover:text-white transition-colors disabled:opacity-60"
+            variant="danger"
+            className="ml-auto"
           >
             刪除
-          </button>
+          </Button>
         )}
       </div>
     </form>

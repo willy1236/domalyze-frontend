@@ -3,6 +3,7 @@
 import { useState, type ReactNode } from "react"
 import { consumeDraft } from "@/lib/dashboard-draft"
 import type { NotifyItem } from "@/lib/dashboard-notifies"
+import { Button } from "@/components/ui"
 import {
   COMMUNITY_DRAFT_KEY,
   CommunityNotifyForm,
@@ -12,9 +13,6 @@ import {
 } from "./community-notify-form"
 import { NotifyRow } from "./notify-item"
 import { TestNotifyButton } from "./test-notify-button"
-
-const buttonClass =
-  "border border-champagne/40 text-champagne px-3 py-1.5 text-xs tracking-widest uppercase hover:bg-champagne hover:text-background-dark transition-colors disabled:opacity-60"
 
 /** 從 reauth 或 session 過期回來時，還原導向前未送出的新增流程或編輯表單 */
 function restoreForm(): CommunityFormDraft | null {
@@ -65,9 +63,9 @@ export function CommunityNotifySection({ guildId, items, onChanged, headerAction
           社群推播 <span className="text-base text-gray-600 dark:text-gray-400 tabular-nums">{items.length}</span>
         </h2>
         <div className="flex items-center gap-2">
-          <button type="button" className={buttonClass} onClick={() => open(newCommunityDraft())}>
+          <Button type="button" size="sm" onClick={() => open(newCommunityDraft())}>
             ＋ 新增推播
-          </button>
+          </Button>
           {headerActions}
         </div>
       </header>
@@ -102,9 +100,9 @@ export function CommunityNotifySection({ guildId, items, onChanged, headerAction
                     item={item}
                     actions={
                       <div className="flex flex-col items-end gap-2">
-                        <button type="button" className={buttonClass} onClick={() => open(editCommunityDraft(item))}>
+                        <Button type="button" size="sm" onClick={() => open(editCommunityDraft(item))}>
                           編輯
-                        </button>
+                        </Button>
                         <TestNotifyButton guildId={guildId} item={item} onChanged={onChanged} />
                       </div>
                     }

@@ -24,12 +24,12 @@ import { registerDraft } from "@/lib/dashboard-draft"
 import { useNotifyOptions } from "@/lib/dashboard-options"
 import { useNotifyPreview } from "@/lib/dashboard-preview"
 import type { NotifyItem } from "@/lib/dashboard-notifies"
+import { Button, Input, Select, Textarea } from "@/components/ui"
 import { ChannelSelect } from "./channel-select"
 import { ConflictNotice } from "./conflict-notice"
 import { WarnIcon } from "./icons"
 import { NotifyPreview } from "./notify-preview"
 import { RoleSelect } from "./role-select"
-import { selectClass } from "./select-class"
 
 /** 表單暫存的內容：新增流程停在哪一步、查到的帳號、勾選的種類與已輸入的欄位 */
 export interface CommunityFormDraft {
@@ -80,8 +80,6 @@ export function editCommunityDraft(item: NotifyItem): CommunityFormDraft {
 }
 
 const labelClass = "block text-sm text-gray-600 dark:text-gray-400 mb-1"
-const buttonClass =
-  "border border-champagne/40 text-champagne px-4 py-2 text-xs tracking-widest uppercase hover:bg-champagne hover:text-background-dark transition-colors disabled:opacity-60"
 
 function FieldError({ reason }: { reason?: string }) {
   if (!reason) return null
@@ -297,9 +295,8 @@ export function CommunityNotifyForm({ guildId, items, initial, onClose, onChange
             <label htmlFor="community-platform" className={labelClass}>
               平台
             </label>
-            <select
+            <Select
               id="community-platform"
-              className={selectClass}
               value={platform}
               disabled={busy || resolving}
               onChange={(e) => {
@@ -314,14 +311,14 @@ export function CommunityNotifyForm({ guildId, items, initial, onClose, onChange
                   {PLATFORM_LABELS[p]}
                 </option>
               ))}
-            </select>
+            </Select>
           </div>
           <div>
             <label htmlFor="community-input" className={labelClass}>
               帳號名稱或網址
             </label>
             <div className="flex flex-wrap gap-2">
-              <input
+              <Input
                 id="community-input"
                 type="text"
                 value={input}
@@ -338,11 +335,11 @@ export function CommunityNotifyForm({ guildId, items, initial, onClose, onChange
                     if (input.trim()) void lookup()
                   }
                 }}
-                className="min-w-0 flex-1 basis-56 rounded-md border border-gray-300 dark:border-gray-600 bg-transparent px-3 py-2 text-sm disabled:opacity-60"
+                className="flex-1 basis-56"
               />
-              <button type="button" disabled={busy || resolving || !input.trim()} onClick={() => void lookup()} className={buttonClass}>
+              <Button type="button" disabled={busy || resolving || !input.trim()} onClick={() => void lookup()}>
                 {resolving ? "查詢中…" : "查詢"}
-              </button>
+              </Button>
             </div>
             <FieldError reason={resolveError ?? undefined} />
             {account && (
@@ -404,14 +401,13 @@ export function CommunityNotifyForm({ guildId, items, initial, onClose, onChange
               <label htmlFor="community-message" className={labelClass}>
                 自訂文字（留空使用預設文字）
               </label>
-              <textarea
+              <Textarea
                 id="community-message"
                 rows={3}
                 maxLength={2000}
                 value={message}
                 disabled={busy}
                 onChange={(e) => setMessage(e.target.value)}
-                className="w-full min-w-0 rounded-md border border-gray-300 dark:border-gray-600 bg-transparent px-3 py-2 text-sm disabled:opacity-60"
               />
               <FieldError reason={fieldErrors.message} />
             </div>
@@ -456,21 +452,22 @@ export function CommunityNotifyForm({ guildId, items, initial, onClose, onChange
       )}
 
       <div className="flex flex-wrap items-center gap-3">
-        <button type="submit" disabled={busy || !canSave} className={buttonClass}>
+        <Button type="submit" disabled={busy || !canSave}>
           {busy ? "處理中…" : "儲存"}
-        </button>
-        <button type="button" disabled={busy} onClick={onClose} className={buttonClass}>
+        </Button>
+        <Button type="button" disabled={busy} onClick={onClose}>
           取消
-        </button>
+        </Button>
         {editKey && base !== null && (
-          <button
+          <Button
             type="button"
             disabled={busy}
             onClick={() => void remove()}
-            className="ml-auto border border-red-700/50 dark:border-red-300/50 text-red-700 dark:text-red-300 px-4 py-2 text-xs tracking-widest uppercase hover:bg-red-700 hover:text-white transition-colors disabled:opacity-60"
+            variant="danger"
+            className="ml-auto"
           >
             刪除
-          </button>
+          </Button>
         )}
       </div>
     </form>
