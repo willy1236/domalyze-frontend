@@ -1,5 +1,7 @@
 "use client"
 
+import { LinkButton } from "@/components/ui"
+
 export function FeaturesCTA() {
   return (
     <section className="py-32 bg-surface-light/50 dark:bg-surface-dark/80 relative overflow-hidden backdrop-blur-lg">
@@ -18,15 +20,9 @@ export function FeaturesCTA() {
         <p className="text-gray-500 dark:text-gray-400 mb-12 font-light leading-relaxed border-t border-b border-silver/20 py-6">
           不必事先規劃要啟用哪些功能。邀請星羽加入後，以 /help 瀏覽指令，需要時再逐項設定。
         </p>
-        <a
-          className="inline-flex items-center bg-surface-light/60 dark:bg-surface-dark/60 border border-primary/30 dark:border-champagne/40 text-primary dark:text-champagne backdrop-blur-md px-8 py-4 text-xs tracking-[0.25em] uppercase hover:bg-primary hover:text-white dark:hover:bg-champagne dark:hover:text-background-dark transition-all duration-300 shadow-[0_0_25px_rgba(196,208,232,0.2)] relative overflow-hidden group"
-          href={process.env.NEXT_PUBLIC_BOT_INVITE_URL}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <span className="absolute w-full h-full bg-champagne/20 -left-full top-0 group-hover:left-0 transition-all duration-500 ease-out z-0"></span>
-          <span className="relative z-10">邀請至伺服器</span>
-        </a>
+        <LinkButton href={process.env.NEXT_PUBLIC_BOT_INVITE_URL} external>
+          邀請至伺服器
+        </LinkButton>
       </div>
     </section>
   )

@@ -1,6 +1,7 @@
 "use client"
 
 import { LucideIcon } from "lucide-react"
+import { Card } from "@/components/ui"
 
 interface FeatureCardProps {
   icon: LucideIcon
@@ -10,7 +11,7 @@ interface FeatureCardProps {
 
 export function FeatureCard({ icon: Icon, title, description }: FeatureCardProps) {
   return (
-    <div className="group relative p-8 border border-transparent hover:border-champagne/20 transition-all duration-500 bg-background-light/50 dark:bg-background-dark/20 backdrop-blur-sm hover:shadow-[0_0_20px_rgba(196,208,232,0.2)]">
+    <Card className="hover:shadow-[0_0_20px_rgba(196,208,232,0.2)]">
       <div className="absolute inset-0 bg-linear-to-b from-champagne/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
 
       {/* Icon */}
@@ -30,6 +31,6 @@ export function FeatureCard({ icon: Icon, title, description }: FeatureCardProps
 
       {/* Decorative element */}
       <div className="absolute bottom-4 right-4 w-12 h-12 rounded-full bg-champagne/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-    </div>
+    </Card>
   )
 }
