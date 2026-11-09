@@ -1,7 +1,7 @@
 "use client"
 
 import { ArrowRight } from "lucide-react"
-import { HomeButton } from "./button"
+import { LinkButton } from "@/components/ui"
 
 export function PerformanceSection() {
   return (
@@ -46,9 +46,9 @@ export function PerformanceSection() {
             <li className="flex items-start"><span className="text-primary dark:text-champagne mr-3 mt-0.5 text-xs drop-shadow-[0_0_5px_rgba(196,208,232,0.8)]">✦</span> 地震 3 分鐘、天氣警特報 15 分鐘，資料取自中央氣象署</li>
             <li className="flex items-start"><span className="text-primary dark:text-champagne mr-3 mt-0.5 text-xs drop-shadow-[0_0_5px_rgba(196,208,232,0.8)]">✦</span> 歌單綁在雲端帳號，不是綁在某一個 Discord 帳號上</li>
           </ul>
-          <HomeButton variant="text" href="/features" icon={<ArrowRight className="w-4 h-4" />}>
+          <LinkButton variant="text" href="/features" icon={<ArrowRight className="w-4 h-4" />}>
             查看完整功能
-          </HomeButton>
+          </LinkButton>
         </div>
       </div>
     </section>

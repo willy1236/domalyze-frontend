@@ -1,7 +1,7 @@
 "use client"
 
 import { Sparkles, Fingerprint, ArrowRightLeft, LucideIcon } from "lucide-react"
-import { HomeButton } from "./button"
+import { Card, LinkButton } from "@/components/ui"
 
 interface FeatureItem {
   icon: LucideIcon
@@ -41,7 +41,7 @@ export function HomeFeaturesSection() {
           {features.map((feature, index) => {
             const Icon = feature.icon
             return (
-              <div key={index} className="group relative p-8 border border-transparent hover:border-champagne/20 transition-colors duration-500 bg-background-light/50 dark:bg-background-dark/20 backdrop-blur-sm">
+              <Card key={index} className="transition-colors">
                 <div className="absolute inset-0 bg-linear-to-b from-champagne/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
                 <div className="mb-6 text-primary dark:text-champagne relative z-10 drop-shadow-[0_0_10px_rgba(196,208,232,0.3)]">
                   <Icon className="w-10 h-10 font-light" strokeWidth={1} />
@@ -50,12 +50,12 @@ export function HomeFeaturesSection() {
                 <p className="text-gray-500 dark:text-gray-400 font-light leading-relaxed text-sm relative z-10 border-t border-silver/20 pt-4">
                   {feature.description}
                 </p>
-              </div>
+              </Card>
             )
           })}
         </div>
         <div className="text-center mt-16">
-          <HomeButton href="/features">查看完整功能</HomeButton>
+          <LinkButton href="/features">查看完整功能</LinkButton>
         </div>
       </div>
     </section>

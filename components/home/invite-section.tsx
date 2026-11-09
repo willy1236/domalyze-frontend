@@ -1,6 +1,6 @@
 "use client"
 
-import { HomeButton } from "./button"
+import { LinkButton } from "@/components/ui"
 
 export function HomeInviteSection() {
   return (
@@ -15,13 +15,13 @@ export function HomeInviteSection() {
         <p className="text-gray-500 dark:text-gray-400 mb-12 font-light leading-relaxed border-t border-b border-silver/20 py-6">
           不必事先規劃要啟用哪些功能。邀請星羽加入後，以 /help 瀏覽指令，需要時再逐項設定。
         </p>
-        <HomeButton 
+        <LinkButton
           href={process.env.NEXT_PUBLIC_BOT_INVITE_URL || ""}
           variant="secondary"
           external
         >
           邀請至伺服器
-        </HomeButton>
+        </LinkButton>
       </div>
     </section>
   )

@@ -1,6 +1,6 @@
 "use client"
 
-import { HomeButton } from "./button"
+import { LinkButton } from "@/components/ui"
 
 export function HeroSection() {
   return (
@@ -45,13 +45,13 @@ export function HeroSection() {
             管理一個社群，花掉時間的從來不是大事，而是設通知、開私人頻道、查戰績、清語音房這些瑣事。星羽把它們接走，剩下的時間還給你。
           </p>
           <div className="flex flex-col sm:flex-row gap-6">
-            <HomeButton 
+            <LinkButton
               href={process.env.NEXT_PUBLIC_BOT_INVITE_URL || ""}
               variant="secondary"
               external
             >
               邀請至伺服器
-            </HomeButton>
+            </LinkButton>
           </div>
         </div>
       </div>
