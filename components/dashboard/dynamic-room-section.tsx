@@ -46,11 +46,14 @@ function RoomRow({ room, onClear }: { room: DynamicRoom; onClear: (room: Dynamic
           {formatCreatedAt(room.created_at)}
         </p>
       </div>
-      {isEmptyRoom(room) && (
-        <Button type="button" size="sm" variant="danger" onClick={() => onClear(room)}>
-          清除
-        </Button>
-      )}
+      {/* 固定寬度保留按鈕位置，有人的房間沒有按鈕時欄位也不會位移 */}
+      <div className="w-16 shrink-0 flex justify-end">
+        {isEmptyRoom(room) && (
+          <Button type="button" size="sm" variant="danger" onClick={() => onClear(room)}>
+            清除
+          </Button>
+        )}
+      </div>
     </li>
   )
 }
