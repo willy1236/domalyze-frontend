@@ -8,6 +8,7 @@ const FIELD_LABELS: Record<string, string> = {
   channel_id: "頻道",
   role_id: "身分組",
   message: "自訂文字",
+  template: "名稱模板",
 }
 
 interface Props {
@@ -22,6 +23,8 @@ interface Props {
   /** 已刪除時的「重新新增」；怎麼新增由呼叫端決定 */
   onRecreate?: () => void
   busy?: boolean
+  /** 衝突提示裡的主詞，預設「這筆通知」 */
+  subject?: string
 }
 
 const defaultFormat = (_field: string, value: string | null): ReactNode => (value === null || value === "" ? "無" : value)
@@ -51,13 +54,21 @@ function Column({
 }
 
 /** 儲存時發現資料已被別人改過或刪除：並排顯示最新版本與使用者的輸入。 */
-export function ConflictNotice({ current, mine, format = defaultFormat, onOverwrite, onRecreate, busy }: Props) {
+export function ConflictNotice({
+  current,
+  mine,
+  format = defaultFormat,
+  onOverwrite,
+  onRecreate,
+  busy,
+  subject = "這筆通知",
+}: Props) {
   const deleted = current === null
   return (
     <div role="alert" className="rounded-md border border-red-700/40 dark:border-red-300/40 p-4">
       <p className="flex items-start gap-1.5 text-sm text-red-700 dark:text-red-300">
         <WarnIcon className="mt-0.5 shrink-0" width={15} height={15} />
-        <span>{deleted ? "這筆通知已在你編輯期間被刪除。" : "這筆通知已在你編輯期間被別人修改。"}</span>
+        <span>{deleted ? `${subject}已在你編輯期間被刪除。` : `${subject}已在你編輯期間被別人修改。`}</span>
       </p>
       <div className={`mt-3 grid gap-3 ${deleted ? "" : "sm:grid-cols-2"}`}>
         {current && <Column title="最新版本" values={current} format={format} />}
