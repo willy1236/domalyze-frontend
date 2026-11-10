@@ -188,7 +188,7 @@ export function LobbySection({ guildId }: { guildId: string }) {
         <LobbyForm
           key={formId}
           guildId={guildId}
-          lobby={form.restored ? null : (data?.lobby ?? null)}
+          lobby={data?.lobby ?? null}
           restored={form.restored}
           onClose={() => setForm(null)}
           onSaved={(lobby) => setData({ lobby })}
