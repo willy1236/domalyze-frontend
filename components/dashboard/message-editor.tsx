@@ -1,6 +1,6 @@
 "use client"
 
-import { useId, useRef, type ReactNode } from "react"
+import { useEffect, useId, useRef, type ReactNode } from "react"
 import { Button, Input, Textarea } from "@/components/ui"
 import {
   AUTHOR_NAME_MAX,
@@ -63,6 +63,11 @@ export function MessageEditor({ value, onChange, errors, buttons }: Props) {
   const headingId = useId()
   // 取消再重新勾選時，還原訊息原本的時間戳而不是改成當下時間
   const savedTimestamp = useRef<string | null>(originalTimestamp(value.embed))
+  // value 之後才帶進讀回的內容時也要記下原值；取消勾選後 value 不再有時間戳，ref 保留最後一個原值
+  const currentOriginal = originalTimestamp(value.embed)
+  useEffect(() => {
+    if (currentOriginal) savedTimestamp.current = currentOriginal
+  }, [currentOriginal])
   const mine = (path: string) => errors.filter((e) => e.path === path)
 
   const setEmbed = (patch: Partial<EmbedContent>) => onChange({ ...value, embed: { ...embed, ...patch } })
