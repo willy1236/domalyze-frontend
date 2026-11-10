@@ -38,7 +38,8 @@ export function DashboardHeader({ user }: { user: DashboardUser }) {
           href="/dashboard"
           className="text-lg font-serif tracking-widest text-primary uppercase flex items-center gap-2 hover:opacity-80 transition-opacity shrink-0"
         >
-          <span className="text-champagne">✦</span> Xingyu
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/xingyu-mark.svg" alt="" width={28} height={28} className="w-7 h-7 dark:brightness-[1.3]" /> Xingyu
         </a>
         <div className="flex items-center gap-3 min-w-0">
           {/* eslint-disable-next-line @next/next/no-img-element */}

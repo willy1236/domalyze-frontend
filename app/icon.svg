@@ -1,4 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
-  <circle cx="50" cy="50" r="48" fill="#05060A" stroke="#C4D0E8" stroke-width="4"/>
-  <text x="50" y="68" font-size="50" fill="#C4D0E8" text-anchor="middle" font-family="serif">✦</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+<defs><mask id="mn" maskUnits="userSpaceOnUse" x="0" y="0" width="64" height="64"><rect width="64" height="64" fill="#fff"/><circle cx="35" cy="30" r="17" fill="#000"/></mask></defs>
+
+<circle cx="28" cy="32" r="23" fill="#36407E" mask="url(#mn)"/>
+<path d="M38 10C42 27 42 27 55 31C42 35 42 35 38 52C34 35 34 35 21 31C34 27 34 27 38 10Z" fill="#8F9AE0"/>
 </svg>

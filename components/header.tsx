@@ -18,7 +18,8 @@ export function Header() {
       <div className="absolute inset-x-0 bottom-0 h-px bg-linear-to-r from-transparent via-silver/40 to-transparent"></div>
       <div className="max-w-7xl mx-auto px-6 lg:px-12 h-24 flex items-center justify-between">
         <a href="/" className="text-2xl font-serif tracking-widest text-primary uppercase flex items-center gap-2 hover:opacity-80 transition-opacity">
-          <span className="text-primary dark:text-champagne text-lg drop-shadow-[0_0_8px_rgba(196,208,232,0.6)]">✦</span> Xingyu
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/xingyu-mark.svg" alt="" width={40} height={40} className="w-10 h-10 dark:brightness-[1.3] drop-shadow-[0_0_8px_rgba(196,208,232,0.35)]" /> Xingyu
         </a>
         <nav className="hidden md:flex items-center">
           <div className="nav-item flex items-center">
