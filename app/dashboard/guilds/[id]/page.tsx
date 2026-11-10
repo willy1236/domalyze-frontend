@@ -7,6 +7,7 @@ import type { NotifyItem, NotifyLists } from "@/lib/dashboard-notifies"
 import { ChannelNotifySection } from "@/components/dashboard/channel-notify-section"
 import { CommunityNotifySection } from "@/components/dashboard/community-notify-section"
 import { WarnIcon } from "@/components/dashboard/icons"
+import { SectionGuard } from "@/components/dashboard/section-guard"
 
 function isInvalid(item: NotifyItem): boolean {
   return item.channel.invalid !== null || (item.role?.invalid ?? null) !== null
@@ -15,7 +16,16 @@ function isInvalid(item: NotifyItem): boolean {
 const linkClass =
   "rounded-sm outline-none focus-visible:ring-2 focus-visible:ring-primary dark:focus-visible:ring-champagne focus-visible:ring-offset-2 focus-visible:ring-offset-background-light dark:focus-visible:ring-offset-background-dark"
 
+/** 通知是伺服器頁的預設落點：沒有 Manage Channels 的人靜默導向第一個有權限的區塊，不會送出通知請求。 */
 export default function GuildPage() {
+  return (
+    <SectionGuard section="notify" silent>
+      <NotifySections />
+    </SectionGuard>
+  )
+}
+
+function NotifySections() {
   const { id } = useParams<{ id: string }>()
   const [lists, setLists] = useState<NotifyLists | null>(null)
   const [failed, setFailed] = useState(false)
