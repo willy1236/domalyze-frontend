@@ -16,6 +16,8 @@ const linkClass =
 
 function Row({ giveaway, onSelect }: { giveaway: GiveawaySummary; onSelect: (id: number) => void }) {
   const active = giveaway.status === "active"
+  const creator = giveaway.creator_name ?? giveaway.creator_id
+  const channel = giveaway.channel_name ? `#${giveaway.channel_name}` : "頻道已不存在"
   return (
     <li>
       <button
@@ -23,7 +25,14 @@ function Row({ giveaway, onSelect }: { giveaway: GiveawaySummary; onSelect: (id:
         onClick={() => onSelect(giveaway.id)}
         className={`w-full text-left py-4 grid gap-x-8 gap-y-1 sm:grid-cols-[minmax(0,1fr)_6rem_9rem_11rem] sm:items-center hover:bg-primary/5 dark:hover:bg-champagne/10 px-2 -mx-2 ${linkClass}`}
       >
-        <span className="font-serif text-lg leading-snug text-primary dark:text-silver break-words">{giveaway.prize_name}</span>
+        <span className="min-w-0">
+          <span className="font-serif text-lg leading-snug text-primary dark:text-silver break-words">{giveaway.prize_name}</span>
+          <span className={`mt-0.5 block text-sm ${muted}`}>
+            {creator}
+            <span aria-hidden="true"> · </span>
+            {channel}
+          </span>
+        </span>
         <span className="text-sm">
           <span
             className={`inline-block rounded-sm border px-2 py-0.5 ${
