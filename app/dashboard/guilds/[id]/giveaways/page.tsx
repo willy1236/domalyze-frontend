@@ -2,6 +2,7 @@
 
 import { useParams } from "next/navigation"
 import { useState } from "react"
+import { GiveawayActions } from "@/components/dashboard/giveaway-actions"
 import { GiveawayDetailView } from "@/components/dashboard/giveaway-detail"
 import { GiveawayList } from "@/components/dashboard/giveaway-list"
 import { SectionGuard } from "@/components/dashboard/section-guard"
@@ -15,7 +16,12 @@ export default function GiveawaysPage() {
         {selected === null ? (
           <GiveawayList guildId={id} onSelect={setSelected} />
         ) : (
-          <GiveawayDetailView guildId={id} giveawayId={selected} onBack={() => setSelected(null)} />
+          <GiveawayDetailView
+            guildId={id}
+            giveawayId={selected}
+            onBack={() => setSelected(null)}
+            actions={(detail, reload) => <GiveawayActions guildId={id} detail={detail} reload={reload} />}
+          />
         )}
       </div>
     </SectionGuard>

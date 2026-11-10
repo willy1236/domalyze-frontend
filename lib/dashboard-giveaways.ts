@@ -86,3 +86,42 @@ export function participantLabel(p: Pick<GiveawayParticipant, "id" | "name" | "l
 export function statusLabel(status: GiveawayStatus): string {
   return status === "active" ? "進行中" : "已結束"
 }
+
+/** 提前結束與重抽的結果：抽獎本身已處理，announce_failure 不為 null 代表原頻道沒有公告 */
+export interface GiveawayActionResult {
+  /** ok：已處理；already_ended：執行當下抽獎已經結束（剛好到期或發起人剛按下），視為成功 */
+  status: "ok" | "already_ended"
+  announce_failure: "channel_missing" | "no_permission" | "failed" | null
+  announce_failure_text: string | null
+}
+
+export function endGiveaway(guildId: string, id: number): Promise<GiveawayActionResult> {
+  return dashboardFetch<GiveawayActionResult>(`${base(guildId)}/${id}/end`, { method: "POST" })
+}
+
+/** winnerUserId 省略為整批重抽；指定時取消該中獎者的資格並抽出替補（已離開的中獎者也可以） */
+export function redrawGiveaway(guildId: string, id: number, winnerUserId?: string): Promise<GiveawayActionResult> {
+  return dashboardFetch<GiveawayActionResult>(`${base(guildId)}/${id}/redraw`, {
+    method: "POST",
+    json: winnerUserId ? { winner_user_id: winnerUserId } : {},
+  })
+}
+
+const ACTION_ERRORS: Record<string, string> = {
+  giveaway_not_found: "找不到這個抽獎。",
+  giveaway_not_ended: "這個抽獎尚未結束，不能重抽。",
+  not_winner: "這位成員已經不是中獎者，請重新整理後再試。",
+  not_participant: "這位成員沒有參加這個抽獎。",
+}
+
+/** 操作失敗時給使用者看的文字 */
+export function actionErrorText(code: string | null): string {
+  return (code && ACTION_ERRORS[code]) || "操作失敗，請稍後再試。"
+}
+
+/** 操作成功後的提示（含沒有公告的原因） */
+export function actionResultText(kind: "end" | "redraw", result: GiveawayActionResult): string {
+  if (result.status === "already_ended") return "這個抽獎已經結束，下方是最新的結果。"
+  const base = kind === "end" ? "已提前結束並開獎。" : "已重抽。"
+  return result.announce_failure_text ? `${base}但${result.announce_failure_text}。` : `${base}已在原頻道公告。`
+}
