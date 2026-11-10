@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react"
 import Link from "next/link"
 import { Button, LinkButton } from "@/components/ui"
 import { API_BASE, dashboardFetch } from "@/lib/dashboard-api"
+import { permissionNotice } from "@/lib/dashboard-sections"
 
 interface GuildItem {
   id: string
@@ -17,7 +18,7 @@ interface GuildLists {
 }
 
 const NOTICES: Record<string, string> = {
-  need_manage_channels: "星羽已加入伺服器，但你沒有該伺服器的「管理頻道」權限，無法設定通知。請伺服器管理員授予權限後再進入。",
+  need_permissions: permissionNotice(),
   invite_pending: "星羽已加入伺服器，但清單還沒更新，請稍後按「重新整理」。",
 }
 
