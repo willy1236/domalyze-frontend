@@ -38,8 +38,8 @@ describe("NAV_ITEMS", () => {
     ])
   })
 
-  it("目前只有通知與動態語音完成頁面", () => {
-    expect(NAV_ITEMS.filter((i) => i.ready).map((i) => i.key)).toEqual(["notify", "dynamic_voice"])
+  it("目前完成頁面的區塊", () => {
+    expect(NAV_ITEMS.filter((i) => i.ready).map((i) => i.key)).toEqual(["notify", "dynamic_voice", "giveaways"])
   })
 })
 

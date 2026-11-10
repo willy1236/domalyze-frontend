@@ -35,7 +35,7 @@ export const NAV_ITEMS: readonly NavItemDef[] = [
   { key: "reaction_roles", label: "反應身分組", path: "/reaction-roles", ready: false },
   { key: "tickets", label: "私人頻道", path: "/tickets", ready: false },
   { key: "warnings", label: "警告", path: "/warnings", ready: false },
-  { key: "giveaways", label: "抽獎", path: "/giveaways", ready: false },
+  { key: "giveaways", label: "抽獎", path: "/giveaways", ready: true },
   { key: "settings", label: "基本設定", path: "/settings", ready: false },
 ]
 
