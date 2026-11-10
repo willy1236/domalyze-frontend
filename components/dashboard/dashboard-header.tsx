@@ -1,8 +1,8 @@
 "use client"
 
 import { useState } from "react"
-import { LAST_USER_KEY, dashboardFetch, discardDrafts } from "@/lib/dashboard-api"
 import { Button } from "@/components/ui"
+import { LAST_USER_KEY, dashboardFetch, discardDrafts } from "@/lib/dashboard-api"
 
 export interface DashboardUser {
   id: string
@@ -52,9 +52,9 @@ export function DashboardHeader({ user }: { user: DashboardUser }) {
           <span className="text-sm truncate max-w-32 sm:max-w-64">{user.name}</span>
           <Button
             type="button"
+            size="sm"
             onClick={logout}
             disabled={busy}
-            size="sm"
             className="shrink-0 disabled:opacity-50"
           >
             登出

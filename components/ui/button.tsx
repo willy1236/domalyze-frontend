@@ -1,24 +1,13 @@
 import type { ButtonHTMLAttributes } from "react"
 import { cn } from "@/lib/utils"
-import { disabledClasses, labelClasses, sizeClasses, variantClasses } from "./styles"
-
-type ButtonVariant = keyof typeof variantClasses
-type ButtonSize = keyof typeof sizeClasses
+import { buttonClass, type ButtonSize, type ButtonVariant } from "./button-styles"
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: ButtonVariant
   size?: ButtonSize
 }
 
-/**
- * 後台控制項共用的按鈕。type 一律由呼叫端指定（submit／button），元件不設預設值，
- * 免得改掉既有表單的送出行為。
- */
+/** 後台操作按鈕。type 不給預設值：表單的 submit 與一般 button 由呼叫端明確指定。 */
 export function Button({ variant = "outline", size = "md", className, ...props }: ButtonProps) {
-  return (
-    <button
-      className={cn(variantClasses[variant], sizeClasses[size], labelClasses, disabledClasses, className)}
-      {...props}
-    />
-  )
+  return <button className={cn(buttonClass(variant, size), className)} {...props} />
 }

@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useRef, useState } from "react"
+import { Button, Input, Select, Textarea } from "@/components/ui"
 import { DashboardApiError } from "@/lib/dashboard-api"
 import type { ChannelNotifyValues } from "@/lib/dashboard-channel-notifies"
 import {
@@ -24,7 +25,6 @@ import { registerDraft } from "@/lib/dashboard-draft"
 import { useNotifyOptions } from "@/lib/dashboard-options"
 import { useNotifyPreview } from "@/lib/dashboard-preview"
 import type { NotifyItem } from "@/lib/dashboard-notifies"
-import { Button, Input, Select, Textarea } from "@/components/ui"
 import { ChannelSelect } from "./channel-select"
 import { ConflictNotice } from "./conflict-notice"
 import { WarnIcon } from "./icons"
@@ -460,10 +460,10 @@ export function CommunityNotifyForm({ guildId, items, initial, onClose, onChange
         </Button>
         {editKey && base !== null && (
           <Button
+            variant="danger"
             type="button"
             disabled={busy}
             onClick={() => void remove()}
-            variant="danger"
             className="ml-auto"
           >
             刪除

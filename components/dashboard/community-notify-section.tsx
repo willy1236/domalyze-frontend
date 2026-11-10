@@ -1,9 +1,9 @@
 "use client"
 
 import { useState, type ReactNode } from "react"
+import { Button } from "@/components/ui"
 import { consumeDraft } from "@/lib/dashboard-draft"
 import type { NotifyItem } from "@/lib/dashboard-notifies"
-import { Button } from "@/components/ui"
 import {
   COMMUNITY_DRAFT_KEY,
   CommunityNotifyForm,

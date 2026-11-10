@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useRef, useState } from "react"
+import { Button, Textarea } from "@/components/ui"
 import { DashboardApiError } from "@/lib/dashboard-api"
 import {
   type ChannelNotifyType,
@@ -12,7 +13,6 @@ import {
 import { registerDraft } from "@/lib/dashboard-draft"
 import { useNotifyOptions } from "@/lib/dashboard-options"
 import { useNotifyPreview } from "@/lib/dashboard-preview"
-import { Button, Textarea } from "@/components/ui"
 import { ChannelSelect } from "./channel-select"
 import { ConflictNotice } from "./conflict-notice"
 import { WarnIcon } from "./icons"
@@ -248,10 +248,10 @@ export function ChannelNotifyForm({ guildId, type, original, restored, onClose, 
         </Button>
         {base !== null && (
           <Button
+            variant="danger"
             type="button"
             disabled={busy}
             onClick={() => void remove()}
-            variant="danger"
             className="ml-auto"
           >
             刪除

@@ -2,8 +2,8 @@
 
 import { useCallback, useEffect, useState } from "react"
 import Link from "next/link"
-import { API_BASE, dashboardFetch } from "@/lib/dashboard-api"
 import { Button, LinkButton } from "@/components/ui"
+import { API_BASE, dashboardFetch } from "@/lib/dashboard-api"
 
 interface GuildItem {
   id: string
@@ -161,7 +161,7 @@ export default function DashboardPage() {
           <p className="text-gray-500 dark:text-gray-400 mb-4">
             沒有可管理的伺服器。管理頻道通知需要「管理頻道」權限，邀請星羽需要「管理伺服器」權限。
           </p>
-          <LinkButton href={inviteUrl()} variant="outline">
+          <LinkButton variant="outline" href={inviteUrl()}>
             邀請星羽
           </LinkButton>
         </div>
