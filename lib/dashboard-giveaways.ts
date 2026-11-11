@@ -15,6 +15,8 @@ export interface GiveawaySummary {
   channel_id: string
   /** 頻道已不存在時為 null */
   channel_name: string | null
+  /** 星羽在抽獎頻道缺少的權限名稱（中文），齊全為空陣列；頻道已不存在時為 null */
+  missing_permissions: string[] | null
   /** 抽獎訊息的連結；沒有訊息 ID 時為 null */
   message_url: string | null
   /** ISO 字串 */
@@ -81,6 +83,16 @@ export function formatDateTime(iso: string, timeZone?: string): string {
 export function participantLabel(p: Pick<GiveawayParticipant, "id" | "name" | "left">): string {
   if (p.left) return `已離開的成員（${p.id}）`
   return p.name || p.id
+}
+
+/** 星羽在抽獎頻道缺少權限時的警告；權限齊全或頻道已不存在（null）時回傳 null */
+export function missingPermissionsText(missing: string[] | null): { short: string; full: string } | null {
+  if (!missing || missing.length === 0) return null
+  const names = missing.join("、")
+  return {
+    short: `星羽缺少頻道權限：${names}`,
+    full: `星羽在此頻道缺少：${names}。開獎與重抽時會無法更新抽獎訊息與公告中獎者，請到頻道設定補上權限。`,
+  }
 }
 
 export function statusLabel(status: GiveawayStatus): string {

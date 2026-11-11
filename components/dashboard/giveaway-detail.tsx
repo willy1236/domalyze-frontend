@@ -5,11 +5,13 @@ import { Button } from "@/components/ui"
 import {
   fetchGiveaway,
   formatDateTime,
+  missingPermissionsText,
   participantLabel,
   statusLabel,
   type GiveawayDetail,
   type GiveawayParticipant,
 } from "@/lib/dashboard-giveaways"
+import { WarnIcon } from "./icons"
 
 const muted = "text-gray-600 dark:text-gray-400"
 const linkClass =
@@ -76,6 +78,7 @@ export function GiveawayDetailView({
   }, [load])
 
   const active = detail?.status === "active"
+  const permissionWarning = detail ? missingPermissionsText(detail.missing_permissions) : null
 
   return (
     <section>
@@ -105,6 +108,14 @@ export function GiveawayDetailView({
       {detail === null && !failed && <p className={`py-8 ${muted}`}>載入中…</p>}
       {detail && (
         <div className="space-y-8 pt-5">
+          {permissionWarning && (
+            <div role="alert" className="rounded-md border border-red-700/40 dark:border-red-300/40 p-4">
+              <p className="flex items-start gap-1.5 text-sm text-red-700 dark:text-red-300">
+                <WarnIcon className="mt-0.5 shrink-0" width={15} height={15} />
+                <span className="break-words">{permissionWarning.full}</span>
+              </p>
+            </div>
+          )}
           <dl className="grid gap-x-8 gap-y-3 sm:grid-cols-2">
             <Field label="狀態">{statusLabel(detail.status)}</Field>
             <Field label="抽出人數">{detail.winner_count} 人</Field>

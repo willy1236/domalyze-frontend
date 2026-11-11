@@ -1,5 +1,12 @@
 import { describe, expect, it } from "vitest"
-import { actionErrorText, actionResultText, formatDateTime, participantLabel, statusLabel } from "./dashboard-giveaways"
+import {
+  actionErrorText,
+  actionResultText,
+  formatDateTime,
+  missingPermissionsText,
+  participantLabel,
+  statusLabel,
+} from "./dashboard-giveaways"
 
 describe("formatDateTime", () => {
   it("年/月/日 時:分，依指定時區", () => {
@@ -78,5 +85,18 @@ describe("actionResultText", () => {
         no_replacement: true,
       }),
     ).toBe("已重抽，但沒有可替補的參加者。")
+  })
+})
+
+describe("missingPermissionsText", () => {
+  it("權限齊全或頻道已不存在時不警告", () => {
+    expect(missingPermissionsText([])).toBeNull()
+    expect(missingPermissionsText(null)).toBeNull()
+  })
+  it("列出缺少的權限", () => {
+    expect(missingPermissionsText(["檢視頻道", "讀取訊息歷史"])).toEqual({
+      short: "星羽缺少頻道權限：檢視頻道、讀取訊息歷史",
+      full: "星羽在此頻道缺少：檢視頻道、讀取訊息歷史。開獎與重抽時會無法更新抽獎訊息與公告中獎者，請到頻道設定補上權限。",
+    })
   })
 })

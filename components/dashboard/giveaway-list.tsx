@@ -5,10 +5,12 @@ import { Button } from "@/components/ui"
 import {
   fetchGiveaways,
   formatDateTime,
+  missingPermissionsText,
   statusLabel,
   type GiveawaySummary,
   type GiveawaysResponse,
 } from "@/lib/dashboard-giveaways"
+import { WarnIcon } from "./icons"
 
 const muted = "text-gray-600 dark:text-gray-400"
 const linkClass =
@@ -18,6 +20,7 @@ function Row({ giveaway, onSelect }: { giveaway: GiveawaySummary; onSelect: (id:
   const active = giveaway.status === "active"
   const creator = giveaway.creator_name ?? giveaway.creator_id
   const channel = giveaway.channel_name ? `#${giveaway.channel_name}` : "頻道已不存在"
+  const permissionWarning = missingPermissionsText(giveaway.missing_permissions)
   return (
     <li>
       <button
@@ -32,6 +35,15 @@ function Row({ giveaway, onSelect }: { giveaway: GiveawaySummary; onSelect: (id:
             <span aria-hidden="true"> · </span>
             {channel}
           </span>
+          {permissionWarning && (
+            <span
+              title={permissionWarning.full}
+              className="mt-0.5 flex items-start gap-1.5 text-sm text-red-700 dark:text-red-300"
+            >
+              <WarnIcon className="mt-0.5 shrink-0" width={15} height={15} />
+              <span className="break-words">{permissionWarning.short}</span>
+            </span>
+          )}
         </span>
         <span className="text-sm">
           <span
