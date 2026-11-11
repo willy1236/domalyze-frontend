@@ -59,6 +59,7 @@ export interface MemberSearchResult {
   name: string
   username: string
   avatar_url: string
+  bot: boolean
 }
 
 const base = (guildId: string) => `/dashboard/guilds/${encodeURIComponent(guildId)}/warnings`
@@ -124,4 +125,163 @@ const MEMBER_ERRORS: Record<string, string> = {
 
 export function memberErrorText(code: string | null): string {
   return (code && MEMBER_ERRORS[code]) || "無法載入紀錄，請稍後再試。"
+}
+
+// ====== W-02：後台懲處 ======
+
+/** 各種類在區塊權限裡對應的動作名稱（與後端 `SECTION_RULES` 一致） */
+export const KIND_ACTION: Record<WarningKind, string> = {
+  warning: "add",
+  timeout: "timeout",
+  kick: "kick",
+  ban: "ban",
+}
+
+/** 使用者有權限的種類，順序同 WARNING_KINDS */
+export function allowedKinds(can: (action: string) => boolean): WarningKind[] {
+  return WARNING_KINDS.filter((k) => can(KIND_ACTION[k]))
+}
+
+/** 警告與停權可以直接填使用者 ID；禁言與踢出只能選伺服器內成員 */
+export function allowsIdOnly(kind: WarningKind): boolean {
+  return kind === "warning" || kind === "ban"
+}
+
+export const MAX_REASON_LENGTH = 100
+
+export const TIMEOUT_OPTIONS: readonly { seconds: number; label: string }[] = [
+  { seconds: 60, label: "1 分鐘" },
+  { seconds: 300, label: "5 分鐘" },
+  { seconds: 600, label: "10 分鐘" },
+  { seconds: 3600, label: "1 小時" },
+  { seconds: 86400, label: "1 天" },
+  { seconds: 259200, label: "3 天" },
+  { seconds: 604800, label: "7 天" },
+]
+
+/** 刪除訊息的選項，與 `/ban` 的選項一致；禁言沿用同一組（上限都是 7 天） */
+export const DELETE_MESSAGE_OPTIONS: readonly { seconds: number; label: string }[] = [
+  { seconds: 0, label: "不要刪除訊息" },
+  { seconds: 3600, label: "1 小時" },
+  { seconds: 21600, label: "6 小時" },
+  { seconds: 43200, label: "12 小時" },
+  { seconds: 86400, label: "1 天" },
+  { seconds: 259200, label: "3 天" },
+  { seconds: 604800, label: "7 天" },
+]
+
+export interface PunishDraft {
+  kind: WarningKind
+  /** 對象的 Discord ID；沒選為 null */
+  userId: string | null
+  reason: string
+  crossGuild: boolean
+  durationSeconds: number
+  deleteMessageSeconds: number
+  announceChannelId: string
+}
+
+export type PunishFieldErrors = Partial<Record<"user" | "reason" | "duration", string>>
+
+/** 送出前的檢查，規則與後端一致（後端仍會再檢查一次）；回傳空物件代表可以送出。 */
+export function validatePunish(draft: PunishDraft, selfId: string | null): PunishFieldErrors {
+  const errors: PunishFieldErrors = {}
+  if (!draft.userId) errors.user = "請選擇對象"
+  else if (selfId !== null && draft.userId === selfId) errors.user = "不能對自己執行"
+  const reason = draft.reason.trim()
+  if (reason.length > MAX_REASON_LENGTH) errors.reason = `原因不得超過 ${MAX_REASON_LENGTH} 字`
+  else if ((draft.kind === "warning" || draft.kind === "ban") && reason === "") errors.reason = "請填寫原因"
+  if (draft.kind === "timeout" && !TIMEOUT_OPTIONS.some((o) => o.seconds === draft.durationSeconds)) {
+    errors.duration = "請選擇禁言時長"
+  }
+  return errors
+}
+
+export interface PunishRequest {
+  kind: WarningKind
+  user_id: string
+  reason: string
+  cross_guild: boolean
+  duration_seconds?: number
+  delete_message_seconds?: number
+  announce_channel_id?: string
+}
+
+/** 草稿轉成 API body：只帶該種類用得到的欄位 */
+export function buildPunishRequest(draft: PunishDraft): PunishRequest {
+  const body: PunishRequest = {
+    kind: draft.kind,
+    user_id: draft.userId ?? "",
+    reason: draft.reason.trim(),
+    cross_guild: draft.crossGuild,
+  }
+  if (draft.kind === "timeout") body.duration_seconds = draft.durationSeconds
+  if ((draft.kind === "timeout" || draft.kind === "ban") && draft.deleteMessageSeconds > 0) {
+    body.delete_message_seconds = draft.deleteMessageSeconds
+  }
+  if (draft.announceChannelId) body.announce_channel_id = draft.announceChannelId
+  return body
+}
+
+export interface PunishResult {
+  ok: boolean
+  error: string | null
+  warning_id: number | null
+  /** 停權時對象已被停權 */
+  already: boolean
+  deleted_summary: string | null
+  auto_timeout: { ok: boolean; duration_seconds: number | null; error: string | null } | null
+}
+
+export interface PunishResponse {
+  result: PunishResult
+  announce_error: string | null
+}
+
+export interface AnnounceChannel {
+  id: string
+  name: string
+}
+
+export function punish(guildId: string, body: PunishRequest): Promise<PunishResponse> {
+  return dashboardFetch<PunishResponse>(base(guildId), { method: "POST", json: body })
+}
+
+export async function fetchAnnounceChannels(guildId: string, signal?: AbortSignal): Promise<AnnounceChannel[]> {
+  const res = await dashboardFetch<{ channels: AnnounceChannel[] }>(`${base(guildId)}/options`, {}, { signal })
+  return res.channels
+}
+
+const PUNISH_ERRORS: Record<string, string> = {
+  not_member: "禁言與踢出只能選伺服器內的成員。",
+  user_not_found: "找不到這個使用者，請確認 ID。",
+  no_permission: "你沒有執行這個動作的權限。",
+}
+
+/** 送出失敗（HTTP 錯誤）時給使用者看的文字；400 的欄位錯誤優先顯示後端指出的原因。 */
+export function punishErrorText(code: string | null, fields?: unknown): string {
+  if (code === "invalid_request" && Array.isArray(fields)) {
+    const reasons = fields
+      .map((f) => (f && typeof f === "object" && "reason" in f ? String((f as { reason: unknown }).reason) : ""))
+      .filter(Boolean)
+    if (reasons.length > 0) return reasons.join("；")
+  }
+  return (code && PUNISH_ERRORS[code]) || "送出失敗，請稍後再試。"
+}
+
+/** 懲處成功（含已被停權）或被 Discord／服務拒絕時的結果文字，依序列出每一項。 */
+export function punishResultLines(kind: WarningKind, res: PunishResponse): { ok: boolean; lines: string[] } {
+  const { result } = res
+  if (!result.ok) return { ok: false, lines: [result.error ?? "執行失敗，沒有寫入紀錄。"] }
+  const lines: string[] = []
+  if (result.already) lines.push("這位使用者已經被停權，沒有重複執行，也沒有新增紀錄。")
+  else if (result.warning_id !== null) lines.push(`已${kindLabel(kind)}，紀錄編號 ${result.warning_id}。`)
+  else lines.push(`${result.error ?? "動作已執行，但紀錄寫入失敗"}。`)
+  if (result.deleted_summary) lines.push(result.deleted_summary)
+  if (result.auto_timeout) {
+    const a = result.auto_timeout
+    lines.push(a.ok ? `自動禁言：已禁言 ${formatDuration(a.duration_seconds ?? 0)}。` : `自動禁言失敗：${a.error ?? "未知原因"}`)
+  }
+  if (res.announce_error) lines.push(`紀錄已寫入，但公告失敗：${res.announce_error}`)
+  return { ok: true, lines }
 }
