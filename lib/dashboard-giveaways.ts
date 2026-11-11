@@ -10,9 +10,11 @@ export interface GiveawaySummary {
   participant_count: number
   redraw_count: number
   creator_id: string
-  /** 發起人已離開且不在 bot 快取時為 null */
+  /** 發起人已離開伺服器時為 null */
   creator_name: string | null
   channel_id: string
+  /** 頻道已不存在時為 null */
+  channel_name: string | null
   /** 抽獎訊息的連結；沒有訊息 ID 時為 null */
   message_url: string | null
   /** ISO 字串 */
@@ -42,8 +44,6 @@ export interface GiveawayParticipant {
 
 export interface GiveawayDetail extends GiveawaySummary {
   description: string | null
-  /** 頻道已不存在時為 null */
-  channel_name: string | null
   participants: GiveawayParticipant[]
   winners: GiveawayParticipant[]
 }
@@ -77,10 +77,10 @@ export function formatDateTime(iso: string, timeZone?: string): string {
   }).format(new Date(iso))
 }
 
-/** 參加者顯示名稱：已離開或查不到名稱時退回 ID */
+/** 參加者顯示名稱：已離開優先標示；否則用名稱，再退回 ID */
 export function participantLabel(p: Pick<GiveawayParticipant, "id" | "name" | "left">): string {
-  if (p.name) return p.name
-  return p.left ? `已離開的成員（${p.id}）` : p.id
+  if (p.left) return `已離開的成員（${p.id}）`
+  return p.name || p.id
 }
 
 export function statusLabel(status: GiveawayStatus): string {
@@ -93,6 +93,8 @@ export interface GiveawayActionResult {
   status: "ok" | "already_ended"
   announce_failure: "channel_missing" | "no_permission" | "failed" | null
   announce_failure_text: string | null
+  /** 重抽時沒抽出新中獎者（沒有可替補的參加者） */
+  no_replacement: boolean
 }
 
 export function endGiveaway(guildId: string, id: number): Promise<GiveawayActionResult> {
@@ -119,9 +121,13 @@ export function actionErrorText(code: string | null): string {
   return (code && ACTION_ERRORS[code]) || "操作失敗，請稍後再試。"
 }
 
-/** 操作成功後的提示（含沒有公告的原因） */
+/** 操作成功後的提示（含沒有公告的原因、重抽沒有替補） */
 export function actionResultText(kind: "end" | "redraw", result: GiveawayActionResult): string {
   if (result.status === "already_ended") return "這個抽獎已經結束，下方是最新的結果。"
+  if (kind === "redraw" && result.no_replacement) {
+    const base = "已重抽，但沒有可替補的參加者。"
+    return result.announce_failure_text ? `${base}且${result.announce_failure_text}。` : base
+  }
   const base = kind === "end" ? "已提前結束並開獎。" : "已重抽。"
   return result.announce_failure_text ? `${base}但${result.announce_failure_text}。` : `${base}已在原頻道公告。`
 }
