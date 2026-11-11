@@ -32,6 +32,8 @@ export function TicketLobbyRemoveButton({
   // 大廳已移除，但開單按鈕沒能拿掉（bot 對大廳頻道缺權限）
   const [buttonLeft, setButtonLeft] = useState(false)
   const ref = useRef<HTMLDialogElement>(null)
+  // 按鈕沒拿掉時，說明視窗關閉後才重新載入一覽：一覽重新載入會讓這個大廳列卸載，說明會跟著消失
+  const reloadOnClose = useRef(false)
   const uid = useId()
   const label = lobby.channel.name ? `#${lobby.channel.name}` : "此大廳"
 
@@ -65,6 +67,10 @@ export function TicketLobbyRemoveButton({
     setError(null)
     setChanged(false)
     setButtonLeft(false)
+    if (reloadOnClose.current) {
+      reloadOnClose.current = false
+      onDone()
+    }
   }
 
   async function confirm() {
@@ -74,9 +80,9 @@ export function TicketLobbyRemoveButton({
     try {
       const result = await removeLobby(guildId, lobby.channel.id, original)
       if (result.button_removed === false) {
-        // 一覽先重新載入；視窗留著說明按鈕還在，按關閉才離開
+        // 視窗留著說明按鈕還在，按關閉才離開並重新載入一覽
+        reloadOnClose.current = true
         setButtonLeft(true)
-        onDone()
       } else {
         close()
         onDone()

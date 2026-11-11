@@ -582,12 +582,14 @@ describe("TicketLobbyRemoveButton", () => {
     responses[`DELETE ${BASE}/lobbies/50`] = { status: 200, body: { removed: true, button_removed: false } }
     const { onDone } = await mountRemove()
     await click(buttonByText("確認移除"))
-    expect(onDone).toHaveBeenCalledTimes(1)
+    // 說明還在畫面上時不重新載入一覽（否則這個大廳列會卸載，說明跟著消失）
+    expect(onDone).not.toHaveBeenCalled()
     expect(text()).toContain("開單按鈕還留在訊息上")
     expect(text()).toContain("Read Message History")
     expect(buttonByText("確認移除")).toBeUndefined()
     await click(buttonByText("關閉"))
     expect(container.querySelector("dialog")?.hasAttribute("open")).toBe(false)
+    expect(onDone).toHaveBeenCalledTimes(1)
   })
 
   it("Discord 拒絕時顯示原因，大廳沒有移除", async () => {

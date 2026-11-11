@@ -95,3 +95,56 @@ describe("TicketLobbyManager", () => {
     expect(container.querySelector("form")).toBeNull()
   })
 })
+
+describe("移除大廳但按鈕沒拿掉", () => {
+  it("一覽重新載入後大廳列消失，說明仍留在畫面上，按關閉才重新載入", async () => {
+    // 不 mock onDone：用真實的一覽重新載入。DELETE 之後，一覽就不再有這個大廳
+    let removed = false
+    let listCalls = 0
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (url: string, init?: RequestInit) => {
+        const path = url.replace(/^.*\/dashboard/, "/dashboard")
+        const method = init?.method ?? "GET"
+        let body: unknown = { error: "not_found" }
+        let status = 404
+        if (method === "DELETE" && path === `${BASE}/lobbies/50`) {
+          removed = true
+          body = { removed: true, button_removed: false }
+          status = 200
+        } else if (method === "GET" && path === BASE) {
+          listCalls += 1
+          body = removed ? { lobbies: [], unassigned: [] } : LIST
+          status = 200
+        } else if (method === "GET" && path === `${BASE}/lobbies/50`) {
+          body = { original: { name_prefix: "report" } }
+          status = 200
+        }
+        return { ok: status < 400, status, json: async () => body } as Response
+      }),
+    )
+    HTMLDialogElement.prototype.showModal = function () {
+      this.setAttribute("open", "")
+    }
+    HTMLDialogElement.prototype.close = function () {
+      this.removeAttribute("open")
+    }
+    await act(async () => {
+      root.render(<TicketLobbyManager guildId="1" />)
+    })
+    await flush()
+    const callsBefore = listCalls
+
+    await click(buttonByText("移除"))
+    await click(buttonByText("確認移除"))
+    // 說明在畫面上，大廳列也還在（一覽尚未重新載入）
+    expect(container.textContent).toContain("開單按鈕還留在訊息上")
+    expect(listCalls).toBe(callsBefore)
+
+    await click(buttonByText("關閉"))
+    // 關閉後才重新載入；大廳已不在一覽
+    expect(listCalls).toBe(callsBefore + 1)
+    expect(container.textContent).not.toContain("report")
+    expect(container.textContent).toContain("目前沒有私人頻道大廳")
+  })
+})
