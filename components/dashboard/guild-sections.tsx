@@ -1,7 +1,8 @@
 "use client"
 
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react"
+import { createContext, useCallback, useContext, useMemo } from "react"
 import { canAccess, fetchSections, type SectionInfo, type SectionKey } from "@/lib/dashboard-sections"
+import { useLoad } from "@/lib/use-load"
 
 interface GuildSections {
   /** 載入完成前為 null */
@@ -16,25 +17,9 @@ const GuildSectionsContext = createContext<GuildSections | null>(null)
 
 /** 載入目前使用者在這個伺服器的區塊權限，供導覽與各區塊頁使用。 */
 export function GuildSectionsProvider({ guildId, children }: { guildId: string; children: React.ReactNode }) {
-  const [sections, setSections] = useState<SectionInfo[] | null>(null)
-  const [failed, setFailed] = useState(false)
-  const [nonce, setNonce] = useState(0)
-
-  useEffect(() => {
-    const controller = new AbortController()
-    setSections(null)
-    setFailed(false)
-    fetchSections(guildId, controller.signal)
-      .then((res) => setSections(res.sections))
-      .catch((e) => {
-        if (controller.signal.aborted) return
-        console.error("load sections failed", e)
-        setFailed(true)
-      })
-    return () => controller.abort()
-  }, [guildId, nonce])
-
-  const reload = useCallback(() => setNonce((n) => n + 1), [])
+  const fetcher = useCallback(async (signal: AbortSignal) => (await fetchSections(guildId, signal)).sections, [guildId])
+  const { data: sections, failed, reload: load } = useLoad(fetcher)
+  const reload = useCallback(() => void load(), [load])
   const value = useMemo<GuildSections>(
     () => ({
       sections,

@@ -1,6 +1,6 @@
 "use client"
 
-import { useCallback, useEffect, useState, type ReactNode } from "react"
+import { useCallback, type ReactNode } from "react"
 import { Button } from "@/components/ui"
 import {
   fetchGiveaway,
@@ -11,6 +11,7 @@ import {
   type GiveawayDetail,
   type GiveawayParticipant,
 } from "@/lib/dashboard-giveaways"
+import { useLoad } from "@/lib/use-load"
 import { WarnIcon } from "./icons"
 
 const muted = "text-gray-600 dark:text-gray-400"
@@ -50,32 +51,8 @@ export function GiveawayDetailView({
   onBack: () => void
   actions?: (detail: GiveawayDetail, reload: () => Promise<void>) => ReactNode
 }) {
-  const [detail, setDetail] = useState<GiveawayDetail | null>(null)
-  const [failed, setFailed] = useState(false)
-  const [loading, setLoading] = useState(false)
-
-  const load = useCallback(
-    async (signal?: AbortSignal) => {
-      setFailed(false)
-      setLoading(true)
-      try {
-        setDetail(await fetchGiveaway(guildId, giveawayId, signal))
-      } catch (e) {
-        if (signal?.aborted) return
-        console.error("load giveaway failed", e)
-        setFailed(true)
-      } finally {
-        if (!signal?.aborted) setLoading(false)
-      }
-    },
-    [guildId, giveawayId],
-  )
-
-  useEffect(() => {
-    const controller = new AbortController()
-    void load(controller.signal)
-    return () => controller.abort()
-  }, [load])
+  const fetcher = useCallback((signal: AbortSignal) => fetchGiveaway(guildId, giveawayId, signal), [guildId, giveawayId])
+  const { data: detail, failed, loading, reload } = useLoad(fetcher)
 
   const active = detail?.status === "active"
   const permissionWarning = detail ? missingPermissionsText(detail.missing_permissions) : null
@@ -90,7 +67,7 @@ export function GiveawayDetailView({
           <Button type="button" size="sm" onClick={onBack}>
             回清單
           </Button>
-          <Button type="button" size="sm" disabled={loading} onClick={() => void load()}>
+          <Button type="button" size="sm" disabled={loading} onClick={() => void reload()}>
             重新整理
           </Button>
         </div>
@@ -99,7 +76,7 @@ export function GiveawayDetailView({
       {failed && (
         <p className={`py-8 ${muted}`}>
           無法載入這個抽獎，請稍後
-          <button type="button" className={`underline mx-1 ${linkClass}`} onClick={() => void load()}>
+          <button type="button" className={`underline mx-1 ${linkClass}`} onClick={() => void reload()}>
             重試
           </button>
           。
@@ -140,7 +117,7 @@ export function GiveawayDetailView({
             {detail.description && <Field label="描述">{detail.description}</Field>}
           </dl>
 
-          {actions?.(detail, () => load())}
+          {actions?.(detail, reload)}
 
           <div>
             <h3 className="font-serif text-xl text-primary dark:text-silver">中獎者</h3>

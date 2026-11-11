@@ -1,10 +1,11 @@
 "use client"
 
-import { useEffect, useId, useRef, useState } from "react"
+import { useCallback, useEffect, useId, useRef, useState } from "react"
 import { useGuildSections } from "@/components/dashboard/guild-sections"
 import { MemberPicker, type PickedMember } from "@/components/dashboard/member-picker"
 import { Button, Input, Select, Textarea } from "@/components/ui"
 import { DashboardApiError, getDashboardUserId } from "@/lib/dashboard-api"
+import { useLoad } from "@/lib/use-load"
 import {
   allowedKinds,
   allowsIdOnly,
@@ -22,7 +23,6 @@ import {
   splitSeconds,
   toSeconds,
   validatePunish,
-  type AnnounceChannel,
   type PunishDraft,
   type PunishFieldErrors,
   type WarningKind,
@@ -160,8 +160,6 @@ function PunishDialog({ guildId, kinds, open, onClose, onDone }: PunishDialogPro
   const [errors, setErrors] = useState<PunishFieldErrors>({})
   const [busy, setBusy] = useState(false)
   const [outcome, setOutcome] = useState<{ ok: boolean; lines: string[] } | null>(null)
-  const [channels, setChannels] = useState<AnnounceChannel[] | null>(null)
-  const [channelsFailed, setChannelsFailed] = useState(false)
   // 送出成功重設表單時遞增，讓自訂欄位的內部狀態一起歸零
   const [formKey, setFormKey] = useState(0)
 
@@ -173,23 +171,17 @@ function PunishDialog({ guildId, kinds, open, onClose, onDone }: PunishDialogPro
     if (!dialog) return
     if (open && !dialog.open) dialog.showModal()
     else if (!open && dialog.open) dialog.close()
-    // 關閉時清掉上一次的結果，下次開啟不會看到舊訊息
-    if (!open) setOutcome(null)
   }, [open])
 
-  useEffect(() => {
-    if (!open) return
-    const controller = new AbortController()
-    setChannelsFailed(false)
-    fetchAnnounceChannels(guildId, controller.signal)
-      .then(setChannels)
-      .catch((e: unknown) => {
-        if (controller.signal.aborted) return
-        console.error("load announce channels failed", e)
-        setChannelsFailed(true)
-      })
-    return () => controller.abort()
-  }, [open, guildId])
+  // 關閉時清掉上一次的結果，下次開啟不會看到舊訊息
+  const [prevOpen, setPrevOpen] = useState(open)
+  if (prevOpen !== open) {
+    setPrevOpen(open)
+    if (!open) setOutcome(null)
+  }
+
+  const channelsFetcher = useCallback((signal: AbortSignal) => fetchAnnounceChannels(guildId, signal), [guildId])
+  const { data: channels, failed: channelsFailed } = useLoad(open ? channelsFetcher : null, { keepPrevious: true })
 
   const patch = (changes: Partial<PunishDraft>) => setDraft((d) => ({ ...d, ...changes }))
 

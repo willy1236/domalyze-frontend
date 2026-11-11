@@ -1,15 +1,15 @@
 "use client"
 
-import { useEffect, useId, useRef, useState } from "react"
+import { useCallback, useEffect, useId, useRef, useState } from "react"
 import { Button } from "@/components/ui"
 import { DashboardApiError } from "@/lib/dashboard-api"
+import { useLoad } from "@/lib/use-load"
 import {
   deleteReactionRole,
   fetchReactionRoleDetail,
   originalOf,
   parseSaveProblem,
   type DeleteMode,
-  type OriginalSnapshot,
   type ReactionRoleMessage,
 } from "@/lib/dashboard-reaction-roles"
 
@@ -33,8 +33,6 @@ export function ReactionRoleDeleteButton({
 }) {
   const [open, setOpen] = useState(false)
   const [mode, setMode] = useState<DeleteMode>("delete_message")
-  const [original, setOriginal] = useState<OriginalSnapshot | null>(null)
-  const [loadFailed, setLoadFailed] = useState(false)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [changed, setChanged] = useState(false)
@@ -51,28 +49,23 @@ export function ReactionRoleDeleteButton({
   }, [open])
 
   // 開啟時載入目前的內容與按鈕，當作衝突比對的原值
-  useEffect(() => {
-    if (!open) return
-    const controller = new AbortController()
-    setOriginal(null)
-    setLoadFailed(false)
-    fetchReactionRoleDetail(guildId, message.message_id, controller.signal)
-      .then((d) => setOriginal(originalOf(d)))
-      .catch((e) => {
-        if (controller.signal.aborted) return
-        if (e instanceof DashboardApiError && e.code === "not_found") {
-          // 紀錄已被別人移除
-          setOpen(false)
-          onDone()
-          return
-        }
-        console.error("load reaction role before delete failed", e)
-        setLoadFailed(true)
-      })
-    return () => controller.abort()
-    // 只在開啟時載入
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open, guildId, message.message_id])
+  const fetcher = useCallback(
+    async (signal: AbortSignal) => originalOf(await fetchReactionRoleDetail(guildId, message.message_id, signal)),
+    [guildId, message.message_id],
+  )
+  const {
+    data: original,
+    setData: setOriginal,
+    failed: loadFailed,
+  } = useLoad(open ? fetcher : null, {
+    onError: (e) => {
+      if (e instanceof DashboardApiError && e.code === "not_found") {
+        // 紀錄已被別人移除；關閉後 fetcher 變成 null，不會顯示載入失敗
+        setOpen(false)
+        onDone()
+      }
+    },
+  })
 
   const close = () => {
     setOpen(false)

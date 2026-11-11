@@ -24,6 +24,8 @@ export function DashboardHeader({ user }: { user: DashboardUser }) {
       } catch {
         // sessionStorage 不可用時略過換帳號偵測
       }
+      // 整頁重新載入，清掉登入期間留在記憶體的狀態
+      // eslint-disable-next-line @next/next/no-location-assign-relative-destination
       window.location.href = "/"
     } catch {
       setBusy(false)

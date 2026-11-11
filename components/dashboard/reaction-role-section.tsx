@@ -1,6 +1,6 @@
 "use client"
 
-import { useCallback, useEffect, useState, type ReactNode } from "react"
+import { useCallback, type ReactNode } from "react"
 import { Button } from "@/components/ui"
 import {
   buttonProblems,
@@ -10,6 +10,7 @@ import {
   scopeLabel,
   type ReactionRoleMessage,
 } from "@/lib/dashboard-reaction-roles"
+import { useLoad } from "@/lib/use-load"
 
 const muted = "text-gray-600 dark:text-gray-400"
 const linkClass =
@@ -104,33 +105,8 @@ interface ReactionRoleSectionProps {
 
 /** 反應身分組一覽：進入頁面時載入並檢查 Discord 現況，另有手動重新整理。 */
 export function ReactionRoleSection({ guildId, headerActions, actions }: ReactionRoleSectionProps) {
-  const [messages, setMessages] = useState<ReactionRoleMessage[] | null>(null)
-  const [failed, setFailed] = useState(false)
-  const [loading, setLoading] = useState(false)
-
-  const load = useCallback(
-    async (signal?: AbortSignal) => {
-      setFailed(false)
-      setLoading(true)
-      try {
-        setMessages((await fetchReactionRoles(guildId, signal)).messages)
-      } catch (e) {
-        if (signal?.aborted) return
-        console.error("load reaction roles failed", e)
-        setFailed(true)
-      } finally {
-        if (!signal?.aborted) setLoading(false)
-      }
-    },
-    [guildId],
-  )
-
-  useEffect(() => {
-    const controller = new AbortController()
-    void load(controller.signal)
-    return () => controller.abort()
-  }, [load])
-
+  const fetcher = useCallback(async (signal: AbortSignal) => (await fetchReactionRoles(guildId, signal)).messages, [guildId])
+  const { data: messages, failed, loading, reload: load } = useLoad(fetcher)
   const reload = useCallback(() => void load(), [load])
 
   return (

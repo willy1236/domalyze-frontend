@@ -1,5 +1,6 @@
-import { useEffect, useState } from "react"
+import { useCallback } from "react"
 import { dashboardFetch } from "./dashboard-api"
+import { useLoad } from "./use-load"
 
 export interface ChannelOption {
   id: string
@@ -27,20 +28,10 @@ export function fetchNotifyOptions(guildId: string, notifyType: string, signal?:
 
 /** 表單用：載入選項，失敗時 error 為 true。 */
 export function useNotifyOptions(guildId: string, notifyType: string) {
-  const [options, setOptions] = useState<NotifyOptions | null>(null)
-  const [error, setError] = useState(false)
-
-  useEffect(() => {
-    const controller = new AbortController()
-    setOptions(null)
-    setError(false)
-    fetchNotifyOptions(guildId, notifyType, controller.signal)
-      .then(setOptions)
-      .catch(() => {
-        if (!controller.signal.aborted) setError(true)
-      })
-    return () => controller.abort()
-  }, [guildId, notifyType])
-
+  const fetcher = useCallback(
+    (signal: AbortSignal) => fetchNotifyOptions(guildId, notifyType, signal),
+    [guildId, notifyType],
+  )
+  const { data: options, failed: error } = useLoad(fetcher)
   return { options, error }
 }

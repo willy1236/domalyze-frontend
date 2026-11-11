@@ -82,7 +82,10 @@ export function LobbyForm({ guildId, lobby, restored, onClose, onSaved, onRemove
   }, [guildId])
 
   const stateRef = useRef<LobbyFormDraft>({ original: base, channelId, template })
-  stateRef.current = { original: base, channelId, template }
+  // 暫存只在工作階段過期時讀取，render 之後再同步即可
+  useEffect(() => {
+    stateRef.current = { original: base, channelId, template }
+  })
   useEffect(() => registerDraft(LOBBY_DRAFT_KEY, base === null ? "create" : "edit", () => stateRef.current), [base])
 
   const selected = options?.channels.find((c) => c.id === channelId) ?? null

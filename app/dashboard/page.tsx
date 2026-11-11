@@ -1,10 +1,11 @@
 "use client"
 
-import { useCallback, useEffect, useState } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 import Link from "next/link"
 import { Button, LinkButton } from "@/components/ui"
 import { API_BASE, dashboardFetch } from "@/lib/dashboard-api"
 import { permissionNotice } from "@/lib/dashboard-sections"
+import { useLoad } from "@/lib/use-load"
 
 interface GuildItem {
   id: string
@@ -86,15 +87,14 @@ function GuildGroup({ title, guilds, invited }: { title: string; guilds: GuildIt
 }
 
 export default function DashboardPage() {
-  const [lists, setLists] = useState<GuildLists | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [failed, setFailed] = useState(false)
   const [notice, setNotice] = useState<string | null>(null)
 
   // 邀請完成後帶 ?notice=，顯示一次後從網址移除
   useEffect(() => {
     const params = new URLSearchParams(window.location.search)
     const key = params.get("notice")
+    // 網址參數只在瀏覽器讀得到，要等 hydration 之後才能設定，否則伺服器與瀏覽器的初次 render 不一致
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (key && NOTICES[key]) setNotice(NOTICES[key])
     if (key) {
       params.delete("notice")
@@ -103,26 +103,14 @@ export default function DashboardPage() {
     }
   }, [])
 
-  const load = useCallback(async (refresh: boolean, signal?: AbortSignal) => {
-    setLoading(true)
-    setFailed(false)
-    try {
-      const path = refresh ? "/dashboard/guilds?refresh=1" : "/dashboard/guilds"
-      setLists(await dashboardFetch<GuildLists>(path, {}, { signal }))
-    } catch (e) {
-      if (signal?.aborted) return
-      console.error("load /dashboard/guilds failed", e)
-      setFailed(true)
-    } finally {
-      if (!signal?.aborted) setLoading(false)
-    }
-  }, [])
-
-  useEffect(() => {
-    const controller = new AbortController()
-    void load(false, controller.signal)
-    return () => controller.abort()
-  }, [load])
+  // 第一次載入用快取，按「重新整理」之後要求後端重新向 Discord 查詢
+  const refreshed = useRef(false)
+  const fetcher = useCallback(
+    (signal: AbortSignal) =>
+      dashboardFetch<GuildLists>(refreshed.current ? "/dashboard/guilds?refresh=1" : "/dashboard/guilds", {}, { signal }),
+    [],
+  )
+  const { data: lists, failed, loading, reload } = useLoad(fetcher)
 
   const isEmpty = lists !== null && lists.invited.length === 0 && lists.not_invited.length === 0
 
@@ -134,7 +122,10 @@ export default function DashboardPage() {
           type="button"
           className="disabled:opacity-50 disabled:pointer-events-none"
           disabled={loading}
-          onClick={() => void load(true)}
+          onClick={() => {
+            refreshed.current = true
+            void reload()
+          }}
         >
           {loading ? "載入中…" : "重新整理"}
         </Button>

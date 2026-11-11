@@ -1,30 +1,21 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useCallback } from "react"
 import { WarningRecordRow } from "@/components/dashboard/warning-record-row"
 import { DashboardApiError } from "@/lib/dashboard-api"
-import { fetchMemberRecords, memberErrorText, personLabel, type MemberRecordsResponse } from "@/lib/dashboard-warnings"
+import { fetchMemberRecords, memberErrorText, personLabel } from "@/lib/dashboard-warnings"
+import { useLoad } from "@/lib/use-load"
 
 const muted = "text-gray-600 dark:text-gray-400"
 
 /** 成員的跨群紀錄：他在所有伺服器存入跨群系統的紀錄，加上本伺服器只在本伺服器的紀錄（同 `/warning list`）。 */
 export function MemberRecords({ guildId, userId, onClose }: { guildId: string; userId: string; onClose: () => void }) {
-  const [data, setData] = useState<MemberRecordsResponse | null>(null)
-  const [error, setError] = useState<string | null>(null)
-
-  useEffect(() => {
-    const controller = new AbortController()
-    setData(null)
-    setError(null)
-    fetchMemberRecords(guildId, userId, controller.signal)
-      .then(setData)
-      .catch((e: unknown) => {
-        if (controller.signal.aborted) return
-        console.error("load member records failed", e)
-        setError(memberErrorText(e instanceof DashboardApiError ? e.code : null))
-      })
-    return () => controller.abort()
-  }, [guildId, userId])
+  const fetcher = useCallback(
+    (signal: AbortSignal) => fetchMemberRecords(guildId, userId, signal),
+    [guildId, userId],
+  )
+  const { data, error: loadError } = useLoad(fetcher)
+  const error = loadError ? memberErrorText(loadError instanceof DashboardApiError ? loadError.code : null) : null
 
   return (
     <section aria-label="成員的跨群紀錄" className="mt-4 rounded-md border border-primary/20 dark:border-champagne/25 p-4">
