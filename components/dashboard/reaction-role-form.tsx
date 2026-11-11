@@ -545,7 +545,7 @@ export function ReactionRoleForm({ guildId, message, restored, onClose, onSaved,
 
   return (
     <form
-      className="mt-4 space-y-5 rounded-md border border-primary/20 dark:border-champagne/25 p-4"
+      className="space-y-5 rounded-md border border-primary/20 dark:border-champagne/25 p-4"
       aria-label={title}
       noValidate
       onSubmit={(e) => {

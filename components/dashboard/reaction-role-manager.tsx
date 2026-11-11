@@ -41,7 +41,7 @@ export function ReactionRoleManager({ guildId }: { guildId: string }) {
   }
 
   return (
-    <div>
+    <div className="space-y-14">
       {form && (
         <ReactionRoleForm
           key={formId}
@@ -58,7 +58,7 @@ export function ReactionRoleManager({ guildId }: { guildId: string }) {
         guildId={guildId}
         headerActions={() => (
           <Button type="button" size="sm" onClick={() => open({ message: null })}>
-            新增（發新訊息或掛到既有訊息）
+            新增
           </Button>
         )}
         actions={(message, reload) => (
