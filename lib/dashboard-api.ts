@@ -67,6 +67,11 @@ export function setDashboardHooks(next: DashboardHooks): void {
   hooks = { ...next }
 }
 
+/** 目前登入的 Discord user ID；尚未取得為 null */
+export function getDashboardUserId(): string | null {
+  return currentUserId
+}
+
 /** layout 取得 /dashboard/me 後呼叫，讓導向登入前能記下目前帳號 */
 export function setDashboardUserId(id: string | null): void {
   currentUserId = id

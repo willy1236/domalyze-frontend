@@ -1,16 +1,14 @@
 "use client"
 
 import { useCallback, useEffect, useState, type ReactNode } from "react"
+import { MemberPicker, type PickedMember } from "@/components/dashboard/member-picker"
 import { MemberRecords } from "@/components/dashboard/member-records"
 import { WarningRecordRow } from "@/components/dashboard/warning-record-row"
-import { Button, Input, Select } from "@/components/ui"
+import { Button, Select } from "@/components/ui"
 import {
   fetchWarnings,
-  isUserId,
   kindLabel,
-  searchMembers,
   WARNING_KINDS,
-  type MemberSearchResult,
   type WarningKind,
   type WarningRecord,
   type WarningsResponse,
@@ -19,74 +17,6 @@ import {
 const muted = "text-gray-600 dark:text-gray-400"
 const linkClass =
   "rounded-sm outline-none focus-visible:ring-2 focus-visible:ring-primary dark:focus-visible:ring-champagne focus-visible:ring-offset-2 focus-visible:ring-offset-background-light dark:focus-visible:ring-offset-background-dark"
-const optionClass = `w-full px-3 py-2 text-left text-sm hover:bg-primary/5 dark:hover:bg-champagne/10 ${linkClass}`
-
-interface PickedMember {
-  id: string
-  label: string
-}
-
-/** 以名稱或 ID 搜尋成員；純數字的 ID 也可以直接使用（對象已離開伺服器時仍查得到舊紀錄）。 */
-function MemberPicker({ guildId, onPick }: { guildId: string; onPick: (m: PickedMember) => void }) {
-  const [text, setText] = useState("")
-  const [results, setResults] = useState<MemberSearchResult[]>([])
-  const query = text.trim()
-
-  useEffect(() => {
-    if (!query) return
-    const controller = new AbortController()
-    const timer = setTimeout(() => {
-      searchMembers(guildId, query, controller.signal)
-        .then(setResults)
-        .catch((e: unknown) => {
-          if (!controller.signal.aborted) console.error("member search failed", e)
-        })
-    }, 250)
-    return () => {
-      clearTimeout(timer)
-      controller.abort()
-    }
-  }, [guildId, query])
-
-  const pick = (m: PickedMember) => {
-    onPick(m)
-    setText("")
-    setResults([])
-  }
-  const shown = query ? results : []
-
-  return (
-    <div className="relative min-w-0 flex-1 basis-56">
-      <Input
-        type="search"
-        aria-label="依成員篩選"
-        placeholder="輸入成員名稱或 ID"
-        value={text}
-        onChange={(e) => setText(e.target.value)}
-      />
-      {query && (
-        <ul className="absolute z-10 mt-1 max-h-64 w-full overflow-auto rounded-md border border-primary/20 dark:border-champagne/25 bg-background-light dark:bg-background-dark shadow-lg">
-          {shown.map((m) => (
-            <li key={m.id}>
-              <button type="button" className={optionClass} onClick={() => pick({ id: m.id, label: m.name })}>
-                {m.name}
-                <span className={`ml-2 ${muted}`}>@{m.username}</span>
-              </button>
-            </li>
-          ))}
-          {isUserId(query) && !shown.some((m) => m.id === query) && (
-            <li>
-              <button type="button" className={optionClass} onClick={() => pick({ id: query, label: query })}>
-                使用 ID {query}
-              </button>
-            </li>
-          )}
-          {shown.length === 0 && !isUserId(query) && <li className={`px-3 py-2 text-sm ${muted}`}>找不到成員</li>}
-        </ul>
-      )}
-    </div>
-  )
-}
 
 interface WarningListProps {
   guildId: string
@@ -147,6 +77,7 @@ export function WarningList({ guildId, headerActions, rowActions }: WarningListP
       <div className="mt-4 flex flex-wrap items-center gap-3">
         <MemberPicker
           guildId={guildId}
+          label="依成員篩選"
           onPick={(m) => {
             setMember(m)
             setPage(1)
