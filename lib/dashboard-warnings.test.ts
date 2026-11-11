@@ -198,6 +198,12 @@ describe("punishResultLines", () => {
     expect(res.ok).toBe(true)
     expect(res.lines.at(-1)).toBe("紀錄已寫入，但公告失敗：頻道不存在")
   })
+  it("自動禁言已執行但紀錄沒寫入時帶出原因", () => {
+    expect(
+      punishResultLines("warning", ok({ auto_timeout: { ok: true, duration_seconds: 600, error: "動作已執行，但紀錄寫入失敗" } })).lines[1],
+    ).toBe("自動禁言：已禁言 10 分鐘。注意：動作已執行，但紀錄寫入失敗。")
+  })
+
   it("自動禁言的結果與失敗原因", () => {
     expect(punishResultLines("warning", ok({ auto_timeout: { ok: true, duration_seconds: 3600, error: null } })).lines[1]).toBe(
       "自動禁言：已禁言 1 小時。",
