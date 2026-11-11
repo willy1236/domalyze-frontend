@@ -231,6 +231,9 @@ export interface LobbyFormDraft {
   message: MessageContent
   buttonLabel: string
   buttonEmoji: string | null
+  /** 編輯失效的大廳時的狀態；舊暫存沒有這兩個欄位 */
+  channelInvalid?: boolean
+  messageInvalid?: boolean
 }
 
 export const TICKET_DRAFT_KEY = "tickets:form"
@@ -258,7 +261,13 @@ export function updateLobby(
   return dashboardFetch(lobbyPath(guildId, channelId), { method: "PUT", json: body })
 }
 
-export function removeLobby(guildId: string, channelId: string, original: LobbyOriginal): Promise<{ removed: true }> {
+export interface RemoveLobbyResult {
+  removed: true
+  /** 開單按鈕是否已拿掉；bot 對大廳頻道缺權限時為 false，大廳仍已移除 */
+  button_removed: boolean
+}
+
+export function removeLobby(guildId: string, channelId: string, original: LobbyOriginal): Promise<RemoveLobbyResult> {
   return dashboardFetch(lobbyPath(guildId, channelId), { method: "DELETE", json: { original } })
 }
 
@@ -349,6 +358,7 @@ export type LobbySaveProblem =
   | { kind: "conflict"; latest: LobbyDetail | null }
   | { kind: "invalid"; fields: FieldError[] }
   | { kind: "discord_error"; text: string }
+  | { kind: "bot_missing_permission"; text: string }
   | { kind: "save_failed" }
   | { kind: "guild_unavailable" }
   | { kind: "not_found" }
@@ -366,6 +376,11 @@ export function parseLobbySaveProblem(e: unknown): LobbySaveProblem | null {
     }
     case "discord_error":
       return { kind: "discord_error", text: String(body.message ?? "") }
+    case "bot_missing_permission": {
+      const fields = body.fields
+      const first = Array.isArray(fields) ? (fields[0] as { reason?: unknown } | undefined) : undefined
+      return { kind: "bot_missing_permission", text: String(first?.reason ?? "我缺少需要的權限") }
+    }
     case "save_failed":
       return { kind: "save_failed" }
     case "guild_unavailable":

@@ -40,6 +40,19 @@ import { WarnIcon } from "./icons"
 import { MessageEditor } from "./message-editor"
 import { RoleMultiSelect } from "./role-multi-select"
 
+/** 表單上有對應位置顯示錯誤的欄位 */
+const SHOWN_FIELDS = new Set([
+  "lobby_channel",
+  "lobby_channel.name",
+  "lobby_channel.category_id",
+  "ticket_category_id",
+  "manager_role_ids",
+  "name_prefix",
+  "max_open",
+  "button_label",
+  "button_emoji",
+])
+
 const labelClass = "block text-sm text-gray-600 dark:text-gray-400 mb-1"
 const muted = "text-gray-600 dark:text-gray-400"
 
@@ -89,8 +102,8 @@ export function TicketLobbyForm({ guildId, lobby, restored, onClose, onSaved }: 
 
   const [lobbyId, setLobbyId] = useState<string | null>(restored ? restored.lobbyId : (lobby?.channel.id ?? null))
   // 修改時大廳頻道已被刪除：必須重新選頻道
-  const [channelInvalid, setChannelInvalid] = useState(false)
-  const [messageInvalid, setMessageInvalid] = useState(false)
+  const [channelInvalid, setChannelInvalid] = useState(restored?.channelInvalid ?? false)
+  const [messageInvalid, setMessageInvalid] = useState(restored?.messageInvalid ?? false)
   const [original, setOriginal] = useState<LobbyOriginal | null>(restored?.original ?? null)
   const [channelKind, setChannelKind] = useState<"existing" | "new">(restored?.channelKind ?? "existing")
   const [channelId, setChannelId] = useState<string | null>(restored?.channelId ?? null)
@@ -180,6 +193,8 @@ export function TicketLobbyForm({ guildId, lobby, restored, onClose, onSaved }: 
     message,
     buttonLabel,
     buttonEmoji,
+    channelInvalid,
+    messageInvalid,
   })
   const stateRef = useRef<LobbyFormDraft>(draft())
   // 暫存只在工作階段過期時讀取，render 之後再同步即可
@@ -253,6 +268,8 @@ export function TicketLobbyForm({ guildId, lobby, restored, onClose, onSaved }: 
         applyFieldErrors(problem.fields)
       } else if (problem.kind === "discord_error") {
         setNotice(`Discord 拒絕了這次操作${problem.text ? `：${problem.text}` : ""}。`)
+      } else if (problem.kind === "bot_missing_permission") {
+        setNotice(`${problem.text}。`)
       } else if (problem.kind === "guild_unavailable") {
         setNotice("Discord 目前無法讀取這個伺服器，請稍後再試。")
       } else if (problem.kind === "not_found") {
@@ -267,8 +284,16 @@ export function TicketLobbyForm({ guildId, lobby, restored, onClose, onSaved }: 
 
   function applyFieldErrors(fields: FieldError[]) {
     const split = splitLobbyFieldErrors(fields)
+    // 大廳頻道在後端被判定不能用（例如表單開著時被刪除）：改成要求重新選頻道
+    if (!needsChannel && split.fields.lobby_channel) {
+      setChannelInvalid(true)
+      setChannelId(null)
+    }
     setErrors(split)
-    if (!hasLobbyErrors(split)) setNotice("內容不符合規則，請檢查後再試。")
+    // 畫面上沒有對應欄位的錯誤改用提示顯示，不能讓儲存無聲失敗
+    const unmatched = Object.entries(split.fields).filter(([key]) => !SHOWN_FIELDS.has(key))
+    if (unmatched.length > 0) setNotice(unmatched.map(([, reason]) => reason).join("；"))
+    else if (!hasLobbyErrors(split)) setNotice("內容不符合規則，請檢查後再試。")
   }
 
   const latestValues = (d: LobbyDetail) =>
@@ -451,7 +476,7 @@ export function TicketLobbyForm({ guildId, lobby, restored, onClose, onSaved }: 
               )}
             </fieldset>
           ) : (
-            <p className="text-sm">
+            <div className="text-sm">
               大廳頻道：
               <span className="font-medium">
                 {lobbyId && options?.channels.find((c) => c.id === lobbyId)
@@ -459,7 +484,9 @@ export function TicketLobbyForm({ guildId, lobby, restored, onClose, onSaved }: 
                   : "（讀取中）"}
               </span>
               <span className={`block ${muted}`}>大廳頻道還在時不能更換；要換頻道請移除這個大廳後重新新增。</span>
-            </p>
+              {fieldError("lobby_channel") && <Problem>{fieldError("lobby_channel")}</Problem>}
+              <Issues issues={options?.channels.find((c) => c.id === lobbyId)?.permission_issues ?? []} />
+            </div>
           )}
 
           <div>

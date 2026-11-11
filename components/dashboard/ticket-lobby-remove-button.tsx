@@ -29,6 +29,8 @@ export function TicketLobbyRemoveButton({
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [changed, setChanged] = useState(false)
+  // 大廳已移除，但開單按鈕沒能拿掉（bot 對大廳頻道缺權限）
+  const [buttonLeft, setButtonLeft] = useState(false)
   const ref = useRef<HTMLDialogElement>(null)
   const uid = useId()
   const label = lobby.channel.name ? `#${lobby.channel.name}` : "此大廳"
@@ -62,6 +64,7 @@ export function TicketLobbyRemoveButton({
     setOpen(false)
     setError(null)
     setChanged(false)
+    setButtonLeft(false)
   }
 
   async function confirm() {
@@ -69,9 +72,15 @@ export function TicketLobbyRemoveButton({
     setBusy(true)
     setError(null)
     try {
-      await removeLobby(guildId, lobby.channel.id, original)
-      close()
-      onDone()
+      const result = await removeLobby(guildId, lobby.channel.id, original)
+      if (result.button_removed === false) {
+        // 一覽先重新載入；視窗留著說明按鈕還在，按關閉才離開
+        setButtonLeft(true)
+        onDone()
+      } else {
+        close()
+        onDone()
+      }
     } catch (e) {
       const problem = parseLobbySaveProblem(e)
       if (problem?.kind === "conflict") {
@@ -139,13 +148,27 @@ export function TicketLobbyRemoveButton({
             {error}
           </p>
         )}
+        {buttonLeft && (
+          <p role="alert" className="mt-3 text-sm text-red-700 dark:text-red-300">
+            大廳已移除，成員不能再開單，但我沒有權限編輯大廳訊息，開單按鈕還留在訊息上。請補上我在大廳頻道的 View Channel 與
+            Read Message History 權限後手動處理，或直接刪除那則訊息。
+          </p>
+        )}
         <div className="mt-5 flex flex-wrap gap-3">
-          <Button type="button" variant="danger" disabled={busy || original === null} onClick={confirm}>
-            確認移除
-          </Button>
-          <Button type="button" disabled={busy} onClick={close}>
-            取消
-          </Button>
+          {buttonLeft ? (
+            <Button type="button" onClick={close}>
+              關閉
+            </Button>
+          ) : (
+            <>
+              <Button type="button" variant="danger" disabled={busy || original === null} onClick={confirm}>
+                確認移除
+              </Button>
+              <Button type="button" disabled={busy} onClick={close}>
+                取消
+              </Button>
+            </>
+          )}
         </div>
       </dialog>
     </>

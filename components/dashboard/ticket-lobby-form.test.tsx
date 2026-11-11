@@ -437,6 +437,87 @@ describe("TicketLobbyForm：修改", () => {
     await mountForm({ lobby })
     expect(text()).toContain("無法載入這個大廳")
   })
+
+  it("編輯時顯示大廳頻道的 bot 權限警告", async () => {
+    responses[`GET ${BASE}/options`] = {
+      status: 200,
+      body: {
+        ...OPTIONS,
+        channels: [
+          {
+            id: "50",
+            name: "開單",
+            category: "客服",
+            permission_issues: [{ permission: "Embed Links", target: "lobby_channel", consequence: "大廳訊息的 embed 無法顯示" }],
+          },
+        ],
+      },
+    }
+    await mountForm({ lobby })
+    expect(text()).toContain("缺少 Embed Links")
+  })
+
+  it("修改時後端說大廳頻道不能用：顯示原因並改成要求重新選頻道", async () => {
+    responses[`PUT ${BASE}/lobbies/50`] = {
+      status: 400,
+      body: { error: "invalid_request", fields: [{ path: "lobby_channel", reason: "找不到這個文字頻道" }] },
+    }
+    await mountForm({ lobby })
+    await submit()
+    expect(text()).toContain("找不到這個文字頻道")
+    expect(field("大廳頻道")).toBeTruthy() // 出現選頻道的欄位
+    expect(text()).toContain("原本的大廳頻道已被刪除")
+  })
+
+  it("畫面上沒有對應欄位的錯誤改用提示顯示", async () => {
+    responses[`PUT ${BASE}/lobbies/50`] = {
+      status: 400,
+      body: { error: "invalid_request", fields: [{ path: "something_else", reason: "奇怪的錯誤" }] },
+    }
+    await mountForm({ lobby })
+    await submit()
+    expect(text()).toContain("奇怪的錯誤")
+  })
+
+  it("大廳頻道讀不到訊息（缺權限）時顯示要補的權限", async () => {
+    responses[`PUT ${BASE}/lobbies/50`] = {
+      status: 400,
+      body: {
+        error: "bot_missing_permission",
+        fields: [{ path: "lobby_channel", reason: "我在大廳頻道缺少 View Channel 或 Read Message History 權限" }],
+      },
+    }
+    await mountForm({ lobby })
+    await submit()
+    expect(text()).toContain("Read Message History")
+  })
+
+  it("從暫存還原時保留「大廳頻道已失效」的狀態", async () => {
+    await mountForm({
+      lobby,
+      restored: {
+        lobbyId: "50",
+        original: ORIGINAL,
+        channelKind: "existing",
+        channelId: null,
+        newName: "",
+        newCategoryId: null,
+        ticketCategoryId: "70",
+        managerRoleIds: ["1"],
+        namePrefix: "report",
+        onePerUser: true,
+        maxOpen: "",
+        message: DETAIL.content,
+        buttonLabel: "",
+        buttonEmoji: null,
+        channelInvalid: true,
+        messageInvalid: true,
+      },
+    })
+    expect(text()).toContain("原本的大廳頻道已被刪除")
+    expect(text()).toContain("大廳訊息已被刪除")
+    expect(field("大廳頻道")).toBeTruthy()
+  })
 })
 
 const LISTED: TicketLobby = {
@@ -495,6 +576,18 @@ describe("TicketLobbyRemoveButton", () => {
     const { onDone } = await mountRemove()
     await click(buttonByText("確認移除"))
     expect(onDone).toHaveBeenCalledTimes(1)
+  })
+
+  it("按鈕沒拿掉（bot 缺權限）時大廳仍已移除，視窗說明後續，按關閉才離開", async () => {
+    responses[`DELETE ${BASE}/lobbies/50`] = { status: 200, body: { removed: true, button_removed: false } }
+    const { onDone } = await mountRemove()
+    await click(buttonByText("確認移除"))
+    expect(onDone).toHaveBeenCalledTimes(1)
+    expect(text()).toContain("開單按鈕還留在訊息上")
+    expect(text()).toContain("Read Message History")
+    expect(buttonByText("確認移除")).toBeUndefined()
+    await click(buttonByText("關閉"))
+    expect(container.querySelector("dialog")?.hasAttribute("open")).toBe(false)
   })
 
   it("Discord 拒絕時顯示原因，大廳沒有移除", async () => {
