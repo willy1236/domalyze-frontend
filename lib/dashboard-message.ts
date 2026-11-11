@@ -195,6 +195,7 @@ export function parseFieldErrors(e: unknown): FieldError[] | null {
 const READ_BACK_REASONS: Record<string, string> = {
   multiple_embeds: "這則訊息有兩個以上的 embed，編輯器無法處理。",
   has_attachments: "這則訊息帶有附件，編輯器無法處理。",
+  message_unavailable: "讀不到這則訊息的內容（訊息或頻道可能已被刪除，或 bot 沒有讀取權限）。",
 }
 
 export function readBackReasonText(code: string): string {

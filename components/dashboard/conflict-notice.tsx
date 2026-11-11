@@ -9,6 +9,8 @@ const FIELD_LABELS: Record<string, string> = {
   role_id: "身分組",
   message: "自訂文字",
   template: "名稱模板",
+  content: "訊息內容",
+  buttons: "按鈕",
 }
 
 interface Props {
