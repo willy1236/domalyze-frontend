@@ -50,4 +50,9 @@ describe("PunishForm", () => {
     expect(out).not.toContain("禁言時長")
     expect(out).not.toContain("刪除對象最近的訊息")
   })
+
+  it("禁言的時長與刪訊息可自訂，停權的刪訊息只有預設選項", () => {
+    expect(render(["view", "timeout"]).match(/自訂…/g)).toHaveLength(2)
+    expect(render(["view", "ban"])).not.toContain("自訂…")
+  })
 })

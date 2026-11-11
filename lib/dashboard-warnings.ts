@@ -149,6 +149,27 @@ export function allowsIdOnly(kind: WarningKind): boolean {
 
 export const MAX_REASON_LENGTH = 100
 
+/** 禁言時長與禁言刪訊息秒數的範圍，與後端一致（Discord 禁言上限 7 天） */
+export const MIN_TIMEOUT_SECONDS = 60
+export const MAX_TIMEOUT_SECONDS = 604800
+export const MAX_DELETE_SECONDS = 604800
+
+/** 自訂時長的單位 */
+export const DURATION_UNITS: readonly { label: string; size: number }[] = [
+  { label: "秒", size: 1 },
+  { label: "分鐘", size: 60 },
+  { label: "小時", size: 3600 },
+  { label: "天", size: 86400 },
+]
+
+/** 數字＋單位轉成秒；不是有限數字（含空白）回 NaN */
+export function toSeconds(amount: string, unitSize: number): number {
+  const text = amount.trim()
+  if (text === "") return NaN
+  const n = Number(text)
+  return Number.isFinite(n) ? n * unitSize : NaN
+}
+
 export const TIMEOUT_OPTIONS: readonly { seconds: number; label: string }[] = [
   { seconds: 60, label: "1 分鐘" },
   { seconds: 300, label: "5 分鐘" },
@@ -159,7 +180,7 @@ export const TIMEOUT_OPTIONS: readonly { seconds: number; label: string }[] = [
   { seconds: 604800, label: "7 天" },
 ]
 
-/** 刪除訊息的選項，與 `/ban` 的選項一致；禁言沿用同一組（上限都是 7 天） */
+/** 刪除訊息的預設選項，與 `/ban` 的選項一致；停權只能選這組，禁言另可自訂 0–604800 秒 */
 export const DELETE_MESSAGE_OPTIONS: readonly { seconds: number; label: string }[] = [
   { seconds: 0, label: "不要刪除訊息" },
   { seconds: 3600, label: "1 小時" },
@@ -181,7 +202,7 @@ export interface PunishDraft {
   announceChannelId: string
 }
 
-export type PunishFieldErrors = Partial<Record<"user" | "reason" | "duration", string>>
+export type PunishFieldErrors = Partial<Record<"user" | "reason" | "duration" | "delete", string>>
 
 /** 送出前的檢查，規則與後端一致（後端仍會再檢查一次）；回傳空物件代表可以送出。 */
 export function validatePunish(draft: PunishDraft, selfId: string | null): PunishFieldErrors {
@@ -191,8 +212,17 @@ export function validatePunish(draft: PunishDraft, selfId: string | null): Punis
   const reason = draft.reason.trim()
   if (reason.length > MAX_REASON_LENGTH) errors.reason = `原因不得超過 ${MAX_REASON_LENGTH} 字`
   else if ((draft.kind === "warning" || draft.kind === "ban") && reason === "") errors.reason = "請填寫原因"
-  if (draft.kind === "timeout" && !TIMEOUT_OPTIONS.some((o) => o.seconds === draft.durationSeconds)) {
-    errors.duration = "請選擇禁言時長"
+  if (draft.kind === "timeout") {
+    const d = draft.durationSeconds
+    if (!Number.isInteger(d) || d < MIN_TIMEOUT_SECONDS || d > MAX_TIMEOUT_SECONDS) {
+      errors.duration = "禁言時長必須是 1 分鐘到 7 天之間的整數秒數"
+    }
+    const del = draft.deleteMessageSeconds
+    if (!Number.isInteger(del) || del < 0 || del > MAX_DELETE_SECONDS) {
+      errors.delete = "刪除訊息的範圍必須在 0 到 7 天（604800 秒）之間"
+    }
+  } else if (draft.kind === "ban" && !DELETE_MESSAGE_OPTIONS.some((o) => o.seconds === draft.deleteMessageSeconds)) {
+    errors.delete = "請選擇刪除訊息的範圍"
   }
   return errors
 }
