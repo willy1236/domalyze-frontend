@@ -1,6 +1,7 @@
 "use client"
 
 import { useId, useState, type ReactNode } from "react"
+import { WarningSheet } from "@/components/dashboard/warning-sheet"
 import { formatDateTime } from "@/lib/dashboard-giveaways"
 import { formatDuration, kindLabel, personLabel, type WarningRecord } from "@/lib/dashboard-warnings"
 
@@ -47,12 +48,7 @@ export function WarningRecordRow({ record, actions }: { record: WarningRecord; a
         </button>
         {actions && <div className="flex items-center gap-2">{actions}</div>}
       </div>
-      {open && (
-        <div id={sheetId} className="mt-2 rounded-md border border-primary/20 dark:border-champagne/25 p-3 text-sm">
-          {record.sheet.title && <p className="font-semibold">{record.sheet.title}</p>}
-          {record.sheet.description && <p className="mt-1 whitespace-pre-line break-words">{record.sheet.description}</p>}
-        </div>
-      )}
+      {open && <WarningSheet record={record} id={sheetId} />}
     </li>
   )
 }
