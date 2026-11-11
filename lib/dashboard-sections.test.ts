@@ -39,7 +39,7 @@ describe("NAV_ITEMS", () => {
   })
 
   it("目前完成頁面的區塊", () => {
-    expect(NAV_ITEMS.filter((i) => i.ready).map((i) => i.key)).toEqual(["notify", "dynamic_voice", "reaction_roles", "warnings", "giveaways"])
+    expect(NAV_ITEMS.filter((i) => i.ready).map((i) => i.key)).toEqual(["notify", "dynamic_voice", "reaction_roles", "warnings", "giveaways", "settings"])
   })
 })
 

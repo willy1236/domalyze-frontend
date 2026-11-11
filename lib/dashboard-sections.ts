@@ -36,7 +36,7 @@ export const NAV_ITEMS: readonly NavItemDef[] = [
   { key: "tickets", label: "私人頻道", path: "/tickets", ready: false },
   { key: "warnings", label: "警告", path: "/warnings", ready: true },
   { key: "giveaways", label: "抽獎", path: "/giveaways", ready: true },
-  { key: "settings", label: "基本設定", path: "/settings", ready: false },
+  { key: "settings", label: "基本設定", path: "/settings", ready: true },
 ]
 
 /** 能進入伺服器頁的權限（與後端進入條件一致），邀請完成後沒有任何一項時列給使用者看。 */
