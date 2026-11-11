@@ -15,6 +15,10 @@ const FIELD_LABELS: Record<string, string> = {
   template: "名稱模板",
   content: "訊息內容",
   buttons: "按鈕",
+  name_prefix: "頻道前綴",
+  manager_roles: "管理身分組",
+  limits: "開單限制",
+  button_label: "開單按鈕文字",
 }
 
 interface Props {
