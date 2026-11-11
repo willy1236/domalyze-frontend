@@ -10,6 +10,7 @@ import {
   personLabel,
   punishErrorText,
   punishResultLines,
+  toSeconds,
   validatePunish,
   type PunishDraft,
   type PunishResponse,
@@ -106,8 +107,30 @@ describe("validatePunish", () => {
     expect(validatePunish(draft({ reason: "字".repeat(100) }), null)).toEqual({})
     expect(validatePunish(draft({ reason: "字".repeat(101) }), null).reason).toContain("100")
   })
-  it("禁言時長要在選項內", () => {
-    expect(validatePunish(draft({ kind: "timeout", durationSeconds: 5 }), null).duration).toBeDefined()
+  it("禁言時長可自訂，範圍 60 秒到 7 天的整數秒數", () => {
+    const t = (durationSeconds: number) => validatePunish(draft({ kind: "timeout", durationSeconds }), null).duration
+    expect(t(60)).toBeUndefined()
+    expect(t(90)).toBeUndefined()
+    expect(t(604800)).toBeUndefined()
+    expect(t(59)).toBeDefined()
+    expect(t(604801)).toBeDefined()
+    expect(t(90.5)).toBeDefined()
+    expect(t(NaN)).toBeDefined()
+  })
+  it("禁言刪訊息秒數可自訂，範圍 0 到 604800", () => {
+    const t = (deleteMessageSeconds: number) =>
+      validatePunish(draft({ kind: "timeout", deleteMessageSeconds }), null).delete
+    expect(t(0)).toBeUndefined()
+    expect(t(1234)).toBeUndefined()
+    expect(t(604800)).toBeUndefined()
+    expect(t(-1)).toBeDefined()
+    expect(t(604801)).toBeDefined()
+    expect(t(NaN)).toBeDefined()
+  })
+  it("停權刪訊息秒數只能選預設組", () => {
+    const t = (deleteMessageSeconds: number) => validatePunish(draft({ kind: "ban", deleteMessageSeconds }), null).delete
+    expect(t(86400)).toBeUndefined()
+    expect(t(100)).toBeDefined()
   })
 })
 
@@ -199,5 +222,18 @@ describe("W-03 移除紀錄", () => {
     expect(removeErrorText("not_this_guild")).toContain("不是這個伺服器")
     expect(removeErrorText("no_permission")).toContain("權限")
     expect(removeErrorText(null)).toContain("稍後")
+  })
+})
+
+describe("toSeconds", () => {
+  it("數字加單位", () => {
+    expect(toSeconds("90", 1)).toBe(90)
+    expect(toSeconds("2", 3600)).toBe(7200)
+    expect(toSeconds(" 1.5 ", 60)).toBe(90)
+  })
+  it("空白或非數字回 NaN", () => {
+    expect(toSeconds("", 60)).toBeNaN()
+    expect(toSeconds("  ", 60)).toBeNaN()
+    expect(toSeconds("abc", 60)).toBeNaN()
   })
 })

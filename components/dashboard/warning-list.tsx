@@ -1,6 +1,6 @@
 "use client"
 
-import { useCallback, useEffect, useState, type ReactNode } from "react"
+import { useCallback, useEffect, useRef, useState, type ReactNode } from "react"
 import { MemberPicker, type PickedMember } from "@/components/dashboard/member-picker"
 import { MemberRecords } from "@/components/dashboard/member-records"
 import { WarningRecordRow } from "@/components/dashboard/warning-record-row"
@@ -36,27 +36,31 @@ export function WarningList({ guildId, headerActions, rowActions }: WarningListP
   const [loading, setLoading] = useState(false)
   const [crossGuildFor, setCrossGuildFor] = useState<string | null>(null)
 
-  const load = useCallback(
-    async (signal?: AbortSignal) => {
-      setFailed(false)
-      setLoading(true)
-      try {
-        setData(await fetchWarnings(guildId, { member: member?.id ?? null, kind, page }, signal))
-      } catch (e) {
-        if (signal?.aborted) return
-        console.error("load warnings failed", e)
-        setFailed(true)
-      } finally {
-        if (!signal?.aborted) setLoading(false)
-      }
-    },
-    [guildId, member, kind, page],
-  )
+  // 目前進行中的請求；每次載入前先取消上一個，晚回的舊請求不會覆蓋新條件的資料或提早清掉 loading
+  const inflight = useRef<AbortController | null>(null)
+
+  const load = useCallback(async () => {
+    inflight.current?.abort()
+    const controller = new AbortController()
+    inflight.current = controller
+    const { signal } = controller
+    setFailed(false)
+    setLoading(true)
+    try {
+      const res = await fetchWarnings(guildId, { member: member?.id ?? null, kind, page }, signal)
+      if (!signal.aborted) setData(res)
+    } catch (e) {
+      if (signal.aborted) return
+      console.error("load warnings failed", e)
+      setFailed(true)
+    } finally {
+      if (!signal.aborted) setLoading(false)
+    }
+  }, [guildId, member, kind, page])
 
   useEffect(() => {
-    const controller = new AbortController()
-    void load(controller.signal)
-    return () => controller.abort()
+    void load()
+    return () => inflight.current?.abort()
   }, [load])
 
   const filtered = member !== null || kind !== null
@@ -139,7 +143,7 @@ export function WarningList({ guildId, headerActions, rowActions }: WarningListP
       {data &&
         (data.warnings.length === 0 && page === 1 ? (
           <p className={`py-8 ${muted}`}>
-            {filtered ? "沒有符合條件的紀錄。" : "目前沒有紀錄。用 /warning、/timeout、/kick、/ban 懲處成員後，會列在這裡。"}
+            {filtered ? "沒有符合條件的紀錄。" : "目前沒有紀錄。用「新增懲處」或 /warning、/timeout、/kick、/ban 懲處成員後，會列在這裡。"}
           </p>
         ) : (
           <ul className="mt-2 divide-y divide-primary/10 dark:divide-champagne/10">

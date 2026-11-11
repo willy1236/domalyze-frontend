@@ -3,13 +3,14 @@
 import { useEffect, useId, useRef, useState } from "react"
 import { useGuildSections } from "@/components/dashboard/guild-sections"
 import { MemberPicker, type PickedMember } from "@/components/dashboard/member-picker"
-import { Button, Select, Textarea } from "@/components/ui"
+import { Button, Input, Select, Textarea } from "@/components/ui"
 import { DashboardApiError, getDashboardUserId } from "@/lib/dashboard-api"
 import {
   allowedKinds,
   allowsIdOnly,
   buildPunishRequest,
   DELETE_MESSAGE_OPTIONS,
+  DURATION_UNITS,
   fetchAnnounceChannels,
   kindLabel,
   MAX_REASON_LENGTH,
@@ -17,6 +18,7 @@ import {
   punishErrorText,
   punishResultLines,
   TIMEOUT_OPTIONS,
+  toSeconds,
   validatePunish,
   type AnnounceChannel,
   type PunishDraft,
@@ -37,6 +39,91 @@ function FieldError({ id, text }: { id: string; text?: string }) {
       <WarnIcon className="mt-0.5 shrink-0" width={15} height={15} />
       <span>{text}</span>
     </p>
+  )
+}
+
+const CUSTOM = "custom"
+
+interface SecondsFieldProps {
+  id: string
+  label: string
+  presets: readonly { seconds: number; label: string }[]
+  value: number
+  onChange: (seconds: number) => void
+  /** 多一個「自訂」選項，可填數字與單位 */
+  allowCustom: boolean
+  error?: string
+  errorId: string
+}
+
+/** 預設選項的下拉；可選「自訂」改填數字加單位。外部重設值時請換 key。 */
+function SecondsField({ id, label, presets, value, onChange, allowCustom, error, errorId }: SecondsFieldProps) {
+  const [custom, setCustom] = useState(false)
+  const [amount, setAmount] = useState("")
+  const [unit, setUnit] = useState(60)
+
+  return (
+    <div>
+      <label htmlFor={id} className="mb-1 block text-sm font-medium">
+        {label}
+      </label>
+      <Select
+        id={id}
+        value={custom ? CUSTOM : value}
+        aria-describedby={error ? errorId : undefined}
+        onChange={(e) => {
+          if (e.target.value === CUSTOM) {
+            setCustom(true)
+            onChange(toSeconds(amount, unit))
+          } else {
+            setCustom(false)
+            onChange(Number(e.target.value))
+          }
+        }}
+      >
+        {presets.map((o) => (
+          <option key={o.seconds} value={o.seconds}>
+            {o.label}
+          </option>
+        ))}
+        {allowCustom && <option value={CUSTOM}>自訂…</option>}
+      </Select>
+      {custom && (
+        <div className="mt-2 flex gap-2">
+          <Input
+            type="number"
+            inputMode="numeric"
+            min={0}
+            step={1}
+            aria-label={`${label}的數值`}
+            value={amount}
+            aria-invalid={error ? true : undefined}
+            onChange={(e) => {
+              setAmount(e.target.value)
+              onChange(toSeconds(e.target.value, unit))
+            }}
+          />
+          <div className="w-28 shrink-0">
+            <Select
+              aria-label={`${label}的單位`}
+              value={unit}
+              onChange={(e) => {
+                const next = Number(e.target.value)
+                setUnit(next)
+                onChange(toSeconds(amount, next))
+              }}
+            >
+              {DURATION_UNITS.map((u) => (
+                <option key={u.size} value={u.size}>
+                  {u.label}
+                </option>
+              ))}
+            </Select>
+          </div>
+        </div>
+      )}
+      <FieldError id={errorId} text={error} />
+    </div>
   )
 }
 
@@ -70,6 +157,8 @@ function PunishDialog({ guildId, kinds, open, onClose, onDone }: PunishDialogPro
   const [outcome, setOutcome] = useState<{ ok: boolean; lines: string[] } | null>(null)
   const [channels, setChannels] = useState<AnnounceChannel[] | null>(null)
   const [channelsFailed, setChannelsFailed] = useState(false)
+  // 送出成功重設表單時遞增，讓自訂欄位的內部狀態一起歸零
+  const [formKey, setFormKey] = useState(0)
 
   // 目前分頁的種類被收回權限時退回第一個可用的種類
   const kind = kinds.includes(draft.kind) ? draft.kind : kinds[0]
@@ -79,6 +168,8 @@ function PunishDialog({ guildId, kinds, open, onClose, onDone }: PunishDialogPro
     if (!dialog) return
     if (open && !dialog.open) dialog.showModal()
     else if (!open && dialog.open) dialog.close()
+    // 關閉時清掉上一次的結果，下次開啟不會看到舊訊息
+    if (!open) setOutcome(null)
   }, [open])
 
   useEffect(() => {
@@ -119,6 +210,7 @@ function PunishDialog({ guildId, kinds, open, onClose, onDone }: PunishDialogPro
       setOutcome(shown)
       if (shown.ok) {
         setPicked(null)
+        setFormKey((n) => n + 1)
         setDraft((d) => ({ ...initialDraft(kind), announceChannelId: d.announceChannelId, crossGuild: d.crossGuild }))
         onDone()
       }
@@ -212,24 +304,17 @@ function PunishDialog({ guildId, kinds, open, onClose, onDone }: PunishDialogPro
         </div>
 
         {kind === "timeout" && (
-          <div>
-            <label htmlFor={`${uid}-duration`} className="mb-1 block text-sm font-medium">
-              禁言時長
-            </label>
-            <Select
-              id={`${uid}-duration`}
-              value={draft.durationSeconds}
-              aria-describedby={errors.duration ? durationErrId : undefined}
-              onChange={(e) => patch({ durationSeconds: Number(e.target.value) })}
-            >
-              {TIMEOUT_OPTIONS.map((o) => (
-                <option key={o.seconds} value={o.seconds}>
-                  {o.label}
-                </option>
-              ))}
-            </Select>
-            <FieldError id={durationErrId} text={errors.duration} />
-          </div>
+          <SecondsField
+            key={`duration-${formKey}`}
+            id={`${uid}-duration`}
+            label="禁言時長"
+            presets={TIMEOUT_OPTIONS}
+            value={draft.durationSeconds}
+            onChange={(seconds) => patch({ durationSeconds: seconds })}
+            allowCustom
+            error={errors.duration}
+            errorId={durationErrId}
+          />
         )}
 
         <div>
@@ -251,22 +336,17 @@ function PunishDialog({ guildId, kinds, open, onClose, onDone }: PunishDialogPro
         </div>
 
         {(kind === "timeout" || kind === "ban") && (
-          <div>
-            <label htmlFor={`${uid}-delete`} className="mb-1 block text-sm font-medium">
-              刪除對象最近的訊息
-            </label>
-            <Select
-              id={`${uid}-delete`}
-              value={draft.deleteMessageSeconds}
-              onChange={(e) => patch({ deleteMessageSeconds: Number(e.target.value) })}
-            >
-              {DELETE_MESSAGE_OPTIONS.map((o) => (
-                <option key={o.seconds} value={o.seconds}>
-                  {o.label}
-                </option>
-              ))}
-            </Select>
-          </div>
+          <SecondsField
+            key={`delete-${kind}-${formKey}`}
+            id={`${uid}-delete`}
+            label="刪除對象最近的訊息"
+            presets={DELETE_MESSAGE_OPTIONS}
+            value={draft.deleteMessageSeconds}
+            onChange={(seconds) => patch({ deleteMessageSeconds: seconds })}
+            allowCustom={kind === "timeout"}
+            error={errors.delete}
+            errorId={`${uid}-delete-error`}
+          />
         )}
 
         <label className="flex items-start gap-2 text-sm">
