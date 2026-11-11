@@ -10,6 +10,7 @@ import {
   allowsIdOnly,
   buildPunishRequest,
   DELETE_MESSAGE_OPTIONS,
+  draftForKind,
   DURATION_UNITS,
   fetchAnnounceChannels,
   kindLabel,
@@ -18,6 +19,7 @@ import {
   punishErrorText,
   punishResultLines,
   TIMEOUT_OPTIONS,
+  splitSeconds,
   toSeconds,
   validatePunish,
   type AnnounceChannel,
@@ -58,9 +60,12 @@ interface SecondsFieldProps {
 
 /** 預設選項的下拉；可選「自訂」改填數字加單位。外部重設值時請換 key。 */
 function SecondsField({ id, label, presets, value, onChange, allowCustom, error, errorId }: SecondsFieldProps) {
-  const [custom, setCustom] = useState(false)
-  const [amount, setAmount] = useState("")
-  const [unit, setUnit] = useState(60)
+  // 掛載時（例如切分頁再切回）值不在預設組內，代表這是自訂值：直接進自訂模式並回填數字與單位，
+  // 否則 select 對不到選項、畫面與實際送出的值會不一致
+  const [custom, setCustom] = useState(() => !presets.some((o) => o.seconds === value))
+  const [initial] = useState(() => splitSeconds(value))
+  const [amount, setAmount] = useState(initial.amount)
+  const [unit, setUnit] = useState(initial.unit)
 
   return (
     <div>
@@ -191,7 +196,7 @@ function PunishDialog({ guildId, kinds, open, onClose, onDone }: PunishDialogPro
   const switchKind = (next: WarningKind) => {
     // 禁言與踢出只能選成員：換到這類分頁時，用 ID 填的對象要重選
     if (!allowsIdOnly(next)) setPicked(null)
-    patch({ kind: next, userId: allowsIdOnly(next) ? draft.userId : null })
+    setDraft((d) => ({ ...draftForKind(d, next), userId: allowsIdOnly(next) ? d.userId : null }))
     setErrors({})
     setOutcome(null)
   }

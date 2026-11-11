@@ -60,6 +60,8 @@ export function WarningList({ guildId, headerActions, rowActions }: WarningListP
 
   useEffect(() => {
     void load()
+    // 刻意在 cleanup 讀 ref 的最新值：要取消的是離開當下仍在進行的請求，不是 effect 建立時的那個
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     return () => inflight.current?.abort()
   }, [load])
 

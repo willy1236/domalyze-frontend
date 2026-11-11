@@ -3,6 +3,7 @@ import {
   allowedKinds,
   allowsIdOnly,
   buildPunishRequest,
+  draftForKind,
   formatDuration,
   isUserId,
   kindLabel,
@@ -10,6 +11,7 @@ import {
   personLabel,
   punishErrorText,
   punishResultLines,
+  splitSeconds,
   toSeconds,
   validatePunish,
   type PunishDraft,
@@ -235,5 +237,33 @@ describe("toSeconds", () => {
     expect(toSeconds("", 60)).toBeNaN()
     expect(toSeconds("  ", 60)).toBeNaN()
     expect(toSeconds("abc", 60)).toBeNaN()
+  })
+})
+
+describe("splitSeconds", () => {
+  it("取能整除的最大單位", () => {
+    expect(splitSeconds(1234)).toEqual({ amount: "1234", unit: 1 })
+    expect(splitSeconds(90)).toEqual({ amount: "90", unit: 1 })
+    expect(splitSeconds(120)).toEqual({ amount: "2", unit: 60 })
+    expect(splitSeconds(7200)).toEqual({ amount: "2", unit: 3600 })
+    expect(splitSeconds(172800)).toEqual({ amount: "2", unit: 86400 })
+  })
+  it("NaN 留空", () => {
+    expect(splitSeconds(NaN)).toEqual({ amount: "", unit: 60 })
+  })
+})
+
+describe("draftForKind", () => {
+  it("切到停權時，禁言留下的自訂刪訊息值與 NaN 退回 0", () => {
+    expect(draftForKind(draft({ kind: "timeout", deleteMessageSeconds: 1234 }), "ban").deleteMessageSeconds).toBe(0)
+    expect(draftForKind(draft({ kind: "timeout", deleteMessageSeconds: NaN }), "ban").deleteMessageSeconds).toBe(0)
+  })
+  it("預設組內的值保留，其他欄位與禁言的自訂值原樣保留", () => {
+    const d = draft({ kind: "timeout", deleteMessageSeconds: 86400, durationSeconds: 90 })
+    expect(draftForKind(d, "ban")).toEqual({ ...d, kind: "ban" })
+    expect(draftForKind(draft({ deleteMessageSeconds: 1234, durationSeconds: 90 }), "kick")).toMatchObject({
+      deleteMessageSeconds: 1234,
+      durationSeconds: 90,
+    })
   })
 })
