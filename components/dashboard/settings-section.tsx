@@ -9,19 +9,19 @@ import {
   formatMinutes,
   parseSettingsProblem,
   saveSettings,
-  settingValues,
+  voiceTimeValues,
+  conflictStrings,
   type LeaderboardRow,
   type SettingValues,
   type SettingsResponse,
 } from "@/lib/dashboard-settings"
 import { useLoad } from "@/lib/use-load"
-import { ConflictNotice, type ConflictValues } from "./conflict-notice"
+import { ConflictNotice } from "./conflict-notice"
 
 const muted = "text-gray-600 dark:text-gray-400"
 const linkClass =
   "rounded-sm outline-none focus-visible:ring-2 focus-visible:ring-primary dark:focus-visible:ring-champagne focus-visible:ring-offset-2 focus-visible:ring-offset-background-light dark:focus-visible:ring-offset-background-dark"
 
-const toConflictValues = (v: SettingValues): ConflictValues => ({ voice_time_counter: v.voice_time_counter ? "true" : "false" })
 const formatConflictValue = (_field: string, value: string | null) => (value === "true" ? "開啟" : "關閉")
 
 function Leaderboard({ rows, counting }: { rows: LeaderboardRow[]; counting: boolean }) {
@@ -101,7 +101,7 @@ function VoiceTimeSetting({
           role="switch"
           aria-checked={on}
           disabled={busy}
-          onClick={() => void save({ voice_time_counter: !on }, settingValues(settings))}
+          onClick={() => void save({ voice_time_counter: !on }, voiceTimeValues(settings))}
         >
           {on ? "關閉統計" : "開啟統計"}
         </Button>
@@ -113,11 +113,11 @@ function VoiceTimeSetting({
         <div className="mt-4">
           <ConflictNotice
             subject="這項設定"
-            current={toConflictValues(conflict.current)}
-            mine={toConflictValues(conflict.mine)}
+            current={conflictStrings(conflict.current)}
+            mine={conflictStrings(conflict.mine)}
             format={formatConflictValue}
             busy={busy}
-            onOverwrite={(current) => void save(conflict.mine, { voice_time_counter: current.voice_time_counter === "true" })}
+            onOverwrite={() => void save(conflict.mine, conflict.current)}
           />
         </div>
       )}
