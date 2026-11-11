@@ -76,6 +76,11 @@ describe("validateAutoTimeout", () => {
     expect(validateAutoTimeout(3, 59)?.field).toBe("duration")
     expect(validateAutoTimeout(3, 604801)?.field).toBe("duration")
   })
+  it("時長須為整分鐘，與後端一致", () => {
+    expect(validateAutoTimeout(3, 90)?.field).toBe("duration")
+    expect(validateAutoTimeout(3, 3601)?.field).toBe("duration")
+    expect(validateAutoTimeout(3, 120)).toBeNull()
+  })
 })
 
 describe("parseSettingsProblem", () => {

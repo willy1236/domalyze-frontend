@@ -317,7 +317,12 @@ export function punishResultLines(kind: WarningKind, res: PunishResponse): { ok:
   if (result.deleted_summary) lines.push(result.deleted_summary)
   if (result.auto_timeout) {
     const a = result.auto_timeout
-    lines.push(a.ok ? `自動禁言：已禁言 ${formatDuration(a.duration_seconds ?? 0)}。` : `自動禁言失敗：${a.error ?? "未知原因"}`)
+    if (a.ok) {
+      // 禁言已執行但紀錄沒寫入時帶出原因
+      lines.push(`自動禁言：已禁言 ${formatDuration(a.duration_seconds ?? 0)}。${a.error ? `注意：${a.error}。` : ""}`)
+    } else {
+      lines.push(`自動禁言失敗：${a.error ?? "未知原因"}`)
+    }
   }
   if (res.announce_error) lines.push(`紀錄已寫入，但公告失敗：${res.announce_error}`)
   return { ok: true, lines }

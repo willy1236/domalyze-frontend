@@ -1,8 +1,9 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { Button, Input, Select } from "@/components/ui"
 import { DashboardApiError } from "@/lib/dashboard-api"
+import { consumeDraft, registerDraft } from "@/lib/dashboard-draft"
 import { formatDuration } from "@/lib/dashboard-warnings"
 import {
   AUTO_TIMEOUT_TIMES_RANGE,
@@ -20,6 +21,18 @@ import {
 } from "@/lib/dashboard-settings"
 import { ConflictNotice } from "./conflict-notice"
 import { WarnIcon } from "./icons"
+
+/** 表單暫存的內容：還原時回到同一份原始值與使用者已輸入的內容 */
+export interface AutoTimeoutFormDraft {
+  original: SettingValues
+  enabled: boolean
+  times: string
+  amount: string
+  unit: DurationUnit
+}
+
+/** 暫存以伺服器區分，換伺服器不會還原到別的伺服器的輸入 */
+export const autoTimeoutDraftKey = (guildId: string) => `settings:auto-timeout:${guildId}`
 
 const muted = "text-gray-600 dark:text-gray-400"
 
@@ -47,13 +60,29 @@ export function AutoTimeoutForm({
 }) {
   const saved = autoTimeoutValues(settings)
   const initial = splitSeconds(saved.auto_timeout_seconds)
-  const [enabled, setEnabled] = useState(saved.auto_timeout_enabled)
-  const [times, setTimes] = useState(String(saved.auto_timeout_times))
-  const [amount, setAmount] = useState(String(initial.amount))
-  const [unit, setUnit] = useState<DurationUnit>(initial.unit)
+  // 從 reauth 或 session 過期回來時，還原導向前未送出的輸入，並沿用當時打開表單的原始值做衝突比對
+  const [restored] = useState(() => consumeDraft<AutoTimeoutFormDraft>(autoTimeoutDraftKey(guildId))?.state ?? null)
+  const [original] = useState<SettingValues>(restored ? restored.original : saved)
+  const [enabled, setEnabled] = useState(restored ? restored.enabled : saved.auto_timeout_enabled)
+  const [times, setTimes] = useState(restored ? restored.times : String(saved.auto_timeout_times))
+  const [amount, setAmount] = useState(restored ? restored.amount : String(initial.amount))
+  const [unit, setUnit] = useState<DurationUnit>(restored ? restored.unit : initial.unit)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [conflict, setConflict] = useState<{ current: SettingValues; mine: SettingValues } | null>(null)
+
+  const stateRef = useRef<AutoTimeoutFormDraft>({ original, enabled, times, amount, unit })
+  // 暫存只在工作階段過期時讀取，render 之後再同步即可
+  useEffect(() => {
+    stateRef.current = { original, enabled, times, amount, unit }
+  })
+  // 只有改過輸入才註冊暫存：沒改過的表單不必還原，免得蓋掉之後別人改的最新值
+  const dirty =
+    enabled !== saved.auto_timeout_enabled ||
+    times !== String(saved.auto_timeout_times) ||
+    amount !== String(initial.amount) ||
+    unit !== initial.unit
+  useEffect(() => (dirty ? registerDraft(autoTimeoutDraftKey(guildId), "edit", () => stateRef.current) : undefined), [dirty, guildId])
 
   const issue = settings.permission_issues.find((i) => i.permission === "Moderate Members")
 
@@ -90,7 +119,7 @@ export function AutoTimeoutForm({
     setError(null)
     void save(
       { auto_timeout_enabled: enabled, auto_timeout_times: timesValue, auto_timeout_seconds: seconds },
-      autoTimeoutValues(settings),
+      original,
     )
   }
 

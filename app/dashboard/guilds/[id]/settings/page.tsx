@@ -3,6 +3,7 @@
 import { useParams } from "next/navigation"
 import { AutoTimeoutForm } from "@/components/dashboard/auto-timeout-form"
 import { SectionGuard } from "@/components/dashboard/section-guard"
+import { autoTimeoutValues } from "@/lib/dashboard-settings"
 import { SettingsSection } from "@/components/dashboard/settings-section"
 
 export default function SettingsPage() {
@@ -13,7 +14,7 @@ export default function SettingsPage() {
         <SettingsSection
           guildId={id}
           extra={(settings, update) => (
-            <AutoTimeoutForm key={JSON.stringify(settings)} guildId={id} settings={settings} onSaved={update} />
+            <AutoTimeoutForm key={JSON.stringify(autoTimeoutValues(settings))} guildId={id} settings={settings} onSaved={update} />
           )}
         />
       </div>
