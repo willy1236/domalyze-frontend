@@ -12,7 +12,7 @@ import { SectionGuard, denyPlan, guardState } from "./section-guard"
 
 const notify: SectionInfo[] = [{ key: "notify", actions: ["view"] }]
 const voice: SectionInfo[] = [{ key: "dynamic_voice", actions: ["view"] }]
-const banOnly: SectionInfo[] = [{ key: "warnings", actions: ["view", "ban"] }]
+const ticketsOnly: SectionInfo[] = [{ key: "tickets", actions: ["view"] }]
 
 const render = (section: "notify" | "dynamic_voice" = "notify") =>
   renderToStaticMarkup(
@@ -39,7 +39,7 @@ describe("denyPlan", () => {
   })
   it("導向第一個有權限且已完成的區塊；沒有就是 null", () => {
     expect(denyPlan(voice, true).target?.key).toBe("dynamic_voice")
-    expect(denyPlan(banOnly, false).target).toBeNull()
+    expect(denyPlan(ticketsOnly, false).target).toBeNull()
   })
 })
 
@@ -64,7 +64,7 @@ describe("SectionGuard", () => {
     expect(out).toContain("正在前往其他區塊")
   })
   it("沒有可去的區塊時停在說明", () => {
-    ctx.value.sections = banOnly
+    ctx.value.sections = ticketsOnly
     const out = render("notify")
     expect(out).not.toContain("內容")
     expect(out).toContain("目前也沒有其他可使用的區塊")

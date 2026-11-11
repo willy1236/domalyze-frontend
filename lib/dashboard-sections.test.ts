@@ -39,7 +39,7 @@ describe("NAV_ITEMS", () => {
   })
 
   it("目前完成頁面的區塊", () => {
-    expect(NAV_ITEMS.filter((i) => i.ready).map((i) => i.key)).toEqual(["notify", "dynamic_voice", "giveaways"])
+    expect(NAV_ITEMS.filter((i) => i.ready).map((i) => i.key)).toEqual(["notify", "dynamic_voice", "warnings", "giveaways"])
   })
 })
 
@@ -53,9 +53,8 @@ describe("canAccess", () => {
 })
 
 describe("visibleNavItems", () => {
-  it("只有 Ban：W-01 旗標打開後側欄只有警告", () => {
-    const items = allReady.map((i) => (i.key === "warnings" ? i : { ...i, ready: false }))
-    expect(visibleNavItems(banOnly, items).map((i) => i.key)).toEqual(["warnings"])
+  it("只有 Ban：側欄只有警告", () => {
+    expect(visibleNavItems(banOnly).map((i) => i.key)).toEqual(["warnings"])
   })
 
   it("只有 Manage Roles：反應身分組與警告，沒有通知與動態語音", () => {
@@ -63,7 +62,7 @@ describe("visibleNavItems", () => {
   })
 
   it("ready 為 false 的區塊即使有權限也不顯示", () => {
-    expect(visibleNavItems(manageChannels).map((i) => i.key)).toEqual(["notify", "dynamic_voice"])
+    expect(visibleNavItems(manageChannels).map((i) => i.key)).toEqual(["notify", "dynamic_voice", "warnings"])
   })
 })
 
@@ -76,8 +75,12 @@ describe("firstSection", () => {
     expect(firstSection(rolesOnly, allReady)?.key).toBe("reaction_roles")
   })
 
+  it("只有 Ban 停在警告", () => {
+    expect(firstSection(banOnly)?.key).toBe("warnings")
+  })
+
   it("權限只涵蓋尚未完成的區塊時回 null", () => {
-    expect(firstSection(banOnly)).toBeNull()
+    expect(firstSection([{ key: "tickets", actions: ["view"] }])).toBeNull()
   })
 
   it("沒有任何區塊回 null", () => {
