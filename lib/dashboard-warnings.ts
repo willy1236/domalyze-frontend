@@ -170,6 +170,13 @@ export function toSeconds(amount: string, unitSize: number): number {
   return Number.isFinite(n) ? n * unitSize : NaN
 }
 
+/** 秒數換回自訂欄位的數字與單位：取能整除的最大單位；不是正整數（含 NaN）時數字留空 */
+export function splitSeconds(seconds: number): { amount: string; unit: number } {
+  if (!Number.isInteger(seconds) || seconds <= 0) return { amount: Number.isFinite(seconds) ? String(seconds) : "", unit: 60 }
+  const unit = [...DURATION_UNITS].reverse().find((u) => seconds % u.size === 0)?.size ?? 1
+  return { amount: String(seconds / unit), unit }
+}
+
 export const TIMEOUT_OPTIONS: readonly { seconds: number; label: string }[] = [
   { seconds: 60, label: "1 分鐘" },
   { seconds: 300, label: "5 分鐘" },
@@ -340,4 +347,10 @@ const REMOVE_ERRORS: Record<string, string> = {
 
 export function removeErrorText(code: string | null): string {
   return (code && REMOVE_ERRORS[code]) || "移除失敗，請稍後再試。"
+}
+
+/** 換種類時整理草稿：停權的刪訊息只能選預設組，禁言留下的自訂值不能帶過去，退回「不刪除」。 */
+export function draftForKind(draft: PunishDraft, next: WarningKind): PunishDraft {
+  const valid = DELETE_MESSAGE_OPTIONS.some((o) => o.seconds === draft.deleteMessageSeconds)
+  return { ...draft, kind: next, deleteMessageSeconds: next === "ban" && !valid ? 0 : draft.deleteMessageSeconds }
 }
