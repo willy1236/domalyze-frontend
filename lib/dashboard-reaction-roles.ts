@@ -497,3 +497,88 @@ export function conflictValues(
       .join("\n"),
   }
 }
+
+// ====== R-04：刪除、失效處理與重新發送 ======
+
+export type DeleteMode = "delete_message" | "remove_buttons"
+
+/** 刪除整則：刪訊息或只拿掉按鈕，兩種都移除 bot 的紀錄；original 用於衝突比對 */
+export function deleteReactionRole(
+  guildId: string,
+  messageId: string,
+  body: { mode: DeleteMode; original: OriginalSnapshot },
+): Promise<{ deleted: true }> {
+  return dashboardFetch(`${base(guildId)}/${encodeURIComponent(messageId)}`, { method: "DELETE", json: body })
+}
+
+export interface SkippedButton {
+  role_id: string
+  role_name: string | null
+  title: string
+  reason: string
+}
+
+export interface ResendResult {
+  message_id: string
+  channel_id: string
+  jump_url: string
+  skipped: SkippedButton[]
+}
+
+/** 重新發送失效的訊息；channel_id 省略時用原頻道，message 在沒有可用的存下內容時必填 */
+export function resendReactionRole(
+  guildId: string,
+  messageId: string,
+  body: { channel_id?: string; message?: MessageContent | null },
+): Promise<ResendResult> {
+  return dashboardFetch(`${base(guildId)}/${encodeURIComponent(messageId)}/resend`, { method: "POST", json: body })
+}
+
+/** 重新發送時會被略過的按鈕與原因：身分組失效或自訂 emoji 失效 */
+export function skippedByResend(buttons: DetailButton[]): { title: string; roleName: string | null; reasons: string[] }[] {
+  return buttons
+    .map((b) => ({ title: b.title, roleName: b.role.name, reasons: buttonProblems(b) }))
+    .filter((b) => b.reasons.length > 0)
+}
+
+/** 重新發送需要使用者用編輯器提供內容時的說明；已有存下的內容回 null */
+export function resendContentNotice(detail: ReactionRoleDetail): string | null {
+  if (detail.content !== null) return null
+  if (detail.content_locked === "message_unavailable" || detail.content_locked === null) return "沒有可重新發送的內容"
+  return `沒有可重新發送的內容，需要重新編排：${readBackReasonText(detail.content_locked)}`
+}
+
+export type ResendProblem =
+  | { kind: "invalid"; fields: FieldError[] }
+  | { kind: "no_valid_buttons"; skipped: SkippedButton[] }
+  | { kind: "message_exists" }
+  | { kind: "not_found" }
+  | { kind: "bot_missing_permission"; text: string }
+  | { kind: "discord_error"; text: string }
+  | { kind: "save_failed" }
+
+/** 把重新發送的 API 錯誤分類；不是已知的錯誤（含 wrapper 已處理的）回 null */
+export function parseResendProblem(e: unknown): ResendProblem | null {
+  if (!(e instanceof DashboardApiError)) return null
+  const body = e.body ?? {}
+  switch (e.code) {
+    case "invalid_request": {
+      const parsed = parseFieldErrors(e)
+      return parsed ? { kind: "invalid", fields: parsed } : null
+    }
+    case "no_valid_buttons":
+      return { kind: "no_valid_buttons", skipped: Array.isArray(body.skipped) ? (body.skipped as SkippedButton[]) : [] }
+    case "message_exists":
+      return { kind: "message_exists" }
+    case "not_found":
+      return { kind: "not_found" }
+    case "bot_missing_permission":
+      return { kind: "bot_missing_permission", text: fieldList(body)[0]?.reason ?? "星羽缺少發送訊息的權限" }
+    case "discord_error":
+      return { kind: "discord_error", text: String(body.message ?? "") }
+    case "save_failed":
+      return { kind: "save_failed" }
+    default:
+      return null
+  }
+}

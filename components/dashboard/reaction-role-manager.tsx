@@ -8,7 +8,9 @@ import {
   type ReactionRoleFormDraft,
   type ReactionRoleMessage,
 } from "@/lib/dashboard-reaction-roles"
+import { ReactionRoleDeleteButton } from "./reaction-role-delete-button"
 import { ReactionRoleForm } from "./reaction-role-form"
+import { ReactionRoleResendButton } from "./reaction-role-resend-button"
 import { ReactionRoleSection } from "./reaction-role-section"
 
 interface OpenForm {
@@ -59,13 +61,19 @@ export function ReactionRoleManager({ guildId }: { guildId: string }) {
             新增（發新訊息或掛到既有訊息）
           </Button>
         )}
-        actions={(message) =>
-          message.invalid ? null : (
-            <button type="button" className={linkButton} onClick={() => open({ message })}>
-              編輯<span className="sr-only">（{message.channel.name ? `#${message.channel.name}` : "此訊息"}）</span>
-            </button>
-          )
-        }
+        actions={(message, reload) => (
+          <>
+            {!message.invalid && !message.channel.invalid && (
+              <button type="button" className={linkButton} onClick={() => open({ message })}>
+                編輯<span className="sr-only">（{message.channel.name ? `#${message.channel.name}` : "此訊息"}）</span>
+              </button>
+            )}
+            {(message.invalid || message.channel.invalid) && (
+              <ReactionRoleResendButton guildId={guildId} message={message} onDone={reload} />
+            )}
+            <ReactionRoleDeleteButton guildId={guildId} message={message} onDone={reload} />
+          </>
+        )}
       />
     </div>
   )
