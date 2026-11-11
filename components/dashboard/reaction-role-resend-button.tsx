@@ -1,8 +1,9 @@
 "use client"
 
-import { useEffect, useId, useRef, useState } from "react"
+import { useCallback, useEffect, useId, useRef, useState } from "react"
 import { Button, Select } from "@/components/ui"
 import { DashboardApiError } from "@/lib/dashboard-api"
+import { useLoad } from "@/lib/use-load"
 import { emptyMessage, validateMessage, type FieldError, type MessageContent } from "@/lib/dashboard-message"
 import {
   fetchReactionRoleDetail,
@@ -14,9 +15,7 @@ import {
   resendReactionRole,
   scopeLabel,
   skippedByResend,
-  type ReactionRoleDetail,
   type ReactionRoleMessage,
-  type ReactionRoleOptions,
   type ResendResult,
 } from "@/lib/dashboard-reaction-roles"
 import { WarnIcon } from "./icons"
@@ -48,9 +47,6 @@ export function ReactionRoleResendButton({
   onDone: () => void
 }) {
   const [open, setOpen] = useState(false)
-  const [detail, setDetail] = useState<ReactionRoleDetail | null>(null)
-  const [options, setOptions] = useState<ReactionRoleOptions | null>(null)
-  const [loadFailed, setLoadFailed] = useState(false)
   const [channelId, setChannelId] = useState<string>(message.channel.invalid ? "" : message.channel.id)
   const [content, setContent] = useState<MessageContent>(emptyMessage())
   const [contentErrors, setContentErrors] = useState<FieldError[]>([])
@@ -69,29 +65,19 @@ export function ReactionRoleResendButton({
     else if (!open && dialog.open) dialog.close()
   }, [open])
 
-  useEffect(() => {
-    if (!open) return
-    const controller = new AbortController()
-    setDetail(null)
-    setOptions(null)
-    setLoadFailed(false)
-    Promise.all([
-      fetchReactionRoleDetail(guildId, message.message_id, controller.signal),
-      fetchReactionRoleOptions(guildId, controller.signal),
-    ])
-      .then(([d, o]) => {
-        setDetail(d)
-        setOptions(o)
-      })
-      .catch((e) => {
-        if (controller.signal.aborted) return
-        console.error("load reaction role resend data failed", e)
-        setLoadFailed(true)
-      })
-    return () => controller.abort()
-    // 只在開啟時載入
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open, guildId, message.message_id])
+  const fetcher = useCallback(
+    async (signal: AbortSignal) => {
+      const [detail, options] = await Promise.all([
+        fetchReactionRoleDetail(guildId, message.message_id, signal),
+        fetchReactionRoleOptions(guildId, signal),
+      ])
+      return { detail, options }
+    },
+    [guildId, message.message_id],
+  )
+  const { data: loaded, failed: loadFailed } = useLoad(open ? fetcher : null)
+  const detail = loaded?.detail ?? null
+  const options = loaded?.options ?? null
 
   const notice = detail ? resendContentNotice(detail) : null
   const needsContent = detail !== null && detail.content === null

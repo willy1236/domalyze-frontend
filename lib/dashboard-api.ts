@@ -100,6 +100,8 @@ export function redirectToLogin(): Promise<never> {
 }
 
 function redirectToDashboard(): Promise<never> {
+  // 在 component 之外沒有 router 可用，且要整頁重新載入丟掉目前伺服器的狀態
+  // eslint-disable-next-line @next/next/no-location-assign-relative-destination
   window.location.href = "/dashboard"
   return new Promise<never>(() => {})
 }

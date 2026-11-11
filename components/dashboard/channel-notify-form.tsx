@@ -75,7 +75,10 @@ export function ChannelNotifyForm({ guildId, type, original, restored, onClose, 
   )
 
   const stateRef = useRef<ChannelFormDraft>({ typeKey: type.key, original: base, channelId, roleId, message })
-  stateRef.current = { typeKey: type.key, original: base, channelId, roleId, message }
+  // 暫存只在工作階段過期時讀取，render 之後再同步即可
+  useEffect(() => {
+    stateRef.current = { typeKey: type.key, original: base, channelId, roleId, message }
+  })
   useEffect(() => registerDraft(CHANNEL_DRAFT_KEY, base === null ? "create" : "edit", () => stateRef.current), [base])
 
   const currentValues = (): ChannelNotifyValues => {

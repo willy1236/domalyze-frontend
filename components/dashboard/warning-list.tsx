@@ -1,6 +1,6 @@
 "use client"
 
-import { useCallback, useEffect, useRef, useState, type ReactNode } from "react"
+import { useCallback, useState, type ReactNode } from "react"
 import { MemberPicker, type PickedMember } from "@/components/dashboard/member-picker"
 import { MemberRecords } from "@/components/dashboard/member-records"
 import { WarningRecordRow } from "@/components/dashboard/warning-record-row"
@@ -11,8 +11,8 @@ import {
   WARNING_KINDS,
   type WarningKind,
   type WarningRecord,
-  type WarningsResponse,
 } from "@/lib/dashboard-warnings"
+import { useLoad } from "@/lib/use-load"
 
 const muted = "text-gray-600 dark:text-gray-400"
 const linkClass =
@@ -31,39 +31,13 @@ export function WarningList({ guildId, headerActions, rowActions }: WarningListP
   const [member, setMember] = useState<PickedMember | null>(null)
   const [kind, setKind] = useState<WarningKind | null>(null)
   const [page, setPage] = useState(1)
-  const [data, setData] = useState<WarningsResponse | null>(null)
-  const [failed, setFailed] = useState(false)
-  const [loading, setLoading] = useState(false)
   const [crossGuildFor, setCrossGuildFor] = useState<string | null>(null)
 
-  // 目前進行中的請求；每次載入前先取消上一個，晚回的舊請求不會覆蓋新條件的資料或提早清掉 loading
-  const inflight = useRef<AbortController | null>(null)
-
-  const load = useCallback(async () => {
-    inflight.current?.abort()
-    const controller = new AbortController()
-    inflight.current = controller
-    const { signal } = controller
-    setFailed(false)
-    setLoading(true)
-    try {
-      const res = await fetchWarnings(guildId, { member: member?.id ?? null, kind, page }, signal)
-      if (!signal.aborted) setData(res)
-    } catch (e) {
-      if (signal.aborted) return
-      console.error("load warnings failed", e)
-      setFailed(true)
-    } finally {
-      if (!signal.aborted) setLoading(false)
-    }
-  }, [guildId, member, kind, page])
-
-  useEffect(() => {
-    void load()
-    // 刻意在 cleanup 讀 ref 的最新值：要取消的是離開當下仍在進行的請求，不是 effect 建立時的那個
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    return () => inflight.current?.abort()
-  }, [load])
+  const fetcher = useCallback(
+    (signal: AbortSignal) => fetchWarnings(guildId, { member: member?.id ?? null, kind, page }, signal),
+    [guildId, member, kind, page],
+  )
+  const { data, failed, loading, reload: load } = useLoad(fetcher, { keepPrevious: true })
 
   const filtered = member !== null || kind !== null
   const reload = () => void load()

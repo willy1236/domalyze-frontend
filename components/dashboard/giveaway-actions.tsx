@@ -39,8 +39,13 @@ function ConfirmDialog({
     if (!dialog) return
     if (pending && !dialog.open) dialog.showModal()
     else if (!pending && dialog.open) dialog.close()
-    if (!pending) setTarget("")
   }, [pending])
+
+  const [prevPending, setPrevPending] = useState(pending)
+  if (prevPending !== pending) {
+    setPrevPending(pending)
+    if (!pending) setTarget("")
+  }
 
   return (
     <dialog

@@ -119,7 +119,10 @@ export function CommunityNotifyForm({ guildId, items, initial, onClose, onChange
   const { preview, error: previewError } = useNotifyPreview(guildId, optionsKey, roleId, hasMessage && message ? message : null)
 
   const stateRef = useRef<CommunityFormDraft>(initial)
-  stateRef.current = { platform, input, account, checked, editKey, base, channelId, roleId, message }
+  // 暫存只在工作階段過期時讀取，render 之後再同步即可
+  useEffect(() => {
+    stateRef.current = { platform, input, account, checked, editKey, base, channelId, roleId, message }
+  })
   const mode = editKey ? "edit" : "create"
   useEffect(() => registerDraft(COMMUNITY_DRAFT_KEY, mode, () => stateRef.current), [mode])
 

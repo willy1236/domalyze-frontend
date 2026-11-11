@@ -1,9 +1,10 @@
 "use client"
 
-import { useCallback, useEffect, useState } from "react"
+import { useCallback, useState } from "react"
 import { Button } from "@/components/ui"
 import { DashboardApiError } from "@/lib/dashboard-api"
 import { consumeDraft } from "@/lib/dashboard-draft"
+import { useLoad } from "@/lib/use-load"
 import {
   DEFAULT_ROOM_NAME_HINT,
   deleteLobby,
@@ -11,7 +12,6 @@ import {
   lobbyValues,
   parseLobbyProblem,
   type Lobby,
-  type LobbyResponse,
 } from "@/lib/dashboard-dynamic-voice"
 import { HashIcon, WarnIcon } from "./icons"
 import { LOBBY_DRAFT_KEY, LobbyForm, type LobbyFormDraft } from "./lobby-form"
@@ -111,31 +111,12 @@ function restoreForm(): OpenForm | null {
 
 /** 動態語音的大廳設定。 */
 export function LobbySection({ guildId }: { guildId: string }) {
-  const [data, setData] = useState<LobbyResponse | null>(null)
-  const [failed, setFailed] = useState(false)
+  const fetcher = useCallback((signal: AbortSignal) => fetchLobby(guildId, signal), [guildId])
+  const { data, setData, failed, reload: load } = useLoad(fetcher)
   const [form, setForm] = useState<OpenForm | null>(restoreForm)
   const [formId, setFormId] = useState(0)
   const [removing, setRemoving] = useState(false)
 
-  const load = useCallback(
-    async (signal?: AbortSignal) => {
-      setFailed(false)
-      try {
-        setData(await fetchLobby(guildId, signal))
-      } catch (e) {
-        if (signal?.aborted) return
-        console.error("load dynamic voice lobby failed", e)
-        setFailed(true)
-      }
-    },
-    [guildId],
-  )
-
-  useEffect(() => {
-    const controller = new AbortController()
-    void load(controller.signal)
-    return () => controller.abort()
-  }, [load])
 
   const openForm = () => {
     setForm({})

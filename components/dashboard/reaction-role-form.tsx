@@ -1,9 +1,10 @@
 "use client"
 
-import { useEffect, useId, useRef, useState, type ReactNode } from "react"
+import { useEffect, useId, useMemo, useRef, useState, type ReactNode } from "react"
 import { Button, Input, Select } from "@/components/ui"
 import { DashboardApiError } from "@/lib/dashboard-api"
 import { registerDraft } from "@/lib/dashboard-draft"
+import { useLoad } from "@/lib/use-load"
 import { emptyMessage, moveItem, readBackReasonText, type FieldError, type MessageContent } from "@/lib/dashboard-message"
 import {
   MAX_BUTTONS,
@@ -35,7 +36,6 @@ import {
   toRequestButtons,
   updateReactionRole,
   type ButtonErrors,
-  type Candidate,
   type FormButton,
   type OriginalSnapshot,
   type ReactionRoleDetail,
@@ -86,26 +86,18 @@ interface PickerProps {
 /** 掛到既有訊息的第一步：從頻道最近的 bot 訊息挑選，或貼訊息連結。 */
 function ExistingPicker({ guildId, channelId, picked, busy, onResolved }: PickerProps) {
   const uid = useId()
-  const [candidates, setCandidates] = useState<Candidate[] | null>(null)
-  const [listError, setListError] = useState<string | null>(null)
+  const candidatesFetcher = useMemo(
+    () =>
+      channelId === null
+        ? null
+        : async (signal: AbortSignal) => (await fetchCandidates(guildId, channelId, signal)).messages,
+    [guildId, channelId],
+  )
+  const { data: candidates, error: candidatesError } = useLoad(candidatesFetcher)
+  const listError = candidatesError ? (targetRejectText(candidatesError) ?? "無法載入這個頻道的訊息，請稍後再試。") : null
   const [link, setLink] = useState("")
   const [problem, setProblem] = useState<string | null>(null)
   const [working, setWorking] = useState(false)
-
-  useEffect(() => {
-    setCandidates(null)
-    setListError(null)
-    if (channelId === null) return
-    const controller = new AbortController()
-    fetchCandidates(guildId, channelId, controller.signal)
-      .then((r) => setCandidates(r.messages))
-      .catch((e) => {
-        if (controller.signal.aborted) return
-        console.error("load reaction role candidates failed", e)
-        setListError(targetRejectText(e) ?? "無法載入這個頻道的訊息，請稍後再試。")
-      })
-    return () => controller.abort()
-  }, [guildId, channelId])
 
   async function resolve(text: string) {
     setWorking(true)
@@ -382,6 +374,15 @@ export function ReactionRoleForm({ guildId, message, restored, onClose, onSaved,
     return () => controller.abort()
   }, [guildId])
 
+  function applyDetail(d: ReactionRoleDetail) {
+    setMessageId(d.message_id)
+    setChannelId(d.channel.invalid ? null : d.channel.id)
+    setOriginal(originalOf(d))
+    setContent(d.content ?? emptyMessage())
+    setContentLocked(d.content_locked)
+    setButtons(formButtonsFromDetail(d.buttons))
+  }
+
   // 編輯既有訊息：載入內容與按鈕（還原暫存時已有，不重新載入）
   useEffect(() => {
     if (restored || message === null) return
@@ -401,15 +402,6 @@ export function ReactionRoleForm({ guildId, message, restored, onClose, onSaved,
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [guildId])
 
-  function applyDetail(d: ReactionRoleDetail) {
-    setMessageId(d.message_id)
-    setChannelId(d.channel.invalid ? null : d.channel.id)
-    setOriginal(originalOf(d))
-    setContent(d.content ?? emptyMessage())
-    setContentLocked(d.content_locked)
-    setButtons(formButtonsFromDetail(d.buttons))
-  }
-
   const stateRef = useRef<ReactionRoleFormDraft>({
     messageId,
     source,
@@ -420,16 +412,19 @@ export function ReactionRoleForm({ guildId, message, restored, onClose, onSaved,
     contentLocked,
     buttons,
   })
-  stateRef.current = {
-    messageId,
-    source,
-    existing,
-    channelId,
-    original,
-    message: contentLocked ? null : content,
-    contentLocked,
-    buttons,
-  }
+  // 暫存只在工作階段過期時讀取，render 之後再同步即可
+  useEffect(() => {
+    stateRef.current = {
+      messageId,
+      source,
+      existing,
+      channelId,
+      original,
+      message: contentLocked ? null : content,
+      contentLocked,
+      buttons,
+    }
+  })
   const mode = messageId === null ? "create" : "edit"
   useEffect(
     () => (ready ? registerDraft(REACTION_ROLE_DRAFT_KEY, mode, () => stateRef.current) : undefined),

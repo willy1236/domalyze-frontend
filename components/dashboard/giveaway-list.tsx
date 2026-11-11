@@ -1,6 +1,6 @@
 "use client"
 
-import { useCallback, useEffect, useState } from "react"
+import { useCallback, useState } from "react"
 import { Button } from "@/components/ui"
 import {
   fetchGiveaways,
@@ -8,8 +8,8 @@ import {
   missingPermissionsText,
   statusLabel,
   type GiveawaySummary,
-  type GiveawaysResponse,
 } from "@/lib/dashboard-giveaways"
+import { useLoad } from "@/lib/use-load"
 import { WarnIcon } from "./icons"
 
 const muted = "text-gray-600 dark:text-gray-400"
@@ -73,32 +73,8 @@ function Row({ giveaway, onSelect }: { giveaway: GiveawaySummary; onSelect: (id:
 export function GiveawayList({ guildId, onSelect }: { guildId: string; onSelect: (id: number) => void }) {
   const [all, setAll] = useState(false)
   const [page, setPage] = useState(1)
-  const [data, setData] = useState<GiveawaysResponse | null>(null)
-  const [failed, setFailed] = useState(false)
-  const [loading, setLoading] = useState(false)
-
-  const load = useCallback(
-    async (signal?: AbortSignal) => {
-      setFailed(false)
-      setLoading(true)
-      try {
-        setData(await fetchGiveaways(guildId, { all, page }, signal))
-      } catch (e) {
-        if (signal?.aborted) return
-        console.error("load giveaways failed", e)
-        setFailed(true)
-      } finally {
-        if (!signal?.aborted) setLoading(false)
-      }
-    },
-    [guildId, all, page],
-  )
-
-  useEffect(() => {
-    const controller = new AbortController()
-    void load(controller.signal)
-    return () => controller.abort()
-  }, [load])
+  const fetcher = useCallback((signal: AbortSignal) => fetchGiveaways(guildId, { all, page }, signal), [guildId, all, page])
+  const { data, failed, loading, reload } = useLoad(fetcher, { keepPrevious: true })
 
   return (
     <section>
@@ -116,7 +92,7 @@ export function GiveawayList({ guildId, onSelect }: { guildId: string; onSelect:
             />
             顯示全部{data && !all ? `（目前只列 ${data.recent_days} 天內建立的）` : ""}
           </label>
-          <Button type="button" size="sm" disabled={loading} onClick={() => void load()}>
+          <Button type="button" size="sm" disabled={loading} onClick={() => void reload()}>
             重新整理
           </Button>
         </div>
@@ -125,7 +101,7 @@ export function GiveawayList({ guildId, onSelect }: { guildId: string; onSelect:
       {failed && (
         <p className={`py-8 ${muted}`}>
           無法載入抽獎，請稍後
-          <button type="button" className={`underline mx-1 ${linkClass}`} onClick={() => void load()}>
+          <button type="button" className={`underline mx-1 ${linkClass}`} onClick={() => void reload()}>
             重試
           </button>
           。

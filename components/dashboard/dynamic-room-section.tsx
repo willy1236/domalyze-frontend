@@ -11,6 +11,7 @@ import {
   type ClearResult,
   type DynamicRoom,
 } from "@/lib/dashboard-dynamic-voice-rooms"
+import { useLoad } from "@/lib/use-load"
 import { WarnIcon } from "./icons"
 
 const muted = "text-gray-600 dark:text-gray-400"
@@ -144,37 +145,13 @@ function ClearReport({ results, onDismiss }: { results: ClearResult[]; onDismiss
 
 /** 動態房間清單：進入頁面時載入，另有手動重新整理，不做即時更新；空房可逐筆或一次清除。 */
 export function DynamicRoomSection({ guildId }: { guildId: string }) {
-  const [rooms, setRooms] = useState<DynamicRoom[] | null>(null)
-  const [failed, setFailed] = useState(false)
-  const [loading, setLoading] = useState(false)
+  const fetcher = useCallback(async (signal: AbortSignal) => (await fetchRooms(guildId, signal)).rooms, [guildId])
+  const { data: rooms, failed, loading, reload: load } = useLoad(fetcher)
   const [confirming, setConfirming] = useState<DynamicRoom[] | null>(null)
   const [clearing, setClearing] = useState(false)
   const [report, setReport] = useState<ClearResult[] | null>(null)
   const [clearError, setClearError] = useState<string | null>(null)
 
-  const load = useCallback(
-    async (signal?: AbortSignal) => {
-      setFailed(false)
-      setLoading(true)
-      try {
-        const res = await fetchRooms(guildId, signal)
-        setRooms(res.rooms)
-      } catch (e) {
-        if (signal?.aborted) return
-        console.error("load dynamic rooms failed", e)
-        setFailed(true)
-      } finally {
-        if (!signal?.aborted) setLoading(false)
-      }
-    },
-    [guildId],
-  )
-
-  useEffect(() => {
-    const controller = new AbortController()
-    void load(controller.signal)
-    return () => controller.abort()
-  }, [load])
 
   const emptyRooms = rooms?.filter(isEmptyRoom) ?? []
 

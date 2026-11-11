@@ -32,6 +32,8 @@ export function TestNotifyButton({ guildId, item, onChanged }: Props) {
   // 一覽重新載入後以伺服器的剩餘秒數為準（別的管理員剛測試過也看得到）
   const serverCooldown = item.cooldown ?? 0
   useEffect(() => {
+    // 剩餘秒數要以收到的當下換算成時間點，Date.now() 不能在 render 裡呼叫，只能在 effect 設定
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setCooldownUntil(Date.now() + serverCooldown * 1000)
     setNow(Date.now())
   }, [serverCooldown])

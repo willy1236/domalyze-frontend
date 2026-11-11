@@ -1,8 +1,9 @@
 "use client"
 
-import { useCallback, useEffect, useState } from "react"
+import { useCallback } from "react"
 import { useParams } from "next/navigation"
 import { dashboardFetch } from "@/lib/dashboard-api"
+import { useLoad } from "@/lib/use-load"
 import type { NotifyItem, NotifyLists } from "@/lib/dashboard-notifies"
 import { ChannelNotifySection } from "@/components/dashboard/channel-notify-section"
 import { CommunityNotifySection } from "@/components/dashboard/community-notify-section"
@@ -27,30 +28,12 @@ export default function GuildPage() {
 
 function NotifySections() {
   const { id } = useParams<{ id: string }>()
-  const [lists, setLists] = useState<NotifyLists | null>(null)
-  const [failed, setFailed] = useState(false)
-
-  const load = useCallback(
-    async (signal?: AbortSignal) => {
-      setFailed(false)
-      try {
-        setLists(
-          await dashboardFetch<NotifyLists>(`/dashboard/guilds/${encodeURIComponent(id)}/notifies`, {}, { signal }),
-        )
-      } catch (e) {
-        if (signal?.aborted) return
-        console.error("load notifies failed", e)
-        setFailed(true)
-      }
-    },
+  const fetcher = useCallback(
+    (signal: AbortSignal) =>
+      dashboardFetch<NotifyLists>(`/dashboard/guilds/${encodeURIComponent(id)}/notifies`, {}, { signal }),
     [id],
   )
-
-  useEffect(() => {
-    const controller = new AbortController()
-    void load(controller.signal)
-    return () => controller.abort()
-  }, [load])
+  const { data: lists, failed, reload } = useLoad(fetcher)
 
   const channelCount = lists?.channel_notifies.length ?? 0
   const communityCount = lists?.community_notifies.length ?? 0
@@ -90,7 +73,7 @@ function NotifySections() {
       {failed && (
         <p className="text-gray-600 dark:text-gray-400">
           無法載入通知設定，請稍後
-          <button type="button" className={`underline mx-1 ${linkClass}`} onClick={() => void load()}>
+          <button type="button" className={`underline mx-1 ${linkClass}`} onClick={() => void reload()}>
             重試
           </button>
           。
@@ -101,8 +84,8 @@ function NotifySections() {
 
       {lists && (
         <div className="space-y-14 motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-2 motion-safe:duration-500">
-          <ChannelNotifySection guildId={id} items={lists.channel_notifies} onChanged={() => void load()} />
-          <CommunityNotifySection guildId={id} items={lists.community_notifies} onChanged={() => void load()} />
+          <ChannelNotifySection guildId={id} items={lists.channel_notifies} onChanged={() => void reload()} />
+          <CommunityNotifySection guildId={id} items={lists.community_notifies} onChanged={() => void reload()} />
         </div>
       )}
     </div>
