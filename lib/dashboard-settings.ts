@@ -91,8 +91,13 @@ export function validateAutoTimeout(times: number, seconds: number): { field: "t
   if (!Number.isInteger(times) || times < AUTO_TIMEOUT_TIMES_RANGE[0] || times > AUTO_TIMEOUT_TIMES_RANGE[1]) {
     return { field: "times", message: `警告次數需為 ${AUTO_TIMEOUT_TIMES_RANGE[0]} 到 ${AUTO_TIMEOUT_TIMES_RANGE[1]} 的整數。` }
   }
-  if (!Number.isInteger(seconds) || seconds < AUTO_TIMEOUT_SECONDS_RANGE[0] || seconds > AUTO_TIMEOUT_SECONDS_RANGE[1]) {
-    return { field: "duration", message: "禁言時長需為 1 分鐘到 7 天。" }
+  if (
+    !Number.isInteger(seconds) ||
+    seconds < AUTO_TIMEOUT_SECONDS_RANGE[0] ||
+    seconds > AUTO_TIMEOUT_SECONDS_RANGE[1] ||
+    seconds % 60 !== 0
+  ) {
+    return { field: "duration", message: "禁言時長需為整分鐘，1 分鐘到 7 天。" }
   }
   return null
 }
