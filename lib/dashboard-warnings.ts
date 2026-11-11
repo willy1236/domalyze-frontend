@@ -285,3 +285,29 @@ export function punishResultLines(kind: WarningKind, res: PunishResponse): { ok:
   if (res.announce_error) lines.push(`紀錄已寫入，但公告失敗：${res.announce_error}`)
   return { ok: true, lines }
 }
+
+// ====== W-03：移除紀錄 ======
+
+export interface RemoveWarningResponse {
+  ok: true
+  /** 紀錄原本就已不存在 */
+  already?: boolean
+}
+
+/** 能否對這筆紀錄顯示移除：要有移除權限，且紀錄是這個伺服器發出的（其他伺服器的紀錄後端會拒絕） */
+export function canRemoveRecord(can: (action: string) => boolean, record: Pick<WarningRecord, "this_guild">): boolean {
+  return can("remove") && record.this_guild
+}
+
+export function removeWarning(guildId: string, warningId: number): Promise<RemoveWarningResponse> {
+  return dashboardFetch<RemoveWarningResponse>(`${base(guildId)}/${warningId}`, { method: "DELETE" })
+}
+
+const REMOVE_ERRORS: Record<string, string> = {
+  no_permission: "你沒有移除紀錄的權限。",
+  not_this_guild: "這筆紀錄不是這個伺服器發出的，不能移除。",
+}
+
+export function removeErrorText(code: string | null): string {
+  return (code && REMOVE_ERRORS[code]) || "移除失敗，請稍後再試。"
+}

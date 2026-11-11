@@ -13,6 +13,8 @@ import {
   validatePunish,
   type PunishDraft,
   type PunishResponse,
+  canRemoveRecord,
+  removeErrorText,
 } from "./dashboard-warnings"
 
 describe("kindLabel", () => {
@@ -182,5 +184,20 @@ describe("punishResultLines", () => {
   it("動作已執行但紀錄寫入失敗時照實說明", () => {
     const res = punishResultLines("kick", ok({ warning_id: null, error: "動作已執行，但紀錄寫入失敗" }))
     expect(res.lines[0]).toBe("動作已執行，但紀錄寫入失敗。")
+  })
+})
+
+describe("W-03 移除紀錄", () => {
+  it("canRemoveRecord 需要移除權限且是本伺服器的紀錄", () => {
+    const yes = (a: string) => a === "remove"
+    expect(canRemoveRecord(yes, { this_guild: true })).toBe(true)
+    expect(canRemoveRecord(yes, { this_guild: false })).toBe(false)
+    expect(canRemoveRecord(() => false, { this_guild: true })).toBe(false)
+  })
+
+  it("removeErrorText 對已知錯誤碼給說明，其餘給通用文字", () => {
+    expect(removeErrorText("not_this_guild")).toContain("不是這個伺服器")
+    expect(removeErrorText("no_permission")).toContain("權限")
+    expect(removeErrorText(null)).toContain("稍後")
   })
 })
