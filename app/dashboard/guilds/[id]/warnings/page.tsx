@@ -3,6 +3,7 @@
 import { useParams } from "next/navigation"
 import { SectionGuard } from "@/components/dashboard/section-guard"
 import { PunishForm } from "@/components/dashboard/punish-form"
+import { RemoveWarningButton } from "@/components/dashboard/remove-warning-button"
 import { WarningList } from "@/components/dashboard/warning-list"
 
 export default function WarningsPage() {
@@ -10,7 +11,11 @@ export default function WarningsPage() {
   return (
     <SectionGuard section="warnings">
       <div className="motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-2 motion-safe:duration-500">
-        <WarningList guildId={id} headerActions={(reload) => <PunishForm guildId={id} reload={reload} />} />
+        <WarningList
+          guildId={id}
+          headerActions={(reload) => <PunishForm guildId={id} reload={reload} />}
+          rowActions={(record, reload) => <RemoveWarningButton guildId={id} record={record} reload={reload} />}
+        />
       </div>
     </SectionGuard>
   )
