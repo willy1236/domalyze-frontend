@@ -149,7 +149,7 @@ describe("ReactionRoleForm：發新訊息", () => {
     await submit()
     const post = calls.find((c) => c.method === "POST")!
     expect(post.body).toEqual({
-      channel_id: "50",
+      target: { kind: "new", channel_id: "50" },
       message: { content: "歡迎", embed: null },
       buttons: [
         { role_id: "1", title: "活動", emoji: "🎉", style: 1 },
@@ -322,5 +322,160 @@ describe("ReactionRoleForm：編輯", () => {
     expect(contentBox().value).toBe("暫存內容")
     expect(input("標題（最多 80 字）", 0).value).toBe("暫存按鈕")
     expect(calls.some((c) => c.path.endsWith("/reaction-roles/900"))).toBe(false)
+  })
+})
+
+describe("ReactionRoleForm：掛到既有訊息", () => {
+  const FREE = { message_id: "700", summary: "歡迎來到伺服器", created_at: "2026-11-11T01:00:00+00:00", status: "free" as const }
+  const REGISTERED = { message_id: "701", summary: "已掛的身分組", created_at: "2026-11-11T02:00:00+00:00", status: "reaction_role" as const }
+  const resolveKey = (id: string) => `/reaction-roles/resolve?link=${encodeURIComponent(`https://discord.com/channels/1/50/${id}`)}`
+  const RESOLVED_FREE = {
+    status: "free",
+    message_id: "700",
+    channel: { id: "50", name: "身分組" },
+    jump_url: "https://discord.com/channels/1/50/700",
+    summary: "歡迎來到伺服器",
+    content: { content: "歡迎來到伺服器", embed: null },
+    content_locked: null,
+  }
+
+  const radio = (value: string) => container.querySelector(`input[name="rr-source"][value="${value}"]`) as HTMLInputElement
+  const candidate = (summary: string) =>
+    [...container.querySelectorAll('ul[aria-label="可掛的訊息"] button')].find((b) => b.textContent?.includes(summary)) as HTMLButtonElement
+
+  async function openPicker(props: Partial<React.ComponentProps<typeof ReactionRoleForm>> = {}) {
+    responses["/reaction-roles/candidates?channel_id=50"] = { status: 200, body: { messages: [FREE, REGISTERED] } }
+    const handlers = await mount(props)
+    act(() => radio("existing").click())
+    change(select("訊息所在的頻道"), "50")
+    await flush()
+    return handlers
+  }
+
+  async function pick(summary: string) {
+    await act(async () => candidate(summary).click())
+    await flush()
+  }
+
+  it("第一步可選發新訊息或掛到既有訊息；選既有訊息前不顯示內容與按鈕", async () => {
+    await mount()
+    expect(radio("new").checked).toBe(true)
+    expect(contentBox()).toBeTruthy()
+    act(() => radio("existing").click())
+    expect(text()).toContain("把反應身分組掛到既有訊息")
+    expect(text()).toContain("先選擇訊息所在的頻道")
+    expect(contentBox()).toBeFalsy()
+    expect(button("新增按鈕")).toBeFalsy()
+  })
+
+  it("選頻道後列出候選訊息，已是反應身分組的有標示", async () => {
+    await openPicker()
+    expect(calls.some((c) => c.path.endsWith("/reaction-roles/candidates?channel_id=50"))).toBe(true)
+    expect(candidate("歡迎來到伺服器")).toBeTruthy()
+    expect(candidate("已掛的身分組").textContent).toContain("已是反應身分組，點選後進入編輯")
+    expect(candidate("歡迎來到伺服器").textContent).not.toContain("已是反應身分組")
+  })
+
+  it("點選候選訊息後帶入原內容，加按鈕送出 target.kind=existing", async () => {
+    responses[resolveKey("700")] = { status: 200, body: RESOLVED_FREE }
+    responses["POST"] = { status: 200, body: { message_id: "700", jump_url: "u" } }
+    const { onSaved } = await openPicker()
+    await pick("歡迎來到伺服器")
+    expect(contentBox().value).toBe("歡迎來到伺服器")
+    expect(text()).toContain("已選擇：歡迎來到伺服器")
+    change(select("身分組", 0), "1")
+    change(input("標題（最多 80 字）", 0), "活動")
+    await submit()
+    expect(calls.find((c) => c.method === "POST")!.body).toEqual({
+      target: { kind: "existing", channel_id: "50", message_id: "700" },
+      message: { content: "歡迎來到伺服器", embed: null },
+      buttons: [{ role_id: "1", title: "活動", emoji: null, style: 1 }],
+    })
+    expect(onSaved).toHaveBeenCalled()
+  })
+
+  it("貼上訊息連結解析並帶入內容", async () => {
+    responses[resolveKey("700")] = { status: 200, body: RESOLVED_FREE }
+    await mount()
+    act(() => radio("existing").click())
+    change(input("或貼上訊息連結"), "https://discord.com/channels/1/50/700")
+    await act(async () => button("使用這則訊息").click())
+    await flush()
+    expect(contentBox().value).toBe("歡迎來到伺服器")
+    expect(select("訊息所在的頻道").value).toBe("50")
+  })
+
+  it.each([
+    ["wrong_guild", "這則訊息不屬於這個伺服器"],
+    ["not_bot_message", "只能掛在星羽發的訊息上"],
+    ["has_components", "已經帶有其他按鈕或互動元件"],
+    ["invalid_link", "這不是 Discord 訊息連結"],
+  ])("連結被擋下時顯示原因：%s", async (code, expected) => {
+    responses[resolveKey("700")] = { status: 400, body: { error: code, message: "x" } }
+    await mount()
+    act(() => radio("existing").click())
+    change(input("或貼上訊息連結"), "https://discord.com/channels/1/50/700")
+    await act(async () => button("使用這則訊息").click())
+    await flush()
+    expect(text()).toContain(expected)
+    expect(contentBox()).toBeFalsy()
+  })
+
+  it("兩則 embed 的訊息只能管按鈕：內容區停用並說明原因，送出的 message 為 null", async () => {
+    responses[resolveKey("700")] = {
+      status: 200,
+      body: { ...RESOLVED_FREE, content: null, content_locked: "multiple_embeds" },
+    }
+    responses["POST"] = { status: 200, body: { message_id: "700", jump_url: "u" } }
+    await openPicker()
+    await pick("歡迎來到伺服器")
+    expect(contentBox()).toBeFalsy()
+    expect(text()).toContain("內容不能在這裡修改，只能管理按鈕")
+    change(select("身分組", 0), "1")
+    change(input("標題（最多 80 字）", 0), "活動")
+    await submit()
+    expect(calls.find((c) => c.method === "POST")!.body).toMatchObject({
+      target: { kind: "existing", channel_id: "50", message_id: "700" },
+      message: null,
+    })
+  })
+
+  it("點選已是反應身分組的訊息，轉到它的編輯畫面", async () => {
+    responses[resolveKey("701")] = {
+      status: 200,
+      body: { status: "reaction_role", message_id: "701", channel: { id: "50", name: "身分組" }, jump_url: "u", summary: "已掛的身分組" },
+    }
+    const onOpenExisting = vi.fn()
+    await openPicker({ onOpenExisting })
+    await pick("已掛的身分組")
+    expect(onOpenExisting).toHaveBeenCalledWith("701")
+  })
+
+  it("沒選訊息就送出會提示，不送出請求", async () => {
+    await openPicker()
+    await submit()
+    expect(text()).toContain("請先選擇要掛的訊息")
+    expect(calls.some((c) => c.method === "POST")).toBe(false)
+  })
+
+  it("送出時才發現已是反應身分組，轉到編輯", async () => {
+    responses[resolveKey("700")] = { status: 200, body: RESOLVED_FREE }
+    responses["POST"] = { status: 400, body: { error: "already_reaction_role", message_id: "700" } }
+    const onOpenExisting = vi.fn()
+    await openPicker({ onOpenExisting })
+    await pick("歡迎來到伺服器")
+    change(select("身分組", 0), "1")
+    change(input("標題（最多 80 字）", 0), "活動")
+    await submit()
+    expect(onOpenExisting).toHaveBeenCalledWith("700")
+  })
+
+  it("候選清單是空的時說明並建議貼連結", async () => {
+    responses["/reaction-roles/candidates?channel_id=50"] = { status: 200, body: { messages: [] } }
+    await mount()
+    act(() => radio("existing").click())
+    change(select("訊息所在的頻道"), "50")
+    await flush()
+    expect(text()).toContain("沒有可以掛的星羽訊息")
   })
 })

@@ -11,31 +11,38 @@ import {
   REACTION_ROLE_DRAFT_KEY,
   STYLE_OPTIONS,
   UNICODE_EMOJIS,
+  alreadyReactionRoleId,
   blankButton,
   conflictValues,
   createReactionRole,
   dangerNotice,
   emojiLabel,
+  fetchCandidates,
   fetchReactionRoleDetail,
   fetchReactionRoleOptions,
   formButtonsFromDetail,
   formErrors,
   hasFormErrors,
+  messageLink,
   originalOf,
   parseSaveProblem,
   previewButtons,
+  resolveMessageLink,
   roleOptionState,
   scopeLabel,
   splitFieldErrors,
+  targetRejectText,
   toRequestButtons,
   updateReactionRole,
   type ButtonErrors,
+  type Candidate,
   type FormButton,
   type OriginalSnapshot,
   type ReactionRoleDetail,
   type ReactionRoleFormDraft,
   type ReactionRoleMessage,
   type ReactionRoleOptions,
+  type ResolvedMessage,
 } from "@/lib/dashboard-reaction-roles"
 import { ConflictNotice } from "./conflict-notice"
 import { WarnIcon } from "./icons"
@@ -55,13 +62,136 @@ function Problem({ children, id }: { children: ReactNode; id?: string }) {
 
 interface Props {
   guildId: string
-  /** 要編輯的訊息；null 表示發新訊息 */
-  message: ReactionRoleMessage | null
+  /** 要編輯的訊息；null 表示新增（發新訊息或掛到既有訊息） */
+  message: Pick<ReactionRoleMessage, "message_id"> | null
   /** 還原暫存時帶入使用者已輸入的內容 */
   restored?: ReactionRoleFormDraft
   onClose: () => void
   /** 存檔成功後呼叫，讓一覽重新載入 */
   onSaved: () => void
+  /** 選到已經是反應身分組的訊息時，轉到那則的編輯畫面 */
+  onOpenExisting?: (messageId: string) => void
+}
+
+type ExistingTarget = NonNullable<ReactionRoleFormDraft["existing"]>
+
+interface PickerProps {
+  guildId: string
+  channelId: string | null
+  picked: ExistingTarget | null
+  busy: boolean
+  onResolved: (r: ResolvedMessage) => void
+}
+
+/** 掛到既有訊息的第一步：從頻道最近的 bot 訊息挑選，或貼訊息連結。 */
+function ExistingPicker({ guildId, channelId, picked, busy, onResolved }: PickerProps) {
+  const uid = useId()
+  const [candidates, setCandidates] = useState<Candidate[] | null>(null)
+  const [listError, setListError] = useState<string | null>(null)
+  const [link, setLink] = useState("")
+  const [problem, setProblem] = useState<string | null>(null)
+  const [working, setWorking] = useState(false)
+
+  useEffect(() => {
+    setCandidates(null)
+    setListError(null)
+    if (channelId === null) return
+    const controller = new AbortController()
+    fetchCandidates(guildId, channelId, controller.signal)
+      .then((r) => setCandidates(r.messages))
+      .catch((e) => {
+        if (controller.signal.aborted) return
+        console.error("load reaction role candidates failed", e)
+        setListError(targetRejectText(e) ?? "無法載入這個頻道的訊息，請稍後再試。")
+      })
+    return () => controller.abort()
+  }, [guildId, channelId])
+
+  async function resolve(text: string) {
+    setWorking(true)
+    setProblem(null)
+    try {
+      onResolved(await resolveMessageLink(guildId, text))
+    } catch (e) {
+      const known = targetRejectText(e)
+      if (known) setProblem(known)
+      else if (!(e instanceof DashboardApiError && e.handled)) {
+        console.error("resolve reaction role message failed", e)
+        setProblem("無法讀取這則訊息，請稍後再試。")
+      }
+    } finally {
+      setWorking(false)
+    }
+  }
+
+  return (
+    <div className="space-y-4">
+      <div>
+        <h4 className="mb-1 font-medium">從頻道最近的訊息挑選</h4>
+        {channelId === null ? (
+          <p className={`text-sm ${muted}`}>先選擇訊息所在的頻道。</p>
+        ) : listError ? (
+          <Problem>{listError}</Problem>
+        ) : candidates === null ? (
+          <p className={`text-sm ${muted}`}>載入中…</p>
+        ) : candidates.length === 0 ? (
+          <p className={`text-sm ${muted}`}>最近 100 則訊息裡沒有可以掛的星羽訊息。可以改貼訊息連結。</p>
+        ) : (
+          <ul className="space-y-1" aria-label="可掛的訊息">
+            {candidates.map((c) => (
+              <li key={c.message_id}>
+                <button
+                  type="button"
+                  disabled={busy || working}
+                  aria-pressed={picked?.messageId === c.message_id}
+                  className={`w-full rounded-md border px-3 py-2 text-left text-sm ${
+                    picked?.messageId === c.message_id
+                      ? "border-primary dark:border-champagne"
+                      : "border-primary/20 dark:border-champagne/25"
+                  }`}
+                  onClick={() => void resolve(messageLink(guildId, channelId, c.message_id))}
+                >
+                  <span className="block truncate">{c.summary}</span>
+                  <span className={`block text-xs ${muted}`}>
+                    {new Date(c.created_at).toLocaleString("zh-TW")}
+                    {c.status === "reaction_role" ? "｜已是反應身分組，點選後進入編輯" : ""}
+                  </span>
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+      <div>
+        <label htmlFor={`${uid}-link`} className={labelClass}>
+          或貼上訊息連結
+        </label>
+        <div className="flex flex-wrap gap-2">
+          <Input
+            id={`${uid}-link`}
+            value={link}
+            placeholder="https://discord.com/channels/…"
+            disabled={busy || working}
+            onChange={(e) => setLink(e.target.value)}
+            className="min-w-0 flex-1"
+          />
+          <Button type="button" disabled={busy || working || !link.trim()} onClick={() => void resolve(link.trim())}>
+            使用這則訊息
+          </Button>
+        </div>
+      </div>
+      {problem && <Problem>{problem}</Problem>}
+      {picked && (
+        <p role="status" className="text-sm">
+          已選擇：{picked.summary}（
+          <a href={picked.jumpUrl} target="_blank" rel="noreferrer" className="underline">
+            在 Discord 開啟
+          </a>
+          ）
+        </p>
+      )}
+    </div>
+  )
 }
 
 interface ButtonRowProps {
@@ -214,7 +344,7 @@ function ButtonRow({ index, button, buttons, options, error, busy, onChange, onM
 }
 
 /** 發新的反應身分組訊息，或編輯既有訊息的內容與按鈕。 */
-export function ReactionRoleForm({ guildId, message, restored, onClose, onSaved }: Props) {
+export function ReactionRoleForm({ guildId, message, restored, onClose, onSaved, onOpenExisting }: Props) {
   const [options, setOptions] = useState<ReactionRoleOptions | null>(null)
   const [optionsError, setOptionsError] = useState(false)
   const [loadError, setLoadError] = useState(false)
@@ -222,6 +352,8 @@ export function ReactionRoleForm({ guildId, message, restored, onClose, onSaved 
 
   const [messageId, setMessageId] = useState<string | null>(restored ? restored.messageId : (message?.message_id ?? null))
   const [channelId, setChannelId] = useState<string | null>(restored ? restored.channelId : null)
+  const [source, setSource] = useState<"new" | "existing">(restored?.source ?? "new")
+  const [existing, setExisting] = useState<ExistingTarget | null>(restored?.existing ?? null)
   const [original, setOriginal] = useState<OriginalSnapshot | null>(restored ? restored.original : null)
   const [content, setContent] = useState<MessageContent>(restored?.message ?? emptyMessage())
   const [contentLocked, setContentLocked] = useState<string | null>(restored ? restored.contentLocked : null)
@@ -280,13 +412,24 @@ export function ReactionRoleForm({ guildId, message, restored, onClose, onSaved 
 
   const stateRef = useRef<ReactionRoleFormDraft>({
     messageId,
+    source,
+    existing,
     channelId,
     original,
     message: contentLocked ? null : content,
     contentLocked,
     buttons,
   })
-  stateRef.current = { messageId, channelId, original, message: contentLocked ? null : content, contentLocked, buttons }
+  stateRef.current = {
+    messageId,
+    source,
+    existing,
+    channelId,
+    original,
+    message: contentLocked ? null : content,
+    contentLocked,
+    buttons,
+  }
   const mode = messageId === null ? "create" : "edit"
   useEffect(
     () => (ready ? registerDraft(REACTION_ROLE_DRAFT_KEY, mode, () => stateRef.current) : undefined),
@@ -294,6 +437,9 @@ export function ReactionRoleForm({ guildId, message, restored, onClose, onSaved 
   )
 
   const isCreate = messageId === null
+  const isAttach = isCreate && source === "existing"
+  // 掛到既有訊息時，選定訊息之前不顯示內容與按鈕
+  const showBody = !isAttach || existing !== null
   const selectedChannel = options?.channels.find((c) => c.id === channelId) ?? null
   const roleName = (id: string | null) => options?.roles.find((r) => r.id === id)?.name ?? null
 
@@ -302,7 +448,24 @@ export function ReactionRoleForm({ guildId, message, restored, onClose, onSaved 
     setErrors((e) => ({ ...e, buttons: { ...e.buttons, [key]: "" } }))
   }
 
+  function pickResolved(r: ResolvedMessage) {
+    if (r.status === "reaction_role") {
+      onOpenExisting?.(r.message_id)
+      return
+    }
+    setChannelId(r.channel.id)
+    setExisting({ messageId: r.message_id, jumpUrl: r.jump_url, summary: r.summary })
+    setContent(r.content ?? emptyMessage())
+    setContentLocked(r.content_locked)
+    setErrors({ message: [], buttons: {} })
+    setNotice(null)
+  }
+
   async function submit(against: OriginalSnapshot | null, asNew = isCreate) {
+    if (asNew && source === "existing" && existing === null) {
+      setNotice("請先選擇要掛的訊息。")
+      return
+    }
     const found = formErrors(contentLocked ? null : content, buttons)
     setErrors(found)
     if (hasFormErrors(found) || (asNew && channelId === null)) {
@@ -314,7 +477,14 @@ export function ReactionRoleForm({ guildId, message, restored, onClose, onSaved 
     setConflict(null)
     try {
       if (asNew) {
-        await createReactionRole(guildId, { channel_id: channelId ?? "", message: content, buttons: toRequestButtons(buttons) })
+        await createReactionRole(guildId, {
+          target:
+            source === "existing" && existing !== null
+              ? { kind: "existing", channel_id: channelId ?? "", message_id: existing.messageId }
+              : { kind: "new", channel_id: channelId ?? "" },
+          message: contentLocked ? null : content,
+          buttons: toRequestButtons(buttons),
+        })
       } else {
         await updateReactionRole(guildId, messageId ?? "", {
           message: contentLocked ? null : content,
@@ -325,6 +495,11 @@ export function ReactionRoleForm({ guildId, message, restored, onClose, onSaved 
       onSaved()
       onClose()
     } catch (e) {
+      const registeredId = alreadyReactionRoleId(e)
+      if (registeredId && onOpenExisting) {
+        onOpenExisting(registeredId)
+        return
+      }
       const problem = parseSaveProblem(e)
       if (!problem) {
         if (!(e instanceof DashboardApiError && e.handled)) {
@@ -340,6 +515,8 @@ export function ReactionRoleForm({ guildId, message, restored, onClose, onSaved 
       } else if (problem.kind === "content_locked") {
         setNotice(`這則訊息的內容不能修改：${problem.text}`)
       } else if (problem.kind === "bot_missing_permission") {
+        setNotice(problem.text)
+      } else if (problem.kind === "target_rejected") {
         setNotice(problem.text)
       } else if (problem.kind === "message_not_found") {
         setNotice("在 Discord 上找不到這則訊息，無法更新。")
@@ -364,7 +541,7 @@ export function ReactionRoleForm({ guildId, message, restored, onClose, onSaved 
     buttons.map((b) => ({ title: b.title, emoji: b.emoji, roleName: roleName(b.role_id) })),
   )
 
-  const title = isCreate ? "發新的反應身分組訊息" : "編輯反應身分組"
+  const title = !isCreate ? "編輯反應身分組" : isAttach ? "把反應身分組掛到既有訊息" : "發新的反應身分組訊息"
 
   return (
     <form
@@ -387,15 +564,46 @@ export function ReactionRoleForm({ guildId, message, restored, onClose, onSaved 
       {ready && (
         <>
           {isCreate && (
+            <fieldset className="space-y-2">
+              <legend className="mb-1 font-medium">要怎麼放</legend>
+              {(
+                [
+                  ["new", "發新訊息"],
+                  ["existing", "掛到既有訊息"],
+                ] as const
+              ).map(([value, label]) => (
+                <label key={value} className="mr-4 inline-flex items-center gap-2 text-sm">
+                  <input
+                    type="radio"
+                    name="rr-source"
+                    value={value}
+                    checked={source === value}
+                    disabled={busy}
+                    onChange={() => {
+                      setSource(value)
+                      setExisting(null)
+                      setNotice(null)
+                    }}
+                  />
+                  {label}
+                </label>
+              ))}
+            </fieldset>
+          )}
+
+          {isCreate && (
             <div>
               <label htmlFor="rr-channel" className={labelClass}>
-                發送到哪個頻道（必填）
+                {isAttach ? "訊息所在的頻道" : "發送到哪個頻道（必填）"}
               </label>
               <Select
                 id="rr-channel"
                 value={channelId ?? ""}
                 disabled={busy || options === null}
-                onChange={(e) => setChannelId(e.target.value || null)}
+                onChange={(e) => {
+                  setChannelId(e.target.value || null)
+                  setExisting(null)
+                }}
               >
                 {options === null ? (
                   <option value="">載入中…</option>
@@ -425,6 +633,12 @@ export function ReactionRoleForm({ guildId, message, restored, onClose, onSaved 
             </div>
           )}
 
+          {isAttach && (
+            <ExistingPicker guildId={guildId} channelId={channelId} picked={existing} busy={busy} onResolved={pickResolved} />
+          )}
+
+          {showBody && (
+          <>
           <section aria-labelledby="rr-content-heading">
             <h4 id="rr-content-heading" className="mb-2 font-medium">
               訊息內容
@@ -479,6 +693,8 @@ export function ReactionRoleForm({ guildId, message, restored, onClose, onSaved 
               新增按鈕
             </Button>
           </section>
+          </>
+          )}
         </>
       )}
 
@@ -508,7 +724,7 @@ export function ReactionRoleForm({ guildId, message, restored, onClose, onSaved 
 
       <div className="flex flex-wrap items-center gap-3">
         <Button type="submit" disabled={busy || !ready}>
-          {isCreate ? "發送" : "儲存"}
+          {isAttach ? "掛上按鈕" : isCreate ? "發送" : "儲存"}
         </Button>
         <Button type="button" disabled={busy} onClick={onClose}>
           取消

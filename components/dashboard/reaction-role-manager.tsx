@@ -12,7 +12,7 @@ import { ReactionRoleForm } from "./reaction-role-form"
 import { ReactionRoleSection } from "./reaction-role-section"
 
 interface OpenForm {
-  message: ReactionRoleMessage | null
+  message: Pick<ReactionRoleMessage, "message_id"> | null
   restored?: ReactionRoleFormDraft
 }
 
@@ -48,6 +48,7 @@ export function ReactionRoleManager({ guildId }: { guildId: string }) {
           restored={form.restored}
           onClose={() => setForm(null)}
           onSaved={() => setListKey((n) => n + 1)}
+          onOpenExisting={(messageId) => open({ message: { message_id: messageId } })}
         />
       )}
       <ReactionRoleSection
@@ -55,7 +56,7 @@ export function ReactionRoleManager({ guildId }: { guildId: string }) {
         guildId={guildId}
         headerActions={() => (
           <Button type="button" size="sm" onClick={() => open({ message: null })}>
-            發新訊息
+            新增（發新訊息或掛到既有訊息）
           </Button>
         )}
         actions={(message) =>

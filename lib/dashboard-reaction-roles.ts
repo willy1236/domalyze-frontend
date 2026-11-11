@@ -171,6 +171,9 @@ export interface FormButton {
 export interface ReactionRoleFormDraft {
   /** null 表示新增 */
   messageId: string | null
+  /** 新增時的來源：發新訊息，或掛到既有訊息（已選定的那則）；舊暫存沒有此欄位，視為新訊息 */
+  source?: "new" | "existing"
+  existing?: { messageId: string; jumpUrl: string; summary: string } | null
   channelId: string | null
   original: OriginalSnapshot | null
   /** 內容不能改時為 null */
@@ -325,11 +328,81 @@ export function fetchReactionRoleDetail(
   return dashboardFetch<ReactionRoleDetail>(`${base(guildId)}/${encodeURIComponent(messageId)}`, {}, { signal })
 }
 
+/** 發新訊息，或掛到 bot 既有的訊息 */
+export type CreateTarget =
+  | { kind: "new"; channel_id: string }
+  | { kind: "existing"; channel_id: string; message_id: string }
+
 export function createReactionRole(
   guildId: string,
-  body: { channel_id: string; message: MessageContent; buttons: ButtonSnapshot[] },
+  body: {
+    target: CreateTarget
+    /** 新訊息必填；掛到既有訊息且內容不能改時為 null */
+    message: MessageContent | null
+    buttons: ButtonSnapshot[]
+  },
 ): Promise<{ message_id: string; jump_url: string }> {
   return dashboardFetch(base(guildId), { method: "POST", json: body })
+}
+
+// ====== R-03：掛到既有訊息 ======
+
+export interface Candidate {
+  message_id: string
+  summary: string
+  created_at: string
+  /** free：可掛；reaction_role：已是反應身分組，點選後進入編輯 */
+  status: "free" | "reaction_role"
+}
+
+export function fetchCandidates(guildId: string, channelId: string, signal?: AbortSignal): Promise<{ messages: Candidate[] }> {
+  return dashboardFetch(`${base(guildId)}/candidates?channel_id=${encodeURIComponent(channelId)}`, {}, { signal })
+}
+
+export type ResolvedMessage =
+  | { status: "reaction_role"; message_id: string; channel: { id: string; name: string }; jump_url: string; summary: string }
+  | {
+      status: "free"
+      message_id: string
+      channel: { id: string; name: string }
+      jump_url: string
+      summary: string
+      /** 內容不能改時為 null */
+      content: MessageContent | null
+      content_locked: string | null
+    }
+
+export function resolveMessageLink(guildId: string, link: string, signal?: AbortSignal): Promise<ResolvedMessage> {
+  return dashboardFetch(`${base(guildId)}/resolve?link=${encodeURIComponent(link)}`, {}, { signal })
+}
+
+/** 候選清單裡的訊息對應的連結（resolve 用） */
+export function messageLink(guildId: string, channelId: string, messageId: string): string {
+  return `https://discord.com/channels/${guildId}/${channelId}/${messageId}`
+}
+
+const TARGET_REJECT_TEXT: Record<string, string> = {
+  invalid_link: "這不是 Discord 訊息連結。",
+  wrong_guild: "這則訊息不屬於這個伺服器。",
+  not_bot_message: "只能掛在星羽發的訊息上。",
+  has_components: "這則訊息已經帶有其他按鈕或互動元件，不能掛反應身分組。",
+  message_not_found: "找不到這則訊息。",
+  bot_missing_permission: "星羽看不到這個頻道的訊息，請確認有 View Channel 與 Read Message History。",
+}
+
+/** 選擇或解析既有訊息被擋下的原因文字；不是已知原因回 null */
+export function targetRejectText(e: unknown): string | null {
+  if (!(e instanceof DashboardApiError) || !e.code) return null
+  return TARGET_REJECT_TEXT[e.code] ?? null
+}
+
+/** 掛上時發現訊息已是反應身分組：回該訊息 ID，供轉到編輯 */
+export function alreadyReactionRoleId(e: unknown): string | null {
+  if (e instanceof DashboardApiError && e.code === "already_reaction_role") {
+    const id = e.body?.message_id
+    return typeof id === "string" ? id : null
+  }
+  return null
 }
 
 export function updateReactionRole(
@@ -347,6 +420,7 @@ export type SaveProblem =
   | { kind: "content_locked"; text: string }
   | { kind: "bot_missing_permission"; text: string }
   | { kind: "message_not_found" }
+  | { kind: "target_rejected"; text: string }
   | { kind: "discord_error"; text: string }
   | { kind: "save_failed" }
 
@@ -377,6 +451,10 @@ export function parseSaveProblem(e: unknown): SaveProblem | null {
       return { kind: "bot_missing_permission", text: fieldList(body)[0]?.reason ?? "bot 缺少發送訊息的權限" }
     case "message_not_found":
       return { kind: "message_not_found" }
+    case "wrong_guild":
+    case "not_bot_message":
+    case "has_components":
+      return { kind: "target_rejected", text: targetRejectText(e) ?? "這則訊息不能掛反應身分組。" }
     case "discord_error":
       return { kind: "discord_error", text: String(body.message ?? "") }
     case "save_failed":
