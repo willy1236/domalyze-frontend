@@ -332,6 +332,26 @@ describe("ReactionRoleResendButton", () => {
     expect(onDone).not.toHaveBeenCalled()
   })
 
+  it("紀錄被並發處理掉（409）時說明並在關閉後重新載入", async () => {
+    responses[`POST ${BASE}/900/resend`] = { status: 409, body: { error: "conflict", deleted: true, current: null } }
+    const { onDone } = await mountResend()
+    await click(sendButton())
+    expect(text()).toContain("剛被別人重新發送或移除")
+    expect(onDone).not.toHaveBeenCalled()
+    await click(buttonByText("取消"))
+    expect(onDone).toHaveBeenCalledTimes(1)
+  })
+
+  it("原頻道讀不到舊訊息時顯示缺少權限的說明", async () => {
+    responses[`POST ${BASE}/900/resend`] = {
+      status: 400,
+      body: { error: "bot_missing_permission", fields: [{ path: "channel_id", reason: "我讀不到原本頻道的訊息" }] },
+    }
+    await mountResend()
+    await click(sendButton())
+    expect(text()).toContain("我讀不到原本頻道的訊息")
+  })
+
   it("後端指出頻道有問題時顯示在視窗內", async () => {
     responses[`POST ${BASE}/900/resend`] = {
       status: 400,

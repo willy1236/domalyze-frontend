@@ -57,6 +57,7 @@ export function ReactionRoleResendButton({
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [result, setResult] = useState<ResendResult | null>(null)
+  const [stale, setStale] = useState(false)
   const ref = useRef<HTMLDialogElement>(null)
   const uid = useId()
   const channelLabel = message.channel.name ? `#${message.channel.name}` : "此訊息"
@@ -103,7 +104,8 @@ export function ReactionRoleResendButton({
     setError(null)
     setResult(null)
     setContentErrors([])
-    if (finished) onDone()
+    setStale(false)
+    if (finished || stale) onDone()
   }
 
   async function send() {
@@ -145,6 +147,9 @@ export function ReactionRoleResendButton({
         setError("這則訊息在 Discord 上又出現了，不需要重新發送。請關閉後重新整理。")
       } else if (problem.kind === "not_found") {
         setError("這筆紀錄已被移除。請關閉後重新整理。")
+      } else if (problem.kind === "record_gone") {
+        setStale(true)
+        setError("這筆紀錄剛被別人重新發送或移除了，剛發出的訊息已刪除。按「取消」關閉視窗後，一覽會重新載入。")
       } else if (problem.kind === "bot_missing_permission") {
         setError(problem.text)
       } else if (problem.kind === "discord_error") {

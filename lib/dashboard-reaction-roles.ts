@@ -553,6 +553,7 @@ export type ResendProblem =
   | { kind: "no_valid_buttons"; skipped: SkippedButton[] }
   | { kind: "message_exists" }
   | { kind: "not_found" }
+  | { kind: "record_gone" }
   | { kind: "bot_missing_permission"; text: string }
   | { kind: "discord_error"; text: string }
   | { kind: "save_failed" }
@@ -572,6 +573,8 @@ export function parseResendProblem(e: unknown): ResendProblem | null {
       return { kind: "message_exists" }
     case "not_found":
       return { kind: "not_found" }
+    case "conflict":
+      return { kind: "record_gone" }
     case "bot_missing_permission":
       return { kind: "bot_missing_permission", text: fieldList(body)[0]?.reason ?? "星羽缺少發送訊息的權限" }
     case "discord_error":
