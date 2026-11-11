@@ -39,7 +39,15 @@ describe("NAV_ITEMS", () => {
   })
 
   it("目前完成頁面的區塊", () => {
-    expect(NAV_ITEMS.filter((i) => i.ready).map((i) => i.key)).toEqual(["notify", "dynamic_voice", "reaction_roles", "warnings", "giveaways", "settings"])
+    expect(NAV_ITEMS.filter((i) => i.ready).map((i) => i.key)).toEqual([
+      "notify",
+      "dynamic_voice",
+      "reaction_roles",
+      "tickets",
+      "warnings",
+      "giveaways",
+      "settings",
+    ])
   })
 })
 
@@ -62,7 +70,8 @@ describe("visibleNavItems", () => {
   })
 
   it("ready 為 false 的區塊即使有權限也不顯示", () => {
-    expect(visibleNavItems(manageChannels).map((i) => i.key)).toEqual(["notify", "dynamic_voice", "warnings"])
+    const items = NAV_ITEMS.map((i) => (i.key === "warnings" ? { ...i, ready: false } : i))
+    expect(visibleNavItems(manageChannels, items).map((i) => i.key)).toEqual(["notify", "dynamic_voice", "tickets"])
   })
 })
 
@@ -80,7 +89,8 @@ describe("firstSection", () => {
   })
 
   it("權限只涵蓋尚未完成的區塊時回 null", () => {
-    expect(firstSection([{ key: "tickets", actions: ["view"] }])).toBeNull()
+    const items = NAV_ITEMS.map((i) => (i.key === "tickets" ? { ...i, ready: false } : i))
+    expect(firstSection([{ key: "tickets", actions: ["view"] }], items)).toBeNull()
   })
 
   it("沒有任何區塊回 null", () => {

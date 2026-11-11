@@ -33,7 +33,7 @@ export const NAV_ITEMS: readonly NavItemDef[] = [
   { key: "notify", label: "通知", path: "", ready: true },
   { key: "dynamic_voice", label: "動態語音", path: "/voice", ready: true },
   { key: "reaction_roles", label: "反應身分組", path: "/reaction-roles", ready: true },
-  { key: "tickets", label: "私人頻道", path: "/tickets", ready: false },
+  { key: "tickets", label: "私人頻道", path: "/tickets", ready: true },
   { key: "warnings", label: "警告", path: "/warnings", ready: true },
   { key: "giveaways", label: "抽獎", path: "/giveaways", ready: true },
   { key: "settings", label: "基本設定", path: "/settings", ready: true },
