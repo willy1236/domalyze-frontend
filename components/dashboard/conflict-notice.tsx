@@ -7,6 +7,9 @@ export type ConflictValues = Record<string, string | null>
 const FIELD_LABELS: Record<string, string> = {
   channel_id: "頻道",
   voice_time_counter: "語音時數統計",
+  auto_timeout_enabled: "自動禁言",
+  auto_timeout_times: "警告次數",
+  auto_timeout_seconds: "禁言時長",
   role_id: "身分組",
   message: "自訂文字",
   template: "名稱模板",
