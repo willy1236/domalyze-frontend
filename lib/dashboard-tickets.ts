@@ -451,3 +451,40 @@ export function lobbyConflictValues(v: {
 export function failureLabel(f: { channel_id: string }, names: Record<string, string | null | undefined>): string {
   return names[f.channel_id] ? `#${names[f.channel_id]}` : `頻道 ${f.channel_id}`
 }
+
+// ====== 鎖定、重開、刪除私人頻道（P-04） ======
+
+export type TicketAction = "lock" | "reopen" | "delete"
+
+export interface TicketActionResult {
+  channel_id: string
+  status: TicketStatus | "deleted"
+  /** false 表示目標本來就是要求的狀態，什麼都沒做 */
+  changed: boolean
+}
+
+const channelPath = (guildId: string, channelId: string) => `${base(guildId)}/channels/${encodeURIComponent(channelId)}`
+
+/** 鎖定、重開或刪除私人頻道。目標已是要求的狀態（含已被刪除）時後端也回成功。 */
+export function runTicketAction(guildId: string, channelId: string, action: TicketAction): Promise<TicketActionResult> {
+  const path = channelPath(guildId, channelId)
+  return action === "delete"
+    ? dashboardFetch(path, { method: "DELETE" })
+    : dashboardFetch(`${path}/${action}`, { method: "POST" })
+}
+
+const ACTION_ERRORS: Record<string, string> = {
+  not_found: "找不到這個私人頻道，可能已在 Discord 被刪除。",
+  bot_missing_permission: "我缺少這個頻道的 Manage Roles 或 Manage Channels 權限，請補上後再試。",
+  discord_error: "Discord 回應錯誤，請稍後再試。",
+  save_failed: "儲存失敗，Discord 上的變更已還原，請稍後再試。",
+}
+
+export function ticketActionErrorText(code: string | null): string {
+  return (code && ACTION_ERRORS[code]) || "操作失敗，請稍後再試。"
+}
+
+/** 每列可做的動作：開啟中可鎖定，已鎖定可重開；兩種狀態都能刪除。 */
+export function ticketRowActions(status: TicketStatus): TicketAction[] {
+  return status === "open" ? ["lock", "delete"] : ["reopen", "delete"]
+}

@@ -5,7 +5,7 @@ import { Button, Input, Select } from "@/components/ui"
 import { DashboardApiError } from "@/lib/dashboard-api"
 import { registerDraft } from "@/lib/dashboard-draft"
 import { useLoad } from "@/lib/use-load"
-import { emptyMessage, moveItem, readBackReasonText, type FieldError, type MessageContent } from "@/lib/dashboard-message"
+import { charLength, emptyMessage, moveItem, readBackReasonText, type FieldError, type MessageContent } from "@/lib/dashboard-message"
 import {
   MAX_BUTTONS,
   MAX_BUTTON_TITLE,
@@ -235,8 +235,11 @@ function ButtonRow({ index, button, buttons, options, error, busy, onChange, onM
           </Select>
         </div>
         <div>
-          <label htmlFor={`${uid}-title`} className={labelClass}>
-            標題（最多 {MAX_BUTTON_TITLE} 字）
+          <label htmlFor={`${uid}-title`} className="mb-1 flex items-baseline justify-between gap-2 text-sm text-gray-600 dark:text-gray-400">
+            <span>標題</span>
+            <span className={`tabular-nums text-xs ${charLength(button.title.trim()) > MAX_BUTTON_TITLE ? "text-red-700 dark:text-red-300" : ""}`}>
+              {charLength(button.title.trim())}／{MAX_BUTTON_TITLE}
+            </span>
           </label>
           <Input
             id={`${uid}-title`}

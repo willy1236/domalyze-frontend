@@ -88,9 +88,10 @@ export function emptyMessage(): MessageContent {
 }
 
 /** 與後端一致：以字元（code point）計算長度 */
-function len(value: string | null | undefined): number {
+export function charLength(value: string | null | undefined): number {
   return value ? [...value].length : 0
 }
+const len = charLength
 
 /** 沒有任何文字或圖片類欄位就是空的；只有 color 或 timestamp 也算空 */
 export function embedIsEmpty(e: EmbedContent | null): boolean {

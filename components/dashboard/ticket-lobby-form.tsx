@@ -525,7 +525,7 @@ export function TicketLobbyForm({ guildId, lobby, restored, onClose, onSaved }: 
 
           <div>
             <RoleMultiSelect
-              legend="管理身分組（可多選，也可以不設）"
+              legend="管理身分組"
               options={options?.roles ?? null}
               value={managerRoleIds}
               disabled={busy}
@@ -564,7 +564,7 @@ export function TicketLobbyForm({ guildId, lobby, restored, onClose, onSaved }: 
             </div>
             <div>
               <label htmlFor={`${uid}-max`} className={labelClass}>
-                同時開啟上限（留空不限）
+                整個大廳的同時開啟上限
               </label>
               <Input
                 id={`${uid}-max`}
@@ -577,12 +577,17 @@ export function TicketLobbyForm({ guildId, lobby, restored, onClose, onSaved }: 
                   clear("max_open")
                 }}
               />
-              <p className={`mt-1 text-sm ${muted}`}>已鎖定、還沒刪除的私人頻道也算在內。</p>
+              <p className={`mt-1 text-sm ${muted}`}>
+                所有成員合計，這個大廳同時存在的私人頻道最多幾個，達到後任何人都不能再開單；已鎖定、還沒刪除的也算在內。留空表示不限。
+              </p>
               {fieldError("max_open") && <Problem>{fieldError("max_open")}</Problem>}
               <label className="mt-3 flex items-center gap-2 text-sm">
                 <input type="checkbox" checked={onePerUser} disabled={busy} onChange={(e) => setOnePerUser(e.target.checked)} />
-                每人在這個大廳同時只能有一張
+                每人限開一張
               </label>
+              <p className={`mt-1 text-sm ${muted}`}>
+                勾選時，每位成員在這個大廳同時只能有一張私人頻道；不勾選則每人不限張數，只受上面的整體上限限制。
+              </p>
             </div>
           </div>
 
