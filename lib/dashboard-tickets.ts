@@ -474,7 +474,7 @@ export function runTicketAction(guildId: string, channelId: string, action: Tick
 }
 
 const ACTION_ERRORS: Record<string, string> = {
-  not_found: "找不到這個私人頻道，可能已在 Discord 被刪除。清單已重新載入。",
+  not_found: "找不到這個私人頻道，可能已在 Discord 被刪除。",
   bot_missing_permission: "我缺少這個頻道的 Manage Roles 或 Manage Channels 權限，請補上後再試。",
   discord_error: "Discord 回應錯誤，請稍後再試。",
   save_failed: "儲存失敗，Discord 上的變更已還原，請稍後再試。",

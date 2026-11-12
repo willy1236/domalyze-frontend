@@ -180,5 +180,6 @@ describe("私人頻道列的動作", () => {
     const before = listLoads()
     await click(button("鎖定 #report-101")!)
     expect(listLoads()).toBe(before + 1)
+    expect(container.querySelector('[role="alert"]')).toBeNull()
   })
 })

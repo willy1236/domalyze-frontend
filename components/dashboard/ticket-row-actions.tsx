@@ -47,14 +47,15 @@ export function TicketRowActions({
       reload()
     } catch (err) {
       const code = err instanceof DashboardApiError ? err.code : null
-      if (!(err instanceof DashboardApiError && err.handled)) {
-        console.error("ticket action failed", err)
-        setError(ticketActionErrorText(code))
-      }
-      // 頻道已不在：紀錄已被後端清掉，清單要重新載入
+      // 頻道已不在：紀錄已被後端清掉，重新載入後這一列就消失，不另外顯示錯誤（元件會跟著卸載）
       if (code === "not_found") {
         setConfirming(false)
         reload()
+        return
+      }
+      if (!(err instanceof DashboardApiError && err.handled)) {
+        console.error("ticket action failed", err)
+        setError(ticketActionErrorText(code))
       }
     } finally {
       setBusy(null)
