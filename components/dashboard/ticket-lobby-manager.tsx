@@ -7,6 +7,7 @@ import { TICKET_DRAFT_KEY, type LobbyFormDraft } from "@/lib/dashboard-tickets"
 import { TicketLobbyForm } from "./ticket-lobby-form"
 import { TicketLobbyRemoveButton } from "./ticket-lobby-remove-button"
 import { TicketLobbySection } from "./ticket-lobby-section"
+import { TicketRowActions } from "./ticket-row-actions"
 
 interface OpenForm {
   lobby: { channel: { id: string } } | null
@@ -63,6 +64,7 @@ export function TicketLobbyManager({ guildId }: { guildId: string }) {
             <TicketLobbyRemoveButton guildId={guildId} lobby={lobby} onDone={reload} />
           </>
         )}
+        ticketActions={(ticket, reload) => <TicketRowActions guildId={guildId} ticket={ticket} reload={reload} />}
       />
     </div>
   )
