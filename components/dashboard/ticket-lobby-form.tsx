@@ -4,12 +4,13 @@ import { useEffect, useId, useRef, useState, type ReactNode } from "react"
 import { Button, Input, Select } from "@/components/ui"
 import { DashboardApiError } from "@/lib/dashboard-api"
 import { registerDraft } from "@/lib/dashboard-draft"
-import type { FieldError, MessageContent } from "@/lib/dashboard-message"
+import { charLength, type FieldError, type MessageContent } from "@/lib/dashboard-message"
 import { UNICODE_EMOJIS } from "@/lib/dashboard-reaction-roles"
 import {
   DEFAULT_BUTTON_LABEL,
   MAX_BUTTON_LABEL,
   MAX_PREFIX,
+  normalizePrefix,
   TICKET_DRAFT_KEY,
   createLobby,
   emojiText,
@@ -35,6 +36,7 @@ import {
   type LobbyRequest,
   type LobbySaveResult,
 } from "@/lib/dashboard-tickets"
+import { LabelWithCount } from "./char-count"
 import { ConflictNotice } from "./conflict-notice"
 import { WarnIcon } from "./icons"
 import { MessageEditor } from "./message-editor"
@@ -544,7 +546,9 @@ export function TicketLobbyForm({ guildId, lobby, restored, onClose, onSaved }: 
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
               <label htmlFor={`${uid}-prefix`} className={labelClass}>
-                頻道名稱前綴
+                <LabelWithCount used={charLength(normalizePrefix(namePrefix))} max={MAX_PREFIX}>
+                  頻道名稱前綴
+                </LabelWithCount>
               </label>
               <Input
                 id={`${uid}-prefix`}
@@ -558,7 +562,7 @@ export function TicketLobbyForm({ guildId, lobby, restored, onClose, onSaved }: 
               />
               <p className={`mt-1 text-sm ${muted}`}>
                 {prefixExample(namePrefix) ? `私人頻道會叫「${prefixExample(namePrefix)}」。` : ""}
-                處理後須為 1 到 {MAX_PREFIX} 個字元，不同大廳可以用相同的前綴。
+                字數以處理後的結果計算，至少 1 個字元；不同大廳可以用相同的前綴。
               </p>
               {fieldError("name_prefix") && <Problem>{fieldError("name_prefix")}</Problem>}
             </div>
@@ -609,7 +613,9 @@ export function TicketLobbyForm({ guildId, lobby, restored, onClose, onSaved }: 
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
               <label htmlFor={`${uid}-label`} className={labelClass}>
-                開單按鈕文字（預設「{DEFAULT_BUTTON_LABEL}」）
+                <LabelWithCount used={charLength(buttonLabel.trim())} max={MAX_BUTTON_LABEL}>
+                  開單按鈕文字（預設「{DEFAULT_BUTTON_LABEL}」）
+                </LabelWithCount>
               </label>
               <Input
                 id={`${uid}-label`}

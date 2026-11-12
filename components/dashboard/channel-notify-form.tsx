@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react"
 import { Button, Textarea } from "@/components/ui"
 import { DashboardApiError } from "@/lib/dashboard-api"
+import { charLength, CONTENT_MAX } from "@/lib/dashboard-message"
 import {
   type ChannelNotifyType,
   type ChannelNotifyValues,
@@ -14,6 +15,7 @@ import { registerDraft } from "@/lib/dashboard-draft"
 import { useNotifyOptions } from "@/lib/dashboard-options"
 import { useNotifyPreview } from "@/lib/dashboard-preview"
 import { ChannelSelect } from "./channel-select"
+import { LabelWithCount } from "./char-count"
 import { ConflictNotice } from "./conflict-notice"
 import { WarnIcon } from "./icons"
 import { NotifyPreview } from "./notify-preview"
@@ -200,7 +202,9 @@ export function ChannelNotifyForm({ guildId, type, original, restored, onClose, 
       {type.hasMessage && (
         <div>
           <label htmlFor="notify-message" className={labelClass}>
-            自訂文字（留空使用預設文字，可用 {"{member}"} 代表成員）
+            <LabelWithCount used={charLength(message)} max={CONTENT_MAX}>
+              自訂文字（留空使用預設文字，可用 {"{member}"} 代表成員）
+            </LabelWithCount>
           </label>
           <Textarea
             id="notify-message"

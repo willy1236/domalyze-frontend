@@ -85,11 +85,16 @@ export function normalizeTemplate(raw: string): string | null {
   return trimmed === "" ? null : trimmed
 }
 
-/** `{member}` 當成最長的 username 估算，房名是否超過上限；以 code point 計數，與 Python len 一致 */
-export function templateTooLong(raw: string): boolean {
+/** `{member}` 當成最長的 username 估算的房名長度；以 code point 計數，與 Python len 一致。留空（用預設房名）回 0 */
+export function estimatedRoomNameLength(raw: string): number {
   const template = normalizeTemplate(raw)
-  if (template === null) return false
-  return [...template.replaceAll("{member}", "x".repeat(MAX_USERNAME))].length > MAX_ROOM_NAME
+  if (template === null) return 0
+  return [...template.replaceAll("{member}", "x".repeat(MAX_USERNAME))].length
+}
+
+/** 估算的房名是否超過上限 */
+export function templateTooLong(raw: string): boolean {
+  return estimatedRoomNameLength(raw) > MAX_ROOM_NAME
 }
 
 /** 預覽 bot 開房時的房名；取不到 username 時用「使用者名稱」字樣 */

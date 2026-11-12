@@ -44,6 +44,7 @@ import {
   type ReactionRoleOptions,
   type ResolvedMessage,
 } from "@/lib/dashboard-reaction-roles"
+import { LabelWithCount } from "./char-count"
 import { ConflictNotice } from "./conflict-notice"
 import { WarnIcon } from "./icons"
 import { MessageEditor } from "./message-editor"
@@ -235,11 +236,10 @@ function ButtonRow({ index, button, buttons, options, error, busy, onChange, onM
           </Select>
         </div>
         <div>
-          <label htmlFor={`${uid}-title`} className="mb-1 flex items-baseline justify-between gap-2 text-sm text-gray-600 dark:text-gray-400">
-            <span>標題</span>
-            <span className={`tabular-nums text-xs ${charLength(button.title.trim()) > MAX_BUTTON_TITLE ? "text-red-700 dark:text-red-300" : ""}`}>
-              {charLength(button.title.trim())}／{MAX_BUTTON_TITLE}
-            </span>
+          <label htmlFor={`${uid}-title`} className={labelClass}>
+            <LabelWithCount used={charLength(button.title.trim())} max={MAX_BUTTON_TITLE}>
+              標題
+            </LabelWithCount>
           </label>
           <Input
             id={`${uid}-title`}

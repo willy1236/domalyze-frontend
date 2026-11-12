@@ -22,6 +22,7 @@ import {
   type MessageContent,
   type PreviewButton,
 } from "@/lib/dashboard-message"
+import { LabelWithCount } from "./char-count"
 import { MessagePreview } from "./message-preview"
 
 interface Props {
@@ -52,18 +53,16 @@ function Field({
   children: ReactNode
 }) {
   const mine = errors.filter((e) => e.path === path)
-  const used = count ? charLength(count.value) : 0
   return (
     <div>
       <label className={labelClass}>
-        <span className="flex items-baseline justify-between gap-2">
-          <span>{label}</span>
-          {count && (
-            <span className={`tabular-nums text-xs ${used > count.max ? "text-red-700 dark:text-red-300" : ""}`}>
-              {used}／{count.max}
-            </span>
-          )}
-        </span>
+        {count ? (
+          <LabelWithCount used={charLength(count.value)} max={count.max}>
+            {label}
+          </LabelWithCount>
+        ) : (
+          <span className="block">{label}</span>
+        )}
         {children}
       </label>
       {mine.map((e, i) => (

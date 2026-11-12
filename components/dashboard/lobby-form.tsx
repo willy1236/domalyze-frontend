@@ -12,11 +12,13 @@ import {
   parseLobbyProblem,
   previewRoomName,
   saveLobby,
+  estimatedRoomNameLength,
   templateTooLong,
   type Lobby,
   type LobbyOptions,
   type LobbyValues,
 } from "@/lib/dashboard-dynamic-voice"
+import { LabelWithCount } from "./char-count"
 import { ConflictNotice } from "./conflict-notice"
 import { WarnIcon } from "./icons"
 
@@ -217,7 +219,9 @@ export function LobbyForm({ guildId, lobby, restored, onClose, onSaved, onRemove
 
       <div>
         <label htmlFor="lobby-template" className={labelClass}>
-          房間名稱模板（留空使用預設，可用 {"{member}"} 代表建立者的 username）
+          <LabelWithCount used={estimatedRoomNameLength(template)} max={MAX_ROOM_NAME} prefix="預估 ">
+            房間名稱模板（留空使用預設，可用 {"{member}"} 代表建立者的 username）
+          </LabelWithCount>
         </label>
         <Input
           id="lobby-template"

@@ -1,6 +1,14 @@
 import { describe, expect, it } from "vitest"
 import { DashboardApiError } from "./dashboard-api"
-import { normalizeTemplate, parseLobbyProblem, previewRoomName, templateTooLong } from "./dashboard-dynamic-voice"
+import { estimatedRoomNameLength, normalizeTemplate, parseLobbyProblem, previewRoomName, templateTooLong } from "./dashboard-dynamic-voice"
+
+describe("estimatedRoomNameLength", () => {
+  it("{member} 以 32 個字元計，留空回 0，emoji 算一個字元", () => {
+    expect(estimatedRoomNameLength("{member} 的房間")).toBe(36)
+    expect(estimatedRoomNameLength("   ")).toBe(0)
+    expect(estimatedRoomNameLength("🎮")).toBe(1)
+  })
+})
 
 describe("templateTooLong", () => {
   it("{member} 以 32 個字元估算：加 68 個字元可存，69 個不行", () => {

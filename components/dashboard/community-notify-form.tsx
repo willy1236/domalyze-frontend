@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react"
 import { Button, Input, Select, Textarea } from "@/components/ui"
 import { DashboardApiError } from "@/lib/dashboard-api"
+import { charLength, CONTENT_MAX } from "@/lib/dashboard-message"
 import type { ChannelNotifyValues } from "@/lib/dashboard-channel-notifies"
 import {
   COMMUNITY_NOTIFY_TYPES,
@@ -26,6 +27,7 @@ import { useNotifyOptions } from "@/lib/dashboard-options"
 import { useNotifyPreview } from "@/lib/dashboard-preview"
 import type { NotifyItem } from "@/lib/dashboard-notifies"
 import { ChannelSelect } from "./channel-select"
+import { LabelWithCount } from "./char-count"
 import { ConflictNotice } from "./conflict-notice"
 import { WarnIcon } from "./icons"
 import { NotifyPreview } from "./notify-preview"
@@ -402,7 +404,9 @@ export function CommunityNotifyForm({ guildId, items, initial, onClose, onChange
           {hasMessage && (
             <div>
               <label htmlFor="community-message" className={labelClass}>
-                自訂文字（留空使用預設文字）
+                <LabelWithCount used={charLength(message)} max={CONTENT_MAX}>
+                  自訂文字（留空使用預設文字）
+                </LabelWithCount>
               </label>
               <Textarea
                 id="community-message"

@@ -27,6 +27,7 @@ import {
   type PunishFieldErrors,
   type WarningKind,
 } from "@/lib/dashboard-warnings"
+import { LabelWithCount } from "./char-count"
 import { WarnIcon } from "./icons"
 
 const muted = "text-gray-600 dark:text-gray-400"
@@ -316,7 +317,9 @@ function PunishDialog({ guildId, kinds, open, onClose, onDone }: PunishDialogPro
 
         <div>
           <label htmlFor={reasonId} className="mb-1 block text-sm font-medium">
-            原因{kind === "warning" || kind === "ban" ? "" : "（選填）"}
+            <LabelWithCount used={reasonLength} max={MAX_REASON_LENGTH}>
+              原因{kind === "warning" || kind === "ban" ? "" : "（選填）"}
+            </LabelWithCount>
           </label>
           <Textarea
             id={reasonId}
@@ -326,9 +329,6 @@ function PunishDialog({ guildId, kinds, open, onClose, onDone }: PunishDialogPro
             aria-describedby={errors.reason ? reasonErrId : undefined}
             onChange={(e) => patch({ reason: e.target.value })}
           />
-          <p className={`mt-1 text-xs tabular-nums ${reasonLength > MAX_REASON_LENGTH ? "text-red-700 dark:text-red-300" : muted}`}>
-            {reasonLength} / {MAX_REASON_LENGTH}
-          </p>
           <FieldError id={reasonErrId} text={errors.reason} />
         </div>
 
