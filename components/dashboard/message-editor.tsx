@@ -4,6 +4,7 @@ import { useEffect, useId, useRef, type ReactNode } from "react"
 import { Button, Input, Textarea } from "@/components/ui"
 import {
   AUTHOR_NAME_MAX,
+  charLength,
   CONTENT_MAX,
   DESCRIPTION_MAX,
   FIELDS_MAX,
@@ -36,12 +37,33 @@ const labelClass = "block text-sm text-gray-600 dark:text-gray-400 mb-1"
 
 const blankToNull = (v: string): string | null => (v === "" ? null : v)
 
-function Field({ label, path, errors, children }: { label: string; path: string; errors: FieldError[]; children: ReactNode }) {
+function Field({
+  label,
+  path,
+  errors,
+  count,
+  children,
+}: {
+  label: string
+  path: string
+  errors: FieldError[]
+  /** 有字數上限的欄位：目前內容與上限，標籤右側即時顯示「目前／上限」 */
+  count?: { value: string | null | undefined; max: number }
+  children: ReactNode
+}) {
   const mine = errors.filter((e) => e.path === path)
+  const used = count ? charLength(count.value) : 0
   return (
     <div>
       <label className={labelClass}>
-        <span className="block">{label}</span>
+        <span className="flex items-baseline justify-between gap-2">
+          <span>{label}</span>
+          {count && (
+            <span className={`tabular-nums text-xs ${used > count.max ? "text-red-700 dark:text-red-300" : ""}`}>
+              {used}／{count.max}
+            </span>
+          )}
+        </span>
         {children}
       </label>
       {mine.map((e, i) => (
@@ -82,19 +104,19 @@ export function MessageEditor({ value, onChange, errors, buttons }: Props) {
         <h3 id={headingId} className="sr-only">
           訊息內容
         </h3>
-        <Field label={`文字（最多 ${CONTENT_MAX} 字）`} path="content" errors={errors}>
+        <Field label="文字" path="content" errors={errors} count={{ value: value.content, max: CONTENT_MAX }}>
           <Textarea rows={3} value={value.content ?? ""} onChange={(e) => onChange({ ...value, content: blankToNull(e.target.value) })} />
         </Field>
 
         <fieldset className="space-y-3 rounded-md border border-gray-300 dark:border-gray-600 p-3">
           <legend className="px-1 text-sm font-semibold">Embed</legend>
-          <Field label={`標題（最多 ${TITLE_MAX} 字）`} path="embed.title" errors={errors}>
+          <Field label="標題" path="embed.title" errors={errors} count={{ value: embed.title, max: TITLE_MAX }}>
             <Input className="w-full" value={embed.title ?? ""} onChange={(e) => setEmbed({ title: blankToNull(e.target.value) })} />
           </Field>
           <Field label="標題連結" path="embed.url" errors={errors}>
             <Input className="w-full" inputMode="url" value={embed.url ?? ""} onChange={(e) => setEmbed({ url: blankToNull(e.target.value) })} />
           </Field>
-          <Field label={`說明（最多 ${DESCRIPTION_MAX} 字）`} path="embed.description" errors={errors}>
+          <Field label="說明" path="embed.description" errors={errors} count={{ value: embed.description, max: DESCRIPTION_MAX }}>
             <Textarea rows={4} value={embed.description ?? ""} onChange={(e) => setEmbed({ description: blankToNull(e.target.value) })} />
           </Field>
           <Field label="顏色" path="embed.color" errors={errors}>
@@ -111,7 +133,7 @@ export function MessageEditor({ value, onChange, errors, buttons }: Props) {
             </span>
           </Field>
 
-          <Field label={`作者名稱（最多 ${AUTHOR_NAME_MAX} 字）`} path="embed.author.name" errors={errors}>
+          <Field label="作者名稱" path="embed.author.name" errors={errors} count={{ value: author.name, max: AUTHOR_NAME_MAX }}>
             <Input className="w-full" value={author.name ?? ""} onChange={(e) => setEmbed({ author: { ...author, name: blankToNull(e.target.value) } })} />
           </Field>
           <Field label="作者連結" path="embed.author.url" errors={errors}>
@@ -130,14 +152,14 @@ export function MessageEditor({ value, onChange, errors, buttons }: Props) {
             ))}
             {embed.fields.map((f, i) => (
               <div key={i} className="space-y-2 rounded-md border border-gray-300 dark:border-gray-600 p-2">
-                <Field label={`名稱（最多 ${FIELD_NAME_MAX} 字）`} path={`embed.fields.${i}.name`} errors={errors}>
+                <Field label="名稱" path={`embed.fields.${i}.name`} errors={errors} count={{ value: f.name, max: FIELD_NAME_MAX }}>
                   <Input
                     className="w-full"
                     value={f.name}
                     onChange={(e) => setFields(embed.fields.map((x, j) => (j === i ? { ...x, name: e.target.value } : x)))}
                   />
                 </Field>
-                <Field label={`內容（最多 ${FIELD_VALUE_MAX} 字）`} path={`embed.fields.${i}.value`} errors={errors}>
+                <Field label="內容" path={`embed.fields.${i}.value`} errors={errors} count={{ value: f.value, max: FIELD_VALUE_MAX }}>
                   <Textarea
                     rows={2}
                     value={f.value}
@@ -181,7 +203,7 @@ export function MessageEditor({ value, onChange, errors, buttons }: Props) {
           <Field label="縮圖網址" path="embed.thumbnail_url" errors={errors}>
             <Input className="w-full" inputMode="url" value={embed.thumbnail_url ?? ""} onChange={(e) => setEmbed({ thumbnail_url: blankToNull(e.target.value) })} />
           </Field>
-          <Field label={`頁尾文字（最多 ${FOOTER_TEXT_MAX} 字）`} path="embed.footer.text" errors={errors}>
+          <Field label="頁尾文字" path="embed.footer.text" errors={errors} count={{ value: footer.text, max: FOOTER_TEXT_MAX }}>
             <Input className="w-full" value={footer.text ?? ""} onChange={(e) => setEmbed({ footer: { ...footer, text: blankToNull(e.target.value) } })} />
           </Field>
           <Field label="頁尾圖示網址" path="embed.footer.icon_url" errors={errors}>

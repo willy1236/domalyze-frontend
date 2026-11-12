@@ -95,6 +95,7 @@ const select = (label: string, nth = 0) =>
   [...container.querySelectorAll("label")].filter((l) => l.textContent?.startsWith(label)).map((l) => document.getElementById(l.htmlFor) as HTMLSelectElement)[nth]
 const input = (label: string, nth = 0) =>
   [...container.querySelectorAll("label")].filter((l) => l.textContent?.startsWith(label)).map((l) => document.getElementById(l.htmlFor) as HTMLInputElement)[nth]
+const titleInput = (nth: number) => container.querySelectorAll<HTMLInputElement>('input[id$="-title"]')[nth]
 const contentBox = () => container.querySelector("textarea") as HTMLTextAreaElement
 const text = () => container.textContent ?? ""
 const submit = async () => {
@@ -140,11 +141,11 @@ describe("ReactionRoleForm：發新訊息", () => {
     change(select("發送到哪個頻道"), "50")
     change(contentBox(), "歡迎")
     change(select("身分組", 0), "1")
-    change(input("標題（最多 80 字）", 0), " 活動 ")
+    change(titleInput(0), " 活動 ")
     change(select("Emoji", 0), "🎉")
     act(() => button("新增按鈕").click())
     change(select("身分組", 1), "2")
-    change(input("標題（最多 80 字）", 1), "遊戲")
+    change(titleInput(1), "遊戲")
     change(select("樣式", 1), "3")
     await submit()
     const post = calls.find((c) => c.method === "POST")!
@@ -181,7 +182,7 @@ describe("ReactionRoleForm：發新訊息", () => {
     change(select("發送到哪個頻道"), "50")
     change(contentBox(), "x")
     change(select("身分組", 0), "3")
-    change(input("標題（最多 80 字）", 0), "管理")
+    change(titleInput(0), "管理")
     expect(text()).toContain("任何人按下按鈕都會取得這些權限：Administrator、Manage Roles")
     await submit()
     expect(calls.some((c) => c.method === "POST")).toBe(true)
@@ -192,14 +193,14 @@ describe("ReactionRoleForm：發新訊息", () => {
     for (let i = 0; i < 24; i++) act(() => button("新增按鈕").click())
     expect(text()).toContain("按鈕（25／25）")
     expect(button("新增按鈕").disabled).toBe(true)
-    change(input("標題（最多 80 字）", 0), "第一")
-    change(input("標題（最多 80 字）", 1), "第二")
+    change(titleInput(0), "第一")
+    change(titleInput(1), "第二")
     act(() => (container.querySelector('[aria-label="第 1 顆按鈕下移"]') as HTMLButtonElement).click())
-    expect(input("標題（最多 80 字）", 0).value).toBe("第二")
-    expect(input("標題（最多 80 字）", 1).value).toBe("第一")
+    expect(titleInput(0).value).toBe("第二")
+    expect(titleInput(1).value).toBe("第一")
     act(() => (container.querySelector('[aria-label="刪除第 1 顆按鈕"]') as HTMLButtonElement).click())
     expect(text()).toContain("按鈕（24／25）")
-    expect(input("標題（最多 80 字）", 0).value).toBe("第一")
+    expect(titleInput(0).value).toBe("第一")
   })
 
   it("後端回報按鈕欄位錯誤時顯示在對應的按鈕，輸入內容保留", async () => {
@@ -211,11 +212,11 @@ describe("ReactionRoleForm：發新訊息", () => {
     change(select("發送到哪個頻道"), "50")
     change(contentBox(), "保留我")
     change(select("身分組", 0), "1")
-    change(input("標題（最多 80 字）", 0), "活動")
+    change(titleInput(0), "活動")
     await submit()
     expect(text()).toContain("我無法發放")
     expect(contentBox().value).toBe("保留我")
-    expect(input("標題（最多 80 字）", 0).value).toBe("活動")
+    expect(titleInput(0).value).toBe("活動")
   })
 })
 
@@ -223,8 +224,8 @@ describe("ReactionRoleForm：編輯", () => {
   it("帶入內容與按鈕；位階不低於操作者的按鈕停用並只能刪除", async () => {
     await mount({ message: LISTED })
     expect(contentBox().value).toBe("請選身分組")
-    expect(input("標題（最多 80 字）", 0).value).toBe("活動通知")
-    expect(input("標題（最多 80 字）", 1).disabled).toBe(true)
+    expect(titleInput(0).value).toBe("活動通知")
+    expect(titleInput(1).disabled).toBe(true)
     expect(select("身分組", 1).disabled).toBe(true)
     expect(text()).toContain("只能刪除，不能修改")
     expect((container.querySelector('[aria-label="刪除第 2 顆按鈕"]') as HTMLButtonElement).disabled).toBe(false)
@@ -234,7 +235,7 @@ describe("ReactionRoleForm：編輯", () => {
   it("存檔送出 original 快照與目前的內容", async () => {
     responses["PUT"] = { status: 200, body: DETAIL }
     const { onSaved } = await mount({ message: LISTED })
-    change(input("標題（最多 80 字）", 0), "活動通知二")
+    change(titleInput(0), "活動通知二")
     await submit()
     const put = calls.find((c) => c.method === "PUT")!
     expect(put.path).toContain("/reaction-roles/900")
@@ -262,7 +263,7 @@ describe("ReactionRoleForm：編輯", () => {
     expect(container.querySelector("textarea")).toBeNull()
     expect(text()).toContain("只能管理按鈕")
     expect(text()).toContain("兩個以上的 embed")
-    change(input("標題（最多 80 字）", 0), "改")
+    change(titleInput(0), "改")
     await submit()
     expect(calls.find((c) => c.method === "PUT")!.body!.message).toBeNull()
   })
@@ -320,7 +321,7 @@ describe("ReactionRoleForm：編輯", () => {
       },
     })
     expect(contentBox().value).toBe("暫存內容")
-    expect(input("標題（最多 80 字）", 0).value).toBe("暫存按鈕")
+    expect(titleInput(0).value).toBe("暫存按鈕")
     expect(calls.some((c) => c.path.endsWith("/reaction-roles/900"))).toBe(false)
   })
 })
@@ -384,7 +385,7 @@ describe("ReactionRoleForm：掛到既有訊息", () => {
     expect(contentBox().value).toBe("歡迎來到伺服器")
     expect(text()).toContain("已選擇：歡迎來到伺服器")
     change(select("身分組", 0), "1")
-    change(input("標題（最多 80 字）", 0), "活動")
+    change(titleInput(0), "活動")
     await submit()
     expect(calls.find((c) => c.method === "POST")!.body).toEqual({
       target: { kind: "existing", channel_id: "50", message_id: "700" },
@@ -432,7 +433,7 @@ describe("ReactionRoleForm：掛到既有訊息", () => {
     expect(contentBox()).toBeFalsy()
     expect(text()).toContain("內容不能在這裡修改，只能管理按鈕")
     change(select("身分組", 0), "1")
-    change(input("標題（最多 80 字）", 0), "活動")
+    change(titleInput(0), "活動")
     await submit()
     expect(calls.find((c) => c.method === "POST")!.body).toMatchObject({
       target: { kind: "existing", channel_id: "50", message_id: "700" },
@@ -465,7 +466,7 @@ describe("ReactionRoleForm：掛到既有訊息", () => {
     await openPicker({ onOpenExisting })
     await pick("歡迎來到伺服器")
     change(select("身分組", 0), "1")
-    change(input("標題（最多 80 字）", 0), "活動")
+    change(titleInput(0), "活動")
     await submit()
     expect(onOpenExisting).toHaveBeenCalledWith("700")
   })
