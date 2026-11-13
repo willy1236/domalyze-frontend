@@ -43,12 +43,16 @@ export const isEmptyRoom = (room: DynamicRoom) => room.member_count === 0
 
 /** 「月/日 時:分」，預設使用者本地時區；timeZone 讓測試能固定結果 */
 export function formatCreatedAt(iso: string, timeZone?: string): string {
-  return new Intl.DateTimeFormat("zh-TW", {
+  // 自己組字串：各版 ICU 在日期與時間之間放的空白字元不同（一般空白或窄空白）
+  const parts = new Intl.DateTimeFormat("zh-TW", {
     month: "numeric",
     day: "numeric",
     hour: "2-digit",
     minute: "2-digit",
-    hour12: false,
+    hourCycle: "h23",
     timeZone,
-  }).format(new Date(iso))
+  }).formatToParts(new Date(iso))
+  const get = (type: Intl.DateTimeFormatPartTypes) =>
+    parts.find((p) => p.type === type)?.value ?? ""
+  return `${get("month")}/${get("day")} ${get("hour")}:${get("minute")}`
 }
