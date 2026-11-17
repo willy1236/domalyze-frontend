@@ -35,18 +35,29 @@ export default function PersonalPage() {
   if (redirecting) return null
 
   return (
-    <div className="grid gap-6">
-      <h1 className="text-2xl font-serif">我的</h1>
-      {failed && <p className="text-gray-500 dark:text-gray-400">無法載入個人資料，請稍後重新整理頁面再試。</p>}
+    <div className="grid gap-10">
+      {failed && (
+        <>
+          <h1 className="text-2xl font-serif">我的</h1>
+          <p className="text-gray-500 dark:text-gray-400">無法載入個人資料，請稍後重新整理頁面再試。</p>
+        </>
+      )}
       {overview && (
         <>
           <AccountSection overview={overview} />
           <AssetsSection overview={overview} />
-          <RecordsSection overview={overview} />
-          <PlaylistsSection overview={overview} />
-          <DriveSection overview={overview} />
-          <NetbirdSection overview={overview} />
-          <PublicSettingsSection overview={overview} />
+          {/* 主欄放瀏覽與編輯為主的紀錄、歌單；側欄放設定型的工具與公開頁 */}
+          <div className="grid gap-10 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)] lg:gap-12 items-start empty:hidden">
+            <div className="grid gap-10 min-w-0 empty:hidden">
+              <RecordsSection overview={overview} />
+              <PlaylistsSection overview={overview} />
+            </div>
+            <aside className="grid gap-10 min-w-0 empty:hidden">
+              <DriveSection overview={overview} />
+              <NetbirdSection overview={overview} />
+              <PublicSettingsSection overview={overview} />
+            </aside>
+          </div>
         </>
       )}
     </div>
