@@ -25,7 +25,7 @@ const NOTICES: Record<string, string> = {
 /** 邀請入口：整頁導向授權，由使用者在 Discord 頁面選擇伺服器，完成後回到後台。 */
 function inviteUrl(): string {
   const params = new URLSearchParams({ origin: window.location.origin })
-  return `${API_BASE}/to/dashboard-invite?${params.toString()}`
+  return `${API_BASE}/to/discordbot?${params.toString()}`
 }
 
 function GuildIcon({ guild }: { guild: GuildItem }) {
