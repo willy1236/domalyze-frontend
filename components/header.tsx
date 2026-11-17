@@ -4,6 +4,7 @@ import Link from "next/link"
 import { useTheme } from "next-themes"
 import { Moon, Sun } from "lucide-react"
 import { useEffect, useState } from "react"
+import { HeaderAccount } from "./header-account"
 
 export function Header() {
   const { theme, setTheme } = useTheme()
@@ -42,7 +43,7 @@ export function Header() {
               <Moon className="w-5 h-5" />
             )}
           </button>
-          <Link className="text-xs sm:text-sm tracking-[0.2em] uppercase text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors whitespace-nowrap" href="/dashboard">管理後台</Link>
+          <HeaderAccount />
           <Link className="hidden sm:inline-block border border-primary/30 dark:border-champagne/40 text-primary dark:text-champagne px-6 py-2.5 text-xs tracking-[0.2em] uppercase hover:bg-primary hover:text-white dark:hover:bg-champagne dark:hover:text-background-dark transition-all duration-300 relative group" href="/#preorder">
             <span className="absolute inset-0 bg-champagne/20 scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-300"></span>
             <span className="relative z-10">邀請</span>
