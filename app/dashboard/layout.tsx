@@ -6,6 +6,7 @@ import { Button } from "@/components/ui"
 import { DashboardHeader, type DashboardUser } from "@/components/dashboard/dashboard-header"
 import { LAST_USER_KEY, dashboardFetch, discardDrafts, setDashboardHooks, setDashboardUserId } from "@/lib/dashboard-api"
 import { createDraftHooks } from "@/lib/dashboard-draft"
+import { forgetNext } from "@/lib/dashboard-login"
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter()
@@ -18,6 +19,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     dashboardFetch<DashboardUser>("/dashboard/me", {}, { signal: controller.signal, silentSessionExpired: true })
       .then((me) => {
         setDashboardUserId(me.id)
+        // 已登入：析域登入前記下的要回去的頁面用不到了
+        forgetNext()
         setDashboardHooks(createDraftHooks(me.id))
         let switched = false
         try {

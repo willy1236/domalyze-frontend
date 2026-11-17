@@ -1,6 +1,8 @@
 // 後台所有 API 呼叫的共用 fetch wrapper。
 // 依回應的 `error` 碼分派，不依 HTTP 狀態碼；其他錯誤碼交給呼叫端處理。
 
+import { loginPageUrl } from "./dashboard-login"
+
 export const API_BASE = process.env.NEXT_PUBLIC_BASE_API_URL ?? ""
 
 /** 換帳號偵測用：導向登入前存下目前的 Discord user ID */
@@ -77,12 +79,7 @@ export function setDashboardUserId(id: string | null): void {
   currentUserId = id
 }
 
-export function dashboardLoginUrl(next: string): string {
-  const params = new URLSearchParams({ next, origin: window.location.origin })
-  return `${API_BASE}/to/dashboard-login?${params.toString()}`
-}
-
-/** 整頁導向登入。回傳永不 resolve 的 Promise，避免呼叫端在導向期間繼續執行。 */
+/** 整頁導向登入頁。回傳永不 resolve 的 Promise，避免呼叫端在導向期間繼續執行。 */
 export function redirectToLogin(): Promise<never> {
   try {
     hooks.beforeLoginRedirect?.()
@@ -95,7 +92,7 @@ export function redirectToLogin(): Promise<never> {
     // sessionStorage 不可用時略過，只是少了換帳號偵測
   }
   const next = window.location.pathname + window.location.search
-  window.location.href = dashboardLoginUrl(next)
+  window.location.href = loginPageUrl(next)
   return new Promise<never>(() => {})
 }
 
