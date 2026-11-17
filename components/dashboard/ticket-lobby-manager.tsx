@@ -14,7 +14,7 @@ interface OpenForm {
   restored?: LobbyFormDraft
 }
 
-/** 從 reauth 或 session 過期回來時，還原導向前未送出的表單 */
+/** session 過期重新登入回來時，還原導向前未送出的表單 */
 function restoreForm(): OpenForm | null {
   const draft = consumeDraft<LobbyFormDraft>(TICKET_DRAFT_KEY)
   return draft ? { lobby: draft.state.lobbyId ? { channel: { id: draft.state.lobbyId } } : null, restored: draft.state } : null

@@ -14,7 +14,7 @@ import {
 import { NotifyRow } from "./notify-item"
 import { TestNotifyButton } from "./test-notify-button"
 
-/** 從 reauth 或 session 過期回來時，還原導向前未送出的新增流程或編輯表單 */
+/** session 過期重新登入回來時，還原導向前未送出的新增流程或編輯表單 */
 function restoreForm(): CommunityFormDraft | null {
   return consumeDraft<CommunityFormDraft>(COMMUNITY_DRAFT_KEY)?.state ?? null
 }

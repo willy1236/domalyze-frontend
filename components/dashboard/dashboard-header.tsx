@@ -1,6 +1,8 @@
 "use client"
 
 import { useState } from "react"
+import Link from "next/link"
+import { usePathname } from "next/navigation"
 import { Button } from "@/components/ui"
 import { LAST_USER_KEY, dashboardFetch, discardDrafts } from "@/lib/dashboard-api"
 
@@ -8,10 +10,18 @@ export interface DashboardUser {
   id: string
   name: string
   avatar_url: string
+  /** 這個 session 帶的析域帳號；username 為 null 表示代號暫時無法載入 */
+  account: { username: string | null } | null
 }
+
+const NAV = [
+  { href: "/dashboard", label: "我的", active: (path: string) => path === "/dashboard" },
+  { href: "/dashboard/guilds", label: "伺服器", active: (path: string) => path.startsWith("/dashboard/guilds") },
+]
 
 export function DashboardHeader({ user }: { user: DashboardUser }) {
   const [busy, setBusy] = useState(false)
+  const pathname = usePathname()
 
   async function logout() {
     setBusy(true)
@@ -41,8 +51,24 @@ export function DashboardHeader({ user }: { user: DashboardUser }) {
           className="text-lg font-serif tracking-widest text-primary uppercase flex items-center gap-2 hover:opacity-80 transition-opacity shrink-0"
         >
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/xingyu-mark.svg" alt="" width={28} height={28} className="w-7 h-7 dark:brightness-[1.3]" /> Xingyu
+          <img src="/xingyu-mark.svg" alt="" width={28} height={28} className="w-7 h-7 dark:brightness-[1.3]" />
+          <span className="hidden sm:inline">Xingyu</span>
         </a>
+        <nav className="flex items-center gap-4 sm:gap-6 mr-auto ml-2 sm:ml-6">
+          {NAV.map((item) => {
+            const active = item.active(pathname)
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                aria-current={active ? "page" : undefined}
+                className={`text-sm whitespace-nowrap transition-colors ${active ? "text-champagne" : "text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"}`}
+              >
+                {item.label}
+              </Link>
+            )
+          })}
+        </nav>
         <div className="flex items-center gap-3 min-w-0">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
@@ -52,7 +78,7 @@ export function DashboardHeader({ user }: { user: DashboardUser }) {
             height={32}
             className="w-8 h-8 rounded-full shrink-0"
           />
-          <span className="text-sm truncate max-w-32 sm:max-w-64">{user.name}</span>
+          <span className="hidden sm:inline text-sm truncate max-w-64">{user.name}</span>
           <Button
             type="button"
             size="sm"

@@ -1,163 +1,54 @@
 "use client"
 
-import { useCallback, useEffect, useRef, useState } from "react"
-import Link from "next/link"
-import { Button, LinkButton } from "@/components/ui"
-import { API_BASE, dashboardFetch } from "@/lib/dashboard-api"
-import { permissionNotice } from "@/lib/dashboard-sections"
+import { useCallback, useEffect, useState } from "react"
+import { useRouter } from "next/navigation"
+import { AccountSection } from "@/components/dashboard/personal/account"
+import { AssetsSection } from "@/components/dashboard/personal/assets"
+import { DriveSection } from "@/components/dashboard/personal/drive"
+import { NetbirdSection } from "@/components/dashboard/personal/netbird"
+import { PlaylistsSection } from "@/components/dashboard/personal/playlists"
+import { PublicSettingsSection } from "@/components/dashboard/personal/public-settings"
+import { RecordsSection } from "@/components/dashboard/personal/records"
+import { dashboardFetch } from "@/lib/dashboard-api"
+import { type PersonalOverview, guildListRedirect } from "@/lib/dashboard-personal"
 import { useLoad } from "@/lib/use-load"
 
-interface GuildItem {
-  id: string
-  name: string
-  icon_url: string | null
-}
-
-interface GuildLists {
-  invited: GuildItem[]
-  not_invited: GuildItem[]
-}
-
-const NOTICES: Record<string, string> = {
-  need_permissions: permissionNotice(),
-  invite_pending: "星羽已加入伺服器，但清單還沒更新，請稍後按「重新整理」。",
-}
-
-/** 邀請入口：整頁導向授權，完成後回到後台。guildId 省略時由使用者在 Discord 頁面選擇伺服器。 */
-function inviteUrl(guildId?: string): string {
-  const params = new URLSearchParams({ origin: window.location.origin })
-  if (guildId) params.set("guild_id", guildId)
-  return `${API_BASE}/to/dashboard-invite?${params.toString()}`
-}
-
-function GuildIcon({ guild }: { guild: GuildItem }) {
-  if (guild.icon_url) {
-    // eslint-disable-next-line @next/next/no-img-element
-    return <img src={guild.icon_url} alt="" width={40} height={40} className="w-10 h-10 rounded-full shrink-0" />
-  }
-  return (
-    <span
-      aria-hidden
-      className="w-10 h-10 rounded-full shrink-0 flex items-center justify-center bg-champagne/20 text-champagne font-serif"
-    >
-      {Array.from(guild.name)[0] ?? "?"}
-    </span>
-  )
-}
-
-function GuildRow({ guild, invited }: { guild: GuildItem; invited: boolean }) {
-  const content = (
-    <>
-      <GuildIcon guild={guild} />
-      <span className="min-w-0 flex-1 truncate">{guild.name}</span>
-      <span className="text-xs tracking-widest uppercase text-champagne shrink-0">{invited ? "管理" : "邀請"}</span>
-    </>
-  )
-  const className =
-    "flex items-center gap-3 border border-champagne/30 px-4 py-3 hover:border-champagne transition-colors"
-  return (
-    <li>
-      {invited ? (
-        <Link href={`/dashboard/guilds/${guild.id}`} className={className}>
-          {content}
-        </Link>
-      ) : (
-        <a href={inviteUrl(guild.id)} className={className}>
-          {content}
-        </a>
-      )}
-    </li>
-  )
-}
-
-function GuildGroup({ title, guilds, invited }: { title: string; guilds: GuildItem[]; invited: boolean }) {
-  if (guilds.length === 0) return null
-  return (
-    <section className="mb-10">
-      <h2 className="text-sm tracking-widest uppercase text-gray-500 dark:text-gray-400 mb-3">
-        {title}（{guilds.length}）
-      </h2>
-      <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        {guilds.map((g) => (
-          <GuildRow key={g.id} guild={g} invited={invited} />
-        ))}
-      </ul>
-    </section>
-  )
-}
-
-export default function DashboardPage() {
-  const [notice, setNotice] = useState<string | null>(null)
-
-  // 邀請完成後帶 ?notice=，顯示一次後從網址移除
+export default function PersonalPage() {
+  const router = useRouter()
+  // 舊網址 /dashboard?notice= 是伺服器清單的通知，轉過去並保留參數
+  const [redirecting, setRedirecting] = useState(false)
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search)
-    const key = params.get("notice")
-    // 網址參數只在瀏覽器讀得到，要等 hydration 之後才能設定，否則伺服器與瀏覽器的初次 render 不一致
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    if (key && NOTICES[key]) setNotice(NOTICES[key])
-    if (key) {
-      params.delete("notice")
-      const query = params.toString()
-      window.history.replaceState(null, "", window.location.pathname + (query ? `?${query}` : ""))
+    const target = guildListRedirect(window.location.search)
+    if (target) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setRedirecting(true)
+      router.replace(target)
     }
-  }, [])
+  }, [router])
 
-  // 第一次載入用快取，按「重新整理」之後要求後端重新向 Discord 查詢
-  const refreshed = useRef(false)
   const fetcher = useCallback(
-    (signal: AbortSignal) =>
-      dashboardFetch<GuildLists>(refreshed.current ? "/dashboard/guilds?refresh=1" : "/dashboard/guilds", {}, { signal }),
+    (signal: AbortSignal) => dashboardFetch<PersonalOverview>("/dashboard/personal/overview", {}, { signal }),
     [],
   )
-  const { data: lists, failed, loading, reload } = useLoad(fetcher)
+  const { data: overview, failed } = useLoad(redirecting ? null : fetcher)
 
-  const isEmpty = lists !== null && lists.invited.length === 0 && lists.not_invited.length === 0
+  if (redirecting) return null
 
   return (
-    <section>
-      <div className="flex items-center justify-between gap-3 mb-6">
-        <h1 className="text-2xl font-serif">伺服器</h1>
-        <Button
-          type="button"
-          className="disabled:opacity-50 disabled:pointer-events-none"
-          disabled={loading}
-          onClick={() => {
-            refreshed.current = true
-            void reload()
-          }}
-        >
-          {loading ? "載入中…" : "重新整理"}
-        </Button>
-      </div>
-
-      {notice && (
-        <p role="status" className="border border-champagne/30 px-4 py-3 mb-6">
-          {notice}
-        </p>
-      )}
-
-      {failed && (
-        <p className="text-gray-500 dark:text-gray-400 mb-6">無法載入伺服器清單，請稍後按「重新整理」再試。</p>
-      )}
-
-      {lists && !failed && (
+    <div className="grid gap-6">
+      <h1 className="text-2xl font-serif">我的</h1>
+      {failed && <p className="text-gray-500 dark:text-gray-400">無法載入個人資料，請稍後重新整理頁面再試。</p>}
+      {overview && (
         <>
-          <GuildGroup title="已邀請" guilds={lists.invited} invited />
-          <GuildGroup title="未邀請" guilds={lists.not_invited} invited={false} />
+          <AccountSection overview={overview} />
+          <AssetsSection overview={overview} />
+          <RecordsSection overview={overview} />
+          <PlaylistsSection overview={overview} />
+          <DriveSection overview={overview} />
+          <NetbirdSection overview={overview} />
+          <PublicSettingsSection overview={overview} />
         </>
       )}
-
-      {isEmpty && !failed && (
-        <div className="border border-champagne/30 px-4 py-8 text-center">
-          <p className="text-gray-500 dark:text-gray-400 mb-4">
-            沒有可管理的伺服器。管理頻道通知需要「管理頻道」權限，邀請星羽需要「管理伺服器」權限。
-          </p>
-          <LinkButton variant="outline" href={inviteUrl()}>
-            邀請星羽
-          </LinkButton>
-        </div>
-      )}
-    </section>
+    </div>
   )
 }

@@ -1,6 +1,8 @@
 // 後台所有 API 呼叫的共用 fetch wrapper。
 // 依回應的 `error` 碼分派，不依 HTTP 狀態碼；其他錯誤碼交給呼叫端處理。
 
+import { loginPageUrl } from "./dashboard-login"
+
 export const API_BASE = process.env.NEXT_PUBLIC_BASE_API_URL ?? ""
 
 /** 換帳號偵測用：導向登入前存下目前的 Discord user ID */
@@ -77,12 +79,7 @@ export function setDashboardUserId(id: string | null): void {
   currentUserId = id
 }
 
-export function dashboardLoginUrl(next: string): string {
-  const params = new URLSearchParams({ next, origin: window.location.origin })
-  return `${API_BASE}/to/dashboard-login?${params.toString()}`
-}
-
-/** 整頁導向登入。回傳永不 resolve 的 Promise，避免呼叫端在導向期間繼續執行。 */
+/** 整頁導向登入頁。回傳永不 resolve 的 Promise，避免呼叫端在導向期間繼續執行。 */
 export function redirectToLogin(): Promise<never> {
   try {
     hooks.beforeLoginRedirect?.()
@@ -95,14 +92,14 @@ export function redirectToLogin(): Promise<never> {
     // sessionStorage 不可用時略過，只是少了換帳號偵測
   }
   const next = window.location.pathname + window.location.search
-  window.location.href = dashboardLoginUrl(next)
+  window.location.href = loginPageUrl(next)
   return new Promise<never>(() => {})
 }
 
 function redirectToDashboard(): Promise<never> {
   // 在 component 之外沒有 router 可用，且要整頁重新載入丟掉目前伺服器的狀態
   // eslint-disable-next-line @next/next/no-location-assign-relative-destination
-  window.location.href = "/dashboard"
+  window.location.href = "/dashboard/guilds"
   return new Promise<never>(() => {})
 }
 
@@ -170,15 +167,8 @@ export async function dashboardFetch<T = unknown>(
 
   switch (code) {
     case "session_expired":
-    case "reauth_required":
-      if (code === "session_expired" && options.sessionExpiredIsOk) return undefined as T
-      if (!(code === "session_expired" && options.silentSessionExpired)) {
-        window.alert(
-          code === "session_expired"
-            ? "登入已過期，請重新登入。"
-            : "Discord 授權已失效，請重新授權。",
-        )
-      }
+      if (options.sessionExpiredIsOk) return undefined as T
+      if (!options.silentSessionExpired) window.alert("登入已過期，請重新登入。")
       return redirectToLogin()
     case "no_permission":
       try {
@@ -192,7 +182,6 @@ export async function dashboardFetch<T = unknown>(
       window.alert("星羽已不在這個伺服器。")
       return redirectToDashboard()
     case "bot_unavailable":
-    case "discord_unavailable":
       window.alert("服務暫時無法使用，請稍後再試。")
       throw new DashboardApiError(res.status, code, data, true)
     default:

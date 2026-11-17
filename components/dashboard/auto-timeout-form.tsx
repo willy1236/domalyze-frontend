@@ -60,7 +60,7 @@ export function AutoTimeoutForm({
 }) {
   const saved = autoTimeoutValues(settings)
   const initial = splitSeconds(saved.auto_timeout_seconds)
-  // 從 reauth 或 session 過期回來時，還原導向前未送出的輸入，並沿用當時打開表單的原始值做衝突比對
+  // session 過期重新登入回來時，還原導向前未送出的輸入，並沿用當時打開表單的原始值做衝突比對
   const [restored] = useState(() => consumeDraft<AutoTimeoutFormDraft>(autoTimeoutDraftKey(guildId))?.state ?? null)
   const [original] = useState<SettingValues>(restored ? restored.original : saved)
   const [enabled, setEnabled] = useState(restored ? restored.enabled : saved.auto_timeout_enabled)

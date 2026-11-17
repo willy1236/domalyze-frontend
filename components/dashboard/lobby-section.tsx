@@ -103,7 +103,7 @@ interface OpenForm {
   restored?: LobbyFormDraft
 }
 
-/** 從 reauth 或 session 過期回來時，還原導向前未送出的表單 */
+/** session 過期重新登入回來時，還原導向前未送出的表單 */
 function restoreForm(): OpenForm | null {
   const draft = consumeDraft<LobbyFormDraft>(LOBBY_DRAFT_KEY)
   return draft ? { restored: draft.state } : null
