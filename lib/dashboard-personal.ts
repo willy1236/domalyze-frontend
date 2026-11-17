@@ -46,3 +46,9 @@ export function isLocked(overview: PersonalOverview): boolean {
 export function accountLabel(account: { username: string | null }): string {
   return account.username ?? "代號暫時無法載入"
 }
+
+/** 舊網址 /dashboard?notice= 是伺服器清單的通知：回傳要轉去的伺服器清單網址（保留參數）；不需要轉址時回 null */
+export function guildListRedirect(search: string): string | null {
+  const params = new URLSearchParams(search)
+  return params.has("notice") ? `/dashboard/guilds?${params.toString()}` : null
+}

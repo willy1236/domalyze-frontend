@@ -13,7 +13,7 @@ const LINK_CLASS =
   "text-xs sm:text-sm tracking-[0.2em] uppercase text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors whitespace-nowrap"
 
 /** 讀登入狀態；任何失敗（含 session_expired、連不上）都當成未登入，不導向也不提示 */
-async function loadMe(signal: AbortSignal): Promise<Me | null> {
+export async function loadMe(signal: AbortSignal): Promise<Me | null> {
   try {
     const res = await fetch(`${API_BASE}/dashboard/me`, { credentials: "include", signal })
     if (!res.ok) return null

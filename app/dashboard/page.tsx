@@ -10,7 +10,7 @@ import { PlaylistsSection } from "@/components/dashboard/personal/playlists"
 import { PublicSettingsSection } from "@/components/dashboard/personal/public-settings"
 import { RecordsSection } from "@/components/dashboard/personal/records"
 import { dashboardFetch } from "@/lib/dashboard-api"
-import type { PersonalOverview } from "@/lib/dashboard-personal"
+import { type PersonalOverview, guildListRedirect } from "@/lib/dashboard-personal"
 import { useLoad } from "@/lib/use-load"
 
 export default function PersonalPage() {
@@ -18,11 +18,11 @@ export default function PersonalPage() {
   // 舊網址 /dashboard?notice= 是伺服器清單的通知，轉過去並保留參數
   const [redirecting, setRedirecting] = useState(false)
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search)
-    if (params.has("notice")) {
+    const target = guildListRedirect(window.location.search)
+    if (target) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setRedirecting(true)
-      router.replace(`/dashboard/guilds?${params.toString()}`)
+      router.replace(target)
     }
   }, [router])
 

@@ -8,6 +8,7 @@ import {
   rememberNext,
   resolveNext,
   sanitizeNext,
+  selectErrorAction,
 } from "./dashboard-login"
 
 beforeEach(() => {
@@ -71,5 +72,14 @@ describe("isLoginNotice", () => {
     expect(isLoginNotice("domalyze_no_discord")).toBe(true)
     expect(isLoginNotice("toString")).toBe(false)
     expect(isLoginNotice(null)).toBe(false)
+  })
+})
+
+describe("selectErrorAction", () => {
+  it("依錯誤碼分流", () => {
+    expect(selectErrorAction("pick_expired")).toBe("restart")
+    expect(selectErrorAction("invalid_candidate")).toBe("reload")
+    expect(selectErrorAction("invalid_request")).toBe("error")
+    expect(selectErrorAction(null)).toBe("error")
   })
 })

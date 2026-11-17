@@ -88,3 +88,10 @@ export function resolveNext(search: URLSearchParams): string {
   }
   return DEFAULT_NEXT
 }
+
+/** 選擇畫面送出或載入失敗時怎麼處理：待選資料失效回登入頁、不在清單裡重新載入、其他顯示錯誤 */
+export function selectErrorAction(code: string | null): "restart" | "reload" | "error" {
+  if (code === "pick_expired") return "restart"
+  if (code === "invalid_candidate") return "reload"
+  return "error"
+}

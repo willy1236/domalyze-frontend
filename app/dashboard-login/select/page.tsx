@@ -2,7 +2,7 @@
 
 import { useCallback, useState } from "react"
 import { DashboardApiError, dashboardFetch } from "@/lib/dashboard-api"
-import { forgetNext, loginPageUrl, sanitizeNext } from "@/lib/dashboard-login"
+import { forgetNext, loginPageUrl, sanitizeNext, selectErrorAction } from "@/lib/dashboard-login"
 import { useLoad } from "@/lib/use-load"
 import { LoginNoticeBox, LoginShell } from "../login-shell"
 
@@ -26,8 +26,8 @@ function backToLogin(): void {
   window.location.href = loginPageUrl(currentNext(), "domalyze_expired")
 }
 
-function isPickExpired(e: unknown): boolean {
-  return e instanceof DashboardApiError && e.code === "pick_expired"
+function errorAction(e: unknown) {
+  return selectErrorAction(e instanceof DashboardApiError ? e.code : null)
 }
 
 function CandidateAvatar({ candidate }: { candidate: Candidate }) {
@@ -48,7 +48,7 @@ export default function DashboardLoginSelectPage() {
   )
   const { data, failed, reload } = useLoad(fetcher, {
     onError: (e) => {
-      if (isPickExpired(e)) backToLogin()
+      if (errorAction(e) === "restart") backToLogin()
     },
   })
 
@@ -64,9 +64,10 @@ export default function DashboardLoginSelectPage() {
       window.location.assign(res.redirect)
     } catch (e) {
       setBusy(false)
-      if (isPickExpired(e)) {
+      const action = errorAction(e)
+      if (action === "restart") {
         backToLogin()
-      } else if (e instanceof DashboardApiError && e.code === "invalid_candidate") {
+      } else if (action === "reload") {
         setError("這個 Discord 已不在可選的清單中，請重新選擇。")
         void reload()
       } else {
