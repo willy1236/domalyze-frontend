@@ -58,7 +58,7 @@ function GuildRow({ guild }: { guild: GuildItem }) {
   )
 }
 
-export default function DashboardPage() {
+export default function GuildListPage() {
   const [notice, setNotice] = useState<string | null>(null)
 
   // 邀請完成後帶 ?notice=，顯示一次後從網址移除

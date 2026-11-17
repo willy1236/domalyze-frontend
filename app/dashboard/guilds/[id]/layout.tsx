@@ -17,7 +17,7 @@ export default function GuildLayout({ children }: { children: React.ReactNode })
       <div className="grid gap-8 lg:grid-cols-[13rem_minmax(0,1fr)] lg:gap-14 selection:bg-champagne/40">
         <aside className="lg:sticky lg:top-8 lg:self-start">
           <Link
-            href="/dashboard"
+            href="/dashboard/guilds"
             className={`inline-flex items-center gap-1.5 text-sm text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-champagne ${linkClass}`}
           >
             <BackIcon width={15} height={15} />
