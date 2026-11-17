@@ -8,6 +8,8 @@ export interface DashboardUser {
   id: string
   name: string
   avatar_url: string
+  /** 這個 session 帶的析域帳號；username 為 null 表示代號暫時無法載入 */
+  account: { username: string | null } | null
 }
 
 export function DashboardHeader({ user }: { user: DashboardUser }) {
