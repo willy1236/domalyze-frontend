@@ -124,7 +124,7 @@ export function SongRow({
       )}
       <span className="w-7 shrink-0 pt-0.5 text-right text-sm tabular-nums text-gray-500 dark:text-gray-400">{index + 1}</span>
       <div className="min-w-0 flex-1">
-        <a href={song.url} target="_blank" rel="noopener noreferrer" className="break-words underline-offset-4 hover:underline">
+        <a href={song.url} target="_blank" rel="noopener noreferrer" className="[overflow-wrap:anywhere] underline-offset-4 hover:underline">
           {song.title}
         </a>
         <p className="text-xs tabular-nums text-gray-500 dark:text-gray-400">{formatDuration(song.duration)}</p>
@@ -253,7 +253,7 @@ function PlaylistDetail({
 
       {writable && renaming !== null && (
         <form
-          className="flex flex-wrap gap-2"
+          className="flex flex-wrap gap-2 min-w-0"
           onSubmit={(e) => {
             e.preventDefault()
             void run(renamePlaylistAction(renaming), () => setRenaming(null))
@@ -291,7 +291,7 @@ function PlaylistDetail({
 
       {writable && (
         <form
-          className="flex flex-wrap gap-2"
+          className="flex flex-wrap gap-2 min-w-0"
           onSubmit={(e) => {
             e.preventDefault()
             void run((p) => addSongs(p, url.trim()), () => setUrl(""))
@@ -304,7 +304,7 @@ function PlaylistDetail({
             value={url}
             disabled={busy || !canAdd}
             onChange={(e) => setUrl(e.target.value)}
-            className="flex-1 basis-56"
+            className="flex-1 basis-40"
           />
           <Button type="submit" disabled={busy || !canAdd || !url.trim()}>
             {busy && url ? "加入中…" : "加入"}
@@ -337,7 +337,7 @@ function PlaylistDetail({
       {playlist.songs.length === 0 ? (
         <p className={mutedClass}>歌單裡沒有歌曲。</p>
       ) : (
-        <div>
+        <div className="min-w-0">
           {writable && (
             <div className="flex flex-wrap items-center gap-3 pb-2">
               <label className="flex items-center gap-2 text-sm">
