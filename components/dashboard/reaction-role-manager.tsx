@@ -18,7 +18,7 @@ interface OpenForm {
   restored?: ReactionRoleFormDraft
 }
 
-/** 從 reauth 或 session 過期回來時，還原導向前未送出的表單 */
+/** session 過期重新登入回來時，還原導向前未送出的表單 */
 function restoreForm(): OpenForm | null {
   const draft = consumeDraft<ReactionRoleFormDraft>(REACTION_ROLE_DRAFT_KEY)
   return draft ? { message: null, restored: draft.state } : null

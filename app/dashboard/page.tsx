@@ -1,8 +1,8 @@
 "use client"
 
-import { useCallback, useEffect, useRef, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 import Link from "next/link"
-import { Button, LinkButton } from "@/components/ui"
+import { LinkButton } from "@/components/ui"
 import { API_BASE, dashboardFetch } from "@/lib/dashboard-api"
 import { permissionNotice } from "@/lib/dashboard-sections"
 import { useLoad } from "@/lib/use-load"
@@ -13,20 +13,18 @@ interface GuildItem {
   icon_url: string | null
 }
 
-interface GuildLists {
-  invited: GuildItem[]
-  not_invited: GuildItem[]
+interface GuildList {
+  guilds: GuildItem[]
 }
 
 const NOTICES: Record<string, string> = {
   need_permissions: permissionNotice(),
-  invite_pending: "星羽已加入伺服器，但清單還沒更新，請稍後按「重新整理」。",
+  invite_pending: "星羽已加入伺服器，但清單還沒更新，請稍後重新整理頁面。",
 }
 
-/** 邀請入口：整頁導向授權，完成後回到後台。guildId 省略時由使用者在 Discord 頁面選擇伺服器。 */
-function inviteUrl(guildId?: string): string {
+/** 邀請入口：整頁導向授權，由使用者在 Discord 頁面選擇伺服器，完成後回到後台。 */
+function inviteUrl(): string {
   const params = new URLSearchParams({ origin: window.location.origin })
-  if (guildId) params.set("guild_id", guildId)
   return `${API_BASE}/to/dashboard-invite?${params.toString()}`
 }
 
@@ -45,44 +43,18 @@ function GuildIcon({ guild }: { guild: GuildItem }) {
   )
 }
 
-function GuildRow({ guild, invited }: { guild: GuildItem; invited: boolean }) {
-  const content = (
-    <>
-      <GuildIcon guild={guild} />
-      <span className="min-w-0 flex-1 truncate">{guild.name}</span>
-      <span className="text-xs tracking-widest uppercase text-champagne shrink-0">{invited ? "管理" : "邀請"}</span>
-    </>
-  )
-  const className =
-    "flex items-center gap-3 border border-champagne/30 px-4 py-3 hover:border-champagne transition-colors"
+function GuildRow({ guild }: { guild: GuildItem }) {
   return (
     <li>
-      {invited ? (
-        <Link href={`/dashboard/guilds/${guild.id}`} className={className}>
-          {content}
-        </Link>
-      ) : (
-        <a href={inviteUrl(guild.id)} className={className}>
-          {content}
-        </a>
-      )}
+      <Link
+        href={`/dashboard/guilds/${guild.id}`}
+        className="flex items-center gap-3 border border-champagne/30 px-4 py-3 hover:border-champagne transition-colors"
+      >
+        <GuildIcon guild={guild} />
+        <span className="min-w-0 flex-1 truncate">{guild.name}</span>
+        <span className="text-xs tracking-widest uppercase text-champagne shrink-0">管理</span>
+      </Link>
     </li>
-  )
-}
-
-function GuildGroup({ title, guilds, invited }: { title: string; guilds: GuildItem[]; invited: boolean }) {
-  if (guilds.length === 0) return null
-  return (
-    <section className="mb-10">
-      <h2 className="text-sm tracking-widest uppercase text-gray-500 dark:text-gray-400 mb-3">
-        {title}（{guilds.length}）
-      </h2>
-      <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        {guilds.map((g) => (
-          <GuildRow key={g.id} guild={g} invited={invited} />
-        ))}
-      </ul>
-    </section>
   )
 }
 
@@ -103,32 +75,23 @@ export default function DashboardPage() {
     }
   }, [])
 
-  // 第一次載入用快取，按「重新整理」之後要求後端重新向 Discord 查詢
-  const refreshed = useRef(false)
   const fetcher = useCallback(
-    (signal: AbortSignal) =>
-      dashboardFetch<GuildLists>(refreshed.current ? "/dashboard/guilds?refresh=1" : "/dashboard/guilds", {}, { signal }),
+    (signal: AbortSignal) => dashboardFetch<GuildList>("/dashboard/guilds", {}, { signal }),
     [],
   )
-  const { data: lists, failed, loading, reload } = useLoad(fetcher)
+  const { data: list, failed } = useLoad(fetcher)
 
-  const isEmpty = lists !== null && lists.invited.length === 0 && lists.not_invited.length === 0
+  const isEmpty = list !== null && list.guilds.length === 0
 
   return (
     <section>
       <div className="flex items-center justify-between gap-3 mb-6">
         <h1 className="text-2xl font-serif">伺服器</h1>
-        <Button
-          type="button"
-          className="disabled:opacity-50 disabled:pointer-events-none"
-          disabled={loading}
-          onClick={() => {
-            refreshed.current = true
-            void reload()
-          }}
-        >
-          {loading ? "載入中…" : "重新整理"}
-        </Button>
+        {list && !isEmpty && (
+          <LinkButton variant="outline" href={inviteUrl()}>
+            邀請星羽
+          </LinkButton>
+        )}
       </div>
 
       {notice && (
@@ -138,20 +101,21 @@ export default function DashboardPage() {
       )}
 
       {failed && (
-        <p className="text-gray-500 dark:text-gray-400 mb-6">無法載入伺服器清單，請稍後按「重新整理」再試。</p>
+        <p className="text-gray-500 dark:text-gray-400 mb-6">無法載入伺服器清單，請稍後重新整理頁面再試。</p>
       )}
 
-      {lists && !failed && (
-        <>
-          <GuildGroup title="已邀請" guilds={lists.invited} invited />
-          <GuildGroup title="未邀請" guilds={lists.not_invited} invited={false} />
-        </>
+      {list && !failed && list.guilds.length > 0 && (
+        <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {list.guilds.map((g) => (
+            <GuildRow key={g.id} guild={g} />
+          ))}
+        </ul>
       )}
 
       {isEmpty && !failed && (
         <div className="border border-champagne/30 px-4 py-8 text-center">
           <p className="text-gray-500 dark:text-gray-400 mb-4">
-            沒有可管理的伺服器。管理頻道通知需要「管理頻道」權限，邀請星羽需要「管理伺服器」權限。
+            沒有可管理的伺服器。星羽要先加入伺服器，你也需要該伺服器的管理權限；邀請星羽需要「管理伺服器」權限。
           </p>
           <LinkButton variant="outline" href={inviteUrl()}>
             邀請星羽

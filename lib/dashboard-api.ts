@@ -170,15 +170,8 @@ export async function dashboardFetch<T = unknown>(
 
   switch (code) {
     case "session_expired":
-    case "reauth_required":
-      if (code === "session_expired" && options.sessionExpiredIsOk) return undefined as T
-      if (!(code === "session_expired" && options.silentSessionExpired)) {
-        window.alert(
-          code === "session_expired"
-            ? "登入已過期，請重新登入。"
-            : "Discord 授權已失效，請重新授權。",
-        )
-      }
+      if (options.sessionExpiredIsOk) return undefined as T
+      if (!options.silentSessionExpired) window.alert("登入已過期，請重新登入。")
       return redirectToLogin()
     case "no_permission":
       try {
@@ -192,7 +185,6 @@ export async function dashboardFetch<T = unknown>(
       window.alert("星羽已不在這個伺服器。")
       return redirectToDashboard()
     case "bot_unavailable":
-    case "discord_unavailable":
       window.alert("服務暫時無法使用，請稍後再試。")
       throw new DashboardApiError(res.status, code, data, true)
     default:
