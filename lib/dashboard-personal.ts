@@ -1,5 +1,7 @@
 // 個人區的資料型別與顯示用的整理。
 
+import { dashboardFetch } from "./dashboard-api"
+
 export interface PersonalPoints {
   stardust: number
   point: number
@@ -51,4 +53,9 @@ export function accountLabel(account: { username: string | null }): string {
 export function guildListRedirect(search: string): string | null {
   const params = new URLSearchParams(search)
   return params.has("notice") ? `/dashboard/guilds?${params.toString()}` : null
+}
+
+/** 回報「連結析域帳號」入口被按下（統計用）：不等回應，失敗也不影響開新分頁 */
+export function reportLinkClick(): void {
+  dashboardFetch("/dashboard/personal/link-click", { method: "POST" }, { sessionExpiredIsOk: true }).catch(() => {})
 }
