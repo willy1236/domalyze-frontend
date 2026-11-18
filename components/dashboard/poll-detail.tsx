@@ -9,6 +9,7 @@ import {
   fetchPoll,
   formatDateTime,
   hiddenResultsText,
+  isNotFound,
   missingPermissionsText,
   roleLabel,
   statusLabel,
@@ -64,7 +65,8 @@ function Results({ detail }: { detail: PollDetail }) {
 /** 單一投票：設定、依可見範圍顯示的票數與明細；進行中每 30 秒自動更新。 */
 export function PollDetailView({ guildId, pollId }: { guildId: string; pollId: number }) {
   const fetcher = useCallback((signal: AbortSignal) => fetchPoll(guildId, pollId, signal), [guildId, pollId])
-  const { data: detail, failed, loading, reload } = useLoad(fetcher)
+  const { data: detail, error, failed, loading, reload } = useLoad(fetcher)
+  const notFound = isNotFound(error)
 
   const active = detail?.status === "active"
   const reloadRef = useRef(reload)
@@ -99,7 +101,8 @@ export function PollDetailView({ guildId, pollId }: { guildId: string; pollId: n
         </div>
       </header>
 
-      {failed && (
+      {notFound && <p className={`py-8 ${muted}`}>找不到這個投票。</p>}
+      {failed && !notFound && (
         <p className={`py-8 ${muted}`}>
           無法載入這個投票，請稍後
           <button type="button" className={`underline mx-1 ${linkClass}`} onClick={() => void reload()}>

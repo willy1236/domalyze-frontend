@@ -1,8 +1,10 @@
 import { describe, expect, it } from "vitest"
+import { DashboardApiError } from "./dashboard-api"
 import {
   channelLabel,
   formatDateTime,
   hiddenResultsText,
+  isNotFound,
   missingPermissionsText,
   roleLabel,
   statusLabel,
@@ -59,5 +61,14 @@ describe("labels", () => {
     expect(voterLabel({ user_id: "7", name: null, left: true })).toBe("已離開的成員（7）")
     expect(voterLabel({ user_id: "7", name: "小明", left: false })).toBe("小明")
     expect(voterLabel({ user_id: "7", name: null, left: false })).toBe("7")
+  })
+})
+
+describe("isNotFound", () => {
+  it("只有 404 的 DashboardApiError 算找不到", () => {
+    expect(isNotFound(new DashboardApiError(404, "poll_not_found", null, false))).toBe(true)
+    expect(isNotFound(new DashboardApiError(500, null, null, false))).toBe(false)
+    expect(isNotFound(new Error("x"))).toBe(false)
+    expect(isNotFound(null)).toBe(false)
   })
 })

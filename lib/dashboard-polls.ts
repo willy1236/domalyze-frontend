@@ -1,4 +1,4 @@
-import { dashboardFetch } from "./dashboard-api"
+import { DashboardApiError, dashboardFetch } from "./dashboard-api"
 import { sectionBasePath } from "./dashboard-sections"
 
 export type PollStatus = "active" | "ended"
@@ -154,4 +154,9 @@ export function roleLabel(r: PollRoleRef): string {
 export function voterLabel(v: Pick<PollVote, "user_id" | "name" | "left">): string {
   if (v.left) return `已離開的成員（${v.user_id}）`
   return v.name || v.user_id
+}
+
+/** 投票不存在或屬於其他伺服器（404）：不是暫時性錯誤，不提供重試 */
+export function isNotFound(error: unknown): boolean {
+  return error instanceof DashboardApiError && error.status === 404
 }
