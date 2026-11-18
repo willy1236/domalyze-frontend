@@ -7,6 +7,26 @@ export const OPTIONS_MAX = 20
 export const VOTES_MAX = 20
 export const WEIGHT_MIN = 1
 export const WEIGHT_MAX = 10
+export const DEADLINE_MAX_DAYS = 30
+
+const TAIPEI_OFFSET_MS = 8 * 60 * 60 * 1000
+const LOCAL_DATETIME = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})$/
+
+/** datetime-local 的值（YYYY-MM-DDTHH:mm）視為台灣時間，回傳 epoch 毫秒；格式不符回 null。與執行環境的時區無關 */
+export function taipeiLocalToEpoch(value: string): number | null {
+  const m = LOCAL_DATETIME.exec(value.trim())
+  if (!m) return null
+  const [y, mo, d, h, mi] = m.slice(1).map(Number)
+  const utc = new Date(Date.UTC(y, mo - 1, d, h, mi))
+  // 擋 2026-02-31 這類被 Date 自動進位的日期
+  if (utc.getUTCMonth() !== mo - 1 || utc.getUTCDate() !== d || h > 23 || mi > 59) return null
+  return utc.getTime() - TAIPEI_OFFSET_MS
+}
+
+/** datetime-local 的值轉成帶 +08:00 的 ISO 字串；格式不符回 null */
+export function taipeiLocalToIso(value: string): string | null {
+  return LOCAL_DATETIME.test(value.trim()) && taipeiLocalToEpoch(value) !== null ? `${value.trim()}:00+08:00` : null
+}
 
 export interface PollChannelOption {
   id: string
@@ -41,6 +61,8 @@ export interface PollFormValues {
   onlyRoles: string[]
   /** 權重列，含尚未選身分組的列；weight 是輸入框的原始字串 */
   roleWeights: { roleId: string; weight: string }[]
+  /** datetime-local 的值（台灣時間），空字串代表沒有截止時間 */
+  deadline: string
 }
 
 export interface PollCreateBody {
@@ -53,6 +75,8 @@ export interface PollCreateBody {
   number_of_user_votes: number
   only_roles: string[]
   role_weights: { role_id: string; weight: number }[]
+  /** 帶 +08:00 的 ISO 字串；沒設時不送 */
+  deadline?: string
 }
 
 export function emptyPollForm(): PollFormValues {
@@ -66,10 +90,11 @@ export function emptyPollForm(): PollFormValues {
     numberOfUserVotes: "1",
     onlyRoles: [],
     roleWeights: [],
+    deadline: "",
   }
 }
 
-/** 欄位錯誤，key 是欄位 path：channel_id、title、options、options.N、number_of_user_votes、role_weights.N.weight（N 是表單的列號） */
+/** 欄位錯誤，key 是欄位 path：channel_id、title、options、options.N、number_of_user_votes、deadline、role_weights.N.weight（N 是表單的列號） */
 export type PollFieldErrors = Record<string, string>
 
 const filledOptions = (values: PollFormValues) =>
@@ -84,7 +109,7 @@ function parseInt10(raw: string): number | null {
 }
 
 /** 前端先擋的規則，與後端 validate_poll_input 一致；回傳空物件表示可以送出 */
-export function validatePollForm(values: PollFormValues): PollFieldErrors {
+export function validatePollForm(values: PollFormValues, now: number = Date.now()): PollFieldErrors {
   const errors: PollFieldErrors = {}
   if (!values.channelId) errors.channel_id = "請選擇頻道"
 
@@ -116,11 +141,19 @@ export function validatePollForm(values: PollFormValues): PollFieldErrors {
     else if (used.has(w.roleId)) errors[`role_weights.${w.row}.role`] = "身分組重複"
     used.add(w.roleId)
   }
+
+  if (values.deadline.trim() !== "") {
+    const at = taipeiLocalToEpoch(values.deadline)
+    if (at === null) errors.deadline = "截止時間格式不正確"
+    else if (at <= now) errors.deadline = "截止時間必須晚於現在"
+    else if (at > now + DEADLINE_MAX_DAYS * 24 * 60 * 60 * 1000) errors.deadline = `截止時間最長為 ${DEADLINE_MAX_DAYS} 天後`
+  }
   return errors
 }
 
 /** 表單轉成 API body（略過空白的選項列與沒選身分組的權重列）；需先通過 validatePollForm */
 export function buildPollBody(values: PollFormValues): PollCreateBody {
+  const deadline = values.deadline.trim() === "" ? null : taipeiLocalToIso(values.deadline)
   return {
     channel_id: values.channelId ?? "",
     title: values.title.trim(),
@@ -131,6 +164,7 @@ export function buildPollBody(values: PollFormValues): PollCreateBody {
     number_of_user_votes: Number(values.numberOfUserVotes.trim()),
     only_roles: values.onlyRoles,
     role_weights: filledWeights(values).map((w) => ({ role_id: w.roleId, weight: Number(w.weight.trim()) })),
+    ...(deadline ? { deadline } : {}),
   }
 }
 
@@ -149,7 +183,7 @@ export function mapServerFieldErrors(
   for (const f of fields) {
     const option = /^options\.(\d+)$/.exec(f.path)
     const weight = /^role_weights\.(\d+)(?:\.(role_id|role|weight))?$/.exec(f.path)
-    if (["channel_id", "title", "options", "number_of_user_votes"].includes(f.path)) {
+    if (["channel_id", "title", "options", "number_of_user_votes", "deadline"].includes(f.path)) {
       errors[f.path] ??= f.reason
     } else if (option && optionRows[Number(option[1])] !== undefined) {
       errors[`options.${optionRows[Number(option[1])]}`] ??= f.reason
