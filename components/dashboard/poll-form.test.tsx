@@ -156,6 +156,30 @@ describe("PollForm", () => {
     expect(push).toHaveBeenCalledWith("/dashboard/guilds/1/polls/9")
   })
 
+  it("截止時間：過去的時間擋下，可清除，未填不送", async () => {
+    await mount()
+    await fillValid()
+    expect(button("清除")).toBeUndefined()
+    change(byId("poll-deadline"), "2020-01-01T00:00")
+    expect(button("清除")).toBeDefined()
+    await submit()
+    expect(text()).toContain("截止時間必須晚於現在")
+    expect(calls.some((c) => c.method === "POST")).toBe(false)
+    await click(button("清除"))
+    expect(byId("poll-deadline").value).toBe("")
+    await submit()
+    expect(calls.find((c) => c.method === "POST")!.body).not.toHaveProperty("deadline")
+  })
+
+  it("截止時間送出帶 +08:00", async () => {
+    await mount()
+    await fillValid()
+    const d = new Date(Date.now() + 2 * 24 * 3600 * 1000 + 8 * 3600 * 1000).toISOString().slice(0, 16)
+    change(byId("poll-deadline"), d)
+    await submit()
+    expect(calls.find((c) => c.method === "POST")!.body).toMatchObject({ deadline: `${d}:00+08:00` })
+  })
+
   it("後端欄位錯誤顯示在欄位上", async () => {
     responses[`POST ${BASE}`] = {
       status: 400,

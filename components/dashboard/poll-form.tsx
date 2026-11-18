@@ -281,6 +281,28 @@ export function PollForm({ guildId }: { guildId: string }) {
         {errors.number_of_user_votes && <Problem>{errors.number_of_user_votes}</Problem>}
       </div>
 
+      <div>
+        <label htmlFor="poll-deadline" className={labelClass}>
+          截止時間
+        </label>
+        <div className="flex items-center gap-2">
+          <Input
+            id="poll-deadline"
+            type="datetime-local"
+            value={form.deadline}
+            disabled={busy}
+            aria-invalid={!!errors.deadline}
+            onChange={(e) => patch({ deadline: e.target.value })}
+          />
+          {form.deadline !== "" && (
+            <Button type="button" size="sm" disabled={busy} onClick={() => patch({ deadline: "" })}>
+              清除
+            </Button>
+          )}
+        </div>
+        {errors.deadline && <Problem>{errors.deadline}</Problem>}
+      </div>
+
       <RoleMultiSelect
         legend="限定身分組（不選代表不限）"
         options={roleOptions}
