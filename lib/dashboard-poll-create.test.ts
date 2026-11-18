@@ -7,6 +7,8 @@ import {
   fetchPollOptions,
   mapServerFieldErrors,
   parseCreateProblem,
+  taipeiLocalToEpoch,
+  taipeiLocalToIso,
   validatePollForm,
   type PollFormValues,
 } from "./dashboard-poll-create"
@@ -157,5 +159,44 @@ describe("API", () => {
     expect(url).toBe("/dashboard/guilds/123/polls")
     expect(init.method).toBe("POST")
     expect(JSON.parse(init.body as string)).toEqual(body)
+  })
+})
+
+describe("截止時間", () => {
+  // 2026-11-18 12:00 台灣時間 = 04:00 UTC
+  const now = Date.UTC(2026, 10, 18, 4, 0)
+
+  it("datetime-local 視為台灣時間，轉成帶 +08:00 的 ISO 字串", () => {
+    expect(taipeiLocalToIso("2026-11-20T09:30")).toBe("2026-11-20T09:30:00+08:00")
+    expect(taipeiLocalToEpoch("2026-11-20T09:30")).toBe(Date.UTC(2026, 10, 20, 1, 30))
+    expect(new Date(taipeiLocalToIso("2026-11-20T00:00")!).toISOString()).toBe("2026-11-19T16:00:00.000Z")
+  })
+
+  it("格式不符或不存在的日期回 null", () => {
+    expect(taipeiLocalToIso("")).toBeNull()
+    expect(taipeiLocalToIso("2026-02-31T10:00")).toBeNull()
+    expect(taipeiLocalToIso("2026-11-20T24:00")).toBeNull()
+    expect(taipeiLocalToIso("2026-11-20")).toBeNull()
+  })
+
+  it("沒填不送、有填送 ISO", () => {
+    expect(buildPollBody(valid())).not.toHaveProperty("deadline")
+    expect(buildPollBody(valid({ deadline: "2026-11-20T09:30" })).deadline).toBe("2026-11-20T09:30:00+08:00")
+  })
+
+  it("擋過去與超過 30 天，邊界可過", () => {
+    const check = (deadline: string) => validatePollForm(valid({ deadline }), now).deadline
+    expect(check("")).toBeUndefined()
+    expect(check("2026-11-18T12:00")).toBe("截止時間必須晚於現在")
+    expect(check("2026-11-17T12:00")).toBe("截止時間必須晚於現在")
+    expect(check("2026-11-18T12:01")).toBeUndefined()
+    expect(check("2026-12-18T12:00")).toBeUndefined()
+    expect(check("2026-12-18T12:01")).toBe("截止時間最長為 30 天後")
+  })
+
+  it("後端 fields 的 deadline 對應到欄位", () => {
+    const r = mapServerFieldErrors(valid(), [{ path: "deadline", reason: "截止時間必須晚於現在" }])
+    expect(r.errors.deadline).toBe("截止時間必須晚於現在")
+    expect(r.rest).toEqual([])
   })
 })
