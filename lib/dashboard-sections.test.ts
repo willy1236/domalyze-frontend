@@ -26,7 +26,7 @@ const manageChannels: SectionInfo[] = [
 ]
 
 describe("NAV_ITEMS", () => {
-  it("七個區塊，順序同後端 Section", () => {
+  it("八個區塊，順序同後端 Section", () => {
     expect(NAV_ITEMS.map((i) => i.key)).toEqual([
       "notify",
       "dynamic_voice",
@@ -34,6 +34,7 @@ describe("NAV_ITEMS", () => {
       "tickets",
       "warnings",
       "giveaways",
+      "polls",
       "settings",
     ])
   })
