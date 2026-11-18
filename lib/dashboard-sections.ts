@@ -8,6 +8,7 @@ export type SectionKey =
   | "tickets"
   | "warnings"
   | "giveaways"
+  | "polls"
   | "settings"
 
 /** 使用者在某區塊擁有的動作；`view` 代表可以進入該區塊。 */
@@ -36,6 +37,7 @@ export const NAV_ITEMS: readonly NavItemDef[] = [
   { key: "tickets", label: "私人頻道", path: "/tickets", ready: true },
   { key: "warnings", label: "警告", path: "/warnings", ready: true },
   { key: "giveaways", label: "抽獎", path: "/giveaways", ready: true },
+  { key: "polls", label: "投票", path: "/polls", ready: true },
   { key: "settings", label: "基本設定", path: "/settings", ready: true },
 ]
 
