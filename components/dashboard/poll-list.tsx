@@ -3,6 +3,7 @@
 import Link from "next/link"
 import { useCallback, useState } from "react"
 import { Button } from "@/components/ui"
+import { buttonClass } from "@/components/ui/button-styles"
 import {
   channelLabel,
   fetchPolls,
@@ -12,6 +13,7 @@ import {
   statusLabel,
   type PollSummary,
 } from "@/lib/dashboard-polls"
+import { sectionBasePath } from "@/lib/dashboard-sections"
 import { useLoad } from "@/lib/use-load"
 import { WarnIcon } from "./icons"
 
@@ -95,6 +97,9 @@ export function PollList({ guildId }: { guildId: string }) {
           <Button type="button" size="sm" disabled={loading} onClick={() => void reload()}>
             重新整理
           </Button>
+          <Link href={`${sectionBasePath(guildId)}/polls/new`} className={buttonClass("outline", "sm")}>
+            發起投票
+          </Link>
         </div>
       </header>
 
