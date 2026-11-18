@@ -21,7 +21,7 @@ export function PollExportLink({ guildId, detail }: { guildId: string; detail: P
     } catch (e) {
       if (!(e instanceof DashboardApiError && e.handled)) {
         console.error("poll export failed", e)
-        setError(exportErrorText(e instanceof DashboardApiError ? e.code : null))
+        setError(exportErrorText(e))
       }
     } finally {
       setBusy(false)

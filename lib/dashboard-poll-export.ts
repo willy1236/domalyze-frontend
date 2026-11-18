@@ -1,4 +1,4 @@
-import { dashboardFetch } from "./dashboard-api"
+import { DashboardApiError, dashboardFetch } from "./dashboard-api"
 
 const FORBIDDEN_CHARS = /[\\/:*?"<>|\u0000-\u001f\u007f]/g
 const MAX_TITLE_LENGTH = 50
@@ -13,13 +13,13 @@ export function pollExportFilename(id: number, title: string): string {
   return safe ? `poll-${id}-${safe}.csv` : `poll-${id}.csv`
 }
 
-const EXPORT_ERRORS: Record<string, string> = {
-  results_hidden: "目前看不到這個投票的結果，無法匯出。",
-  not_found: "找不到這個投票。",
-}
-
-export function exportErrorText(code: string | null): string {
-  return (code && EXPORT_ERRORS[code]) || "匯出失敗，請稍後再試。"
+/** 匯出失敗時給使用者看的文字 */
+export function exportErrorText(error: unknown): string {
+  if (error instanceof DashboardApiError) {
+    if (error.code === "results_hidden") return "目前看不到這個投票的結果，無法匯出。"
+    if (error.status === 404) return "找不到這個投票。"
+  }
+  return "匯出失敗，請稍後再試。"
 }
 
 export function fetchPollExport(guildId: string, id: number): Promise<Blob> {

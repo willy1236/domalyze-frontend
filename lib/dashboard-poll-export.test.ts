@@ -23,9 +23,15 @@ describe("pollExportFilename", () => {
 })
 
 describe("exportErrorText", () => {
-  it("results_hidden 與預設", () => {
-    expect(exportErrorText("results_hidden")).toContain("無法匯出")
-    expect(exportErrorText(null)).toBe("匯出失敗，請稍後再試。")
+  it("results_hidden", () => {
+    expect(exportErrorText(new DashboardApiError(403, "results_hidden", null, false))).toContain("無法匯出")
+  })
+  it("404 poll_not_found 顯示找不到", () => {
+    expect(exportErrorText(new DashboardApiError(404, "poll_not_found", null, false))).toBe("找不到這個投票。")
+  })
+  it("其他錯誤用通用文字", () => {
+    expect(exportErrorText(new TypeError("x"))).toBe("匯出失敗，請稍後再試。")
+    expect(exportErrorText(new DashboardApiError(500, null, null, false))).toBe("匯出失敗，請稍後再試。")
   })
 })
 
