@@ -37,6 +37,8 @@ export interface DashboardFetchOptions {
   silentSessionExpired?: boolean
   /** 收到 session_expired 視同成功（登出用）：不提示、不導向，回傳 undefined */
   sessionExpiredIsOk?: boolean
+  /** 成功時的回應解析方式；預設 JSON，"blob" 用於檔案下載 */
+  as?: "json" | "blob"
 }
 
 export class DashboardApiError extends Error {
@@ -124,9 +126,21 @@ function mergeSignals(
   }
 }
 
+type DashboardInit = Omit<RequestInit, "signal" | "credentials" | "body"> & { json?: unknown }
+
+export async function dashboardFetch(
+  path: string,
+  init: DashboardInit,
+  options: DashboardFetchOptions & { as: "blob" },
+): Promise<Blob>
 export async function dashboardFetch<T = unknown>(
   path: string,
-  init: Omit<RequestInit, "signal" | "credentials" | "body"> & { json?: unknown } = {},
+  init?: DashboardInit,
+  options?: DashboardFetchOptions,
+): Promise<T>
+export async function dashboardFetch<T = unknown>(
+  path: string,
+  init: DashboardInit = {},
   options: DashboardFetchOptions = {},
 ): Promise<T> {
   const { json, headers, ...rest } = init
@@ -153,6 +167,7 @@ export async function dashboardFetch<T = unknown>(
 
   if (res.ok) {
     if (res.status === 204) return undefined as T
+    if (options.as === "blob") return (await res.blob()) as T
     return (await res.json()) as T
   }
 
