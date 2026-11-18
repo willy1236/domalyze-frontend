@@ -35,14 +35,15 @@ export interface BetRecord {
   title: string | null
   option: string | null
   amount: number
-  at: string
+  /** 舊版指令下注沒有記錄時間 */
+  at: string | null
 }
 
 export interface GiveawayRecord {
   id: number
   guild_name: string | null
   prize: string | null
-  result: "won" | "lost" | "pending"
+  result: "won" | "lost" | "pending" | "deleted"
   at: string
 }
 
@@ -78,6 +79,7 @@ export const GIVEAWAY_RESULT_LABELS: Record<GiveawayRecord["result"], string> = 
   won: "中獎",
   lost: "未中獎",
   pending: "尚未開獎",
+  deleted: "抽獎已刪除",
 }
 
 export function fetchVoice(discordId: string, signal?: AbortSignal): Promise<{ items: VoiceRecord[] }> {
@@ -113,7 +115,8 @@ export function formatSpan(seconds: number): string {
   return parts.join(" ")
 }
 
-export function formatRecordTime(iso: string): string {
+export function formatRecordTime(iso: string | null): string {
+  if (iso === null) return "時間不明"
   return new Date(iso).toLocaleString("zh-TW", { hour12: false, dateStyle: "medium", timeStyle: "short" })
 }
 
