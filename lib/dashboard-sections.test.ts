@@ -47,6 +47,7 @@ describe("NAV_ITEMS", () => {
       "tickets",
       "warnings",
       "giveaways",
+      "polls",
       "settings",
     ])
   })
