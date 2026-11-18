@@ -1,5 +1,5 @@
-import { describe, expect, it } from "vitest"
-import { type PersonalOverview, accountLabel, guildListRedirect, isLocked } from "./dashboard-personal"
+import { afterEach, describe, expect, it, vi } from "vitest"
+import { type PersonalOverview, accountLabel, guildListRedirect, isLocked, reportLinkClick } from "./dashboard-personal"
 
 const base: PersonalOverview = { account: null, partial: false, discords: [] }
 
@@ -23,5 +23,30 @@ describe("guildListRedirect", () => {
   it("沒有 notice 時留在個人區", () => {
     expect(guildListRedirect("")).toBeNull()
     expect(guildListRedirect("?x=1")).toBeNull()
+  })
+})
+
+describe("reportLinkClick", () => {
+  afterEach(() => vi.unstubAllGlobals())
+
+  it("送出 POST /dashboard/personal/link-click 且不等回應", () => {
+    const fetchMock = vi.fn(() => new Promise<Response>(() => {}))
+    vi.stubGlobal("fetch", fetchMock)
+    expect(reportLinkClick()).toBeUndefined()
+    expect(fetchMock).toHaveBeenCalledTimes(1)
+    const [url, init] = fetchMock.mock.calls[0] as unknown as [string, RequestInit]
+    expect(url).toMatch(/\/dashboard\/personal\/link-click$/)
+    expect(init.method).toBe("POST")
+    expect(init.credentials).toBe("include")
+  })
+
+  it("請求失敗時不拋錯", async () => {
+    vi.stubGlobal("fetch", vi.fn(() => Promise.reject(new TypeError("network"))))
+    const unhandled = vi.fn()
+    process.on("unhandledRejection", unhandled)
+    reportLinkClick()
+    await new Promise((r) => setTimeout(r, 0))
+    process.off("unhandledRejection", unhandled)
+    expect(unhandled).not.toHaveBeenCalled()
   })
 })
