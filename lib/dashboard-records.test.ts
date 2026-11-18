@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest"
-import { formatSpan, formatVoiceMinutes, guildLabel, UNKNOWN_GUILD } from "./dashboard-records"
+import { formatRecordTime, formatSpan, formatVoiceMinutes, guildLabel, UNKNOWN_GUILD } from "./dashboard-records"
 
 describe("formatVoiceMinutes", () => {
   it("換算成「X 小時 Y 分」", () => {
@@ -21,5 +21,11 @@ describe("guildLabel", () => {
   it("取不到名稱時顯示無法取得名稱的伺服器", () => {
     expect(guildLabel(null)).toBe(UNKNOWN_GUILD)
     expect(guildLabel("快樂營")).toBe("快樂營")
+  })
+})
+
+describe("formatRecordTime", () => {
+  it("沒有時間的紀錄（舊版指令下注）顯示時間不明", () => {
+    expect(formatRecordTime(null)).toBe("時間不明")
   })
 })

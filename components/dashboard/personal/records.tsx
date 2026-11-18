@@ -114,7 +114,11 @@ function KindList({ kind, discordId }: { kind: RecordKind; discordId: string }) 
     setMoreFailed(false)
     try {
       const page = await fetchRecords(kind, discordId, items.length)
-      setExtra((prev) => [...prev, ...page.items])
+      // 載入期間有新紀錄時 offset 會往後推，下一頁開頭會與目前最後一筆重複，以 id 去重
+      setExtra((prev) => {
+        const seen = new Set([...data!.items, ...prev].map((i) => i.id))
+        return [...prev, ...page.items.filter((i) => !seen.has(i.id))]
+      })
     } catch {
       setMoreFailed(true)
     } finally {
