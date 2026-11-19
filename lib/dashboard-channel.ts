@@ -19,8 +19,11 @@ export interface ChannelDetail extends ChannelInfo {
   forward_access: ForwardAccess
 }
 
+/** 頻道清單頁；頻道後台的前端網址都從這裡與 channelPath 組出，後端 API 仍在 /dashboard/channels */
+export const CHANNEL_LIST_PATH = "/dashboard/twitch"
+
 export function channelPath(channelId: string): string {
-  return `/dashboard/channels/${encodeURIComponent(channelId)}`
+  return `${CHANNEL_LIST_PATH}/${encodeURIComponent(channelId)}`
 }
 
 export function fetchChannels(signal?: AbortSignal): Promise<{ channels: ChannelInfo[] }> {
@@ -138,7 +141,7 @@ export const CHANNEL_LIST_NOTICES: Record<ChannelListNotice, string> = {
   channel_unlinked: "剛才的頻道已不在這個析域帳號的連結裡，已回到頻道清單。",
 }
 
-export const CHANNEL_UNLINKED_URL = "/dashboard/channels?notice=channel_unlinked"
+export const CHANNEL_UNLINKED_URL = `${CHANNEL_LIST_PATH}?notice=channel_unlinked`
 
 /** 解析頻道清單頁的 notice 參數；不認得的代碼回 null */
 export function parseChannelListNotice(value: string | null): ChannelListNotice | null {

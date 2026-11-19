@@ -43,7 +43,7 @@ describe("dashboardNav", () => {
     expect(mine.active("/dashboard/guilds")).toBe(false)
     expect(guilds.active("/dashboard/guilds/1")).toBe(true)
     const channels = dashboardNav(twitchUser)[1]
-    expect(channels.active("/dashboard/channels/777/commands")).toBe(true)
+    expect(channels.active("/dashboard/twitch/777/commands")).toBe(true)
     expect(channels.active("/dashboard/guilds")).toBe(false)
   })
 })

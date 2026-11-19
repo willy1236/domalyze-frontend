@@ -8,7 +8,7 @@ const load = vi.hoisted(() => ({
   value: { data: null as ChannelDetail | null, error: null as unknown, reload: async () => {} },
 }))
 vi.mock("@/lib/use-load", () => ({ useLoad: () => load.value }))
-vi.mock("next/navigation", () => ({ useRouter: () => ({ replace: () => {} }), usePathname: () => "/dashboard/channels/777" }))
+vi.mock("next/navigation", () => ({ useRouter: () => ({ replace: () => {} }), usePathname: () => "/dashboard/twitch/777" }))
 
 import { ChannelAccessGuard, channelGuardView, useChannel } from "./channel-access-guard"
 

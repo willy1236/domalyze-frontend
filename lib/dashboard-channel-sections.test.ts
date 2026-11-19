@@ -11,18 +11,18 @@ describe("CHANNEL_NAV", () => {
 
 describe("channelSectionHref", () => {
   it("總覽是頻道頁本身，其他區塊接上子路徑", () => {
-    expect(channelSectionHref("7", item("overview"))).toBe("/dashboard/channels/7")
-    expect(channelSectionHref("7", item("commands"))).toBe("/dashboard/channels/7/commands")
+    expect(channelSectionHref("7", item("overview"))).toBe("/dashboard/twitch/7")
+    expect(channelSectionHref("7", item("commands"))).toBe("/dashboard/twitch/7/commands")
   })
 })
 
 describe("isChannelSectionActive", () => {
   it("總覽只在網址完全相符時算所在位置", () => {
-    expect(isChannelSectionActive("7", item("overview"), "/dashboard/channels/7")).toBe(true)
-    expect(isChannelSectionActive("7", item("overview"), "/dashboard/channels/7/commands")).toBe(false)
+    expect(isChannelSectionActive("7", item("overview"), "/dashboard/twitch/7")).toBe(true)
+    expect(isChannelSectionActive("7", item("overview"), "/dashboard/twitch/7/commands")).toBe(false)
   })
   it("其他區塊含子路徑", () => {
-    expect(isChannelSectionActive("7", item("commands"), "/dashboard/channels/7/commands")).toBe(true)
-    expect(isChannelSectionActive("7", item("commands"), "/dashboard/channels/7/timers")).toBe(false)
+    expect(isChannelSectionActive("7", item("commands"), "/dashboard/twitch/7/commands")).toBe(true)
+    expect(isChannelSectionActive("7", item("commands"), "/dashboard/twitch/7/timers")).toBe(false)
   })
 })

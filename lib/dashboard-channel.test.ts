@@ -82,7 +82,7 @@ describe("channelListView 帶提示", () => {
 describe("channelLeaveTarget", () => {
   const forbidden = new DashboardApiError(403, "channel_forbidden", null, false)
   it("析域登入的頻道被解除連結時回到頻道清單並帶提示", () => {
-    expect(channelLeaveTarget(forbidden, "domalyze")).toBe("/dashboard/channels?notice=channel_unlinked")
+    expect(channelLeaveTarget(forbidden, "domalyze")).toBe("/dashboard/twitch?notice=channel_unlinked")
   })
   it("其他登入方式或其他錯誤留在原頁", () => {
     expect(channelLeaveTarget(forbidden, "twitch")).toBeNull()
@@ -130,7 +130,7 @@ describe("forwardAccessNotice", () => {
 
 describe("channelPath", () => {
   it("組出頻道頁網址", () => {
-    expect(channelPath("123")).toBe("/dashboard/channels/123")
+    expect(channelPath("123")).toBe("/dashboard/twitch/123")
   })
 })
 

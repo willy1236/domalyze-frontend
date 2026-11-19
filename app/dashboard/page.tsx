@@ -11,6 +11,7 @@ import { PlaylistsSection } from "@/components/dashboard/personal/playlists"
 import { PublicSettingsSection } from "@/components/dashboard/personal/public-settings"
 import { RecordsSection } from "@/components/dashboard/personal/records"
 import { dashboardFetch } from "@/lib/dashboard-api"
+import { CHANNEL_LIST_PATH } from "@/lib/dashboard-channel"
 import { type PersonalOverview, guildListRedirect, hasDiscord } from "@/lib/dashboard-personal"
 import { useDashboardUser } from "@/lib/dashboard-user"
 import { useLoad } from "@/lib/use-load"
@@ -22,7 +23,7 @@ export default function PersonalPage() {
   // 舊網址 /dashboard?notice= 是伺服器清單的通知，轉過去並保留參數
   const [redirecting, setRedirecting] = useState(false)
   useEffect(() => {
-    const target = twitchLogin ? "/dashboard/channels" : guildListRedirect(window.location.search)
+    const target = twitchLogin ? CHANNEL_LIST_PATH : guildListRedirect(window.location.search)
     if (target) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setRedirecting(true)

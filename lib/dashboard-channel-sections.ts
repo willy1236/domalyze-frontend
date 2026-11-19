@@ -6,7 +6,7 @@ export type ChannelSectionKey = "overview" | "commands" | "timers" | "events" | 
 export interface ChannelNavItem {
   key: ChannelSectionKey
   label: string
-  /** 相對於 /dashboard/channels/[id] 的路徑；總覽是頻道頁本身，所以是空字串 */
+  /** 相對於 /dashboard/twitch/[id] 的路徑；總覽是頻道頁本身，所以是空字串 */
   path: string
 }
 

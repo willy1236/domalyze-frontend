@@ -15,6 +15,15 @@ const nextConfig: NextConfig = {
   //   ],
   // },
 
+  // 頻道後台的前端網址從 /dashboard/channels 改成 /dashboard/twitch（後端 API 路徑不變）；
+  // 舊網址永久導到新網址，保留子頁與 query
+  async redirects() {
+    return [
+      { source: "/dashboard/channels", destination: "/dashboard/twitch", permanent: true },
+      { source: "/dashboard/channels/:path*", destination: "/dashboard/twitch/:path*", permanent: true },
+    ];
+  },
+
   // async rewrites() {
   //   return [
   //     {
