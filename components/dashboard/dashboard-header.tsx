@@ -4,6 +4,7 @@ import { useState } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { Button } from "@/components/ui"
+import { UserAvatar } from "@/components/user-avatar"
 import { LAST_USER_KEY, dashboardFetch, discardDrafts } from "@/lib/dashboard-api"
 import { type DashboardUser, dashboardNav } from "@/lib/dashboard-user"
 
@@ -60,14 +61,7 @@ export function DashboardHeader({ user }: { user: DashboardUser }) {
           })}
         </nav>
         <div className="flex items-center gap-3 min-w-0">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={user.avatar_url}
-            alt=""
-            width={32}
-            height={32}
-            className="w-8 h-8 rounded-full shrink-0"
-          />
+          <UserAvatar src={user.avatar_url} name={user.name} />
           <span className="hidden sm:inline text-sm truncate max-w-64">{user.name}</span>
           <Button
             type="button"

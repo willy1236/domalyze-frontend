@@ -7,7 +7,8 @@ export interface DashboardUser {
   /** 主身分 key：有 Discord 時是 Discord ID，Twitch 登入是 `twitch:<id>` */
   id: string
   name: string
-  avatar_url: string
+  /** 沒有頭像時為 null（沒有 Discord 的析域登入） */
+  avatar_url: string | null
   /** Discord 身分；只用 Twitch 登入時為 null */
   discord: { id: string } | null
   /** Twitch 身分；沒有時為 null */

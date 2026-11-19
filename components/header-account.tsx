@@ -2,11 +2,12 @@
 
 import { useEffect, useState } from "react"
 import Link from "next/link"
+import { UserAvatar } from "@/components/user-avatar"
 import { API_BASE } from "@/lib/dashboard-api"
 
 interface Me {
   name: string
-  avatar_url: string
+  avatar_url: string | null
 }
 
 const LINK_CLASS =
@@ -48,8 +49,7 @@ export function HeaderAccount() {
   }
   return (
     <Link href="/dashboard" aria-label={`${me.name} 的個人區`} className="shrink-0 hover:opacity-80 transition-opacity">
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src={me.avatar_url} alt="" width={32} height={32} className="w-8 h-8 rounded-full" />
+      <UserAvatar src={me.avatar_url} name={me.name} />
     </Link>
   )
 }
