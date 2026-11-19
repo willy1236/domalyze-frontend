@@ -1,13 +1,18 @@
 import { afterEach, describe, expect, it, vi } from "vitest"
-import { type PersonalOverview, accountLabel, guildListRedirect, isLocked, reportLinkClick } from "./dashboard-personal"
+import { type PersonalOverview, accountLabel, guildListRedirect, hasDiscord, isLocked, reportLinkClick } from "./dashboard-personal"
 
-const base: PersonalOverview = { account: null, partial: false, discords: [] }
+const base: PersonalOverview = { account: null, partial: false, discords: [], channels: [] }
 
 describe("個人區", () => {
   it("沒有析域帳號時鎖住工具與公開設定", () => {
     expect(isLocked(base)).toBe(true)
     expect(isLocked({ ...base, account: { username: "willy" } })).toBe(false)
     expect(isLocked({ ...base, account: { username: null } })).toBe(false)
+  })
+  it("沒有 Discord 身分（只連結 Twitch 的析域帳號）時不是 Discord 個人區", () => {
+    expect(hasDiscord(base)).toBe(false)
+    const discord = { id: "1", name: "n", avatar_url: "u", current: true, points: { stardust: 0, point: 0, rcoin: 0 }, pet: null }
+    expect(hasDiscord({ ...base, discords: [discord] })).toBe(true)
   })
   it("代號暫時查不到時顯示說明", () => {
     expect(accountLabel({ username: "willy" })).toBe("willy")

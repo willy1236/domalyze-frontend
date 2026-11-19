@@ -1,6 +1,7 @@
 // 個人區的資料型別與顯示用的整理。
 
 import { dashboardFetch } from "./dashboard-api"
+import type { ChannelInfo } from "./dashboard-channel"
 
 export interface PersonalPoints {
   stardust: number
@@ -29,7 +30,10 @@ export interface PersonalOverview {
   account: { username: string | null } | null
   /** auth server 暫時查不到連結了哪些 Discord，只有目前這個 Discord 的資料 */
   partial: boolean
+  /** 沒有 Discord 身分的析域登入為空 */
   discords: PersonalDiscord[]
+  /** 這個登入可以管理的 Twitch 頻道；沒有時為空 */
+  channels: ChannelInfo[]
 }
 
 /** 欄位名稱同 /user */
@@ -38,6 +42,11 @@ export const POINT_LABELS: [keyof PersonalPoints, string][] = [
   ["point", "PT點數"],
   ["rcoin", "Rcoin"],
 ]
+
+/** 這個登入有 Discord 身分；沒有時（只連結 Twitch 的析域帳號）Discord 相關區塊都不顯示 */
+export function hasDiscord(overview: PersonalOverview): boolean {
+  return overview.discords.length > 0
+}
 
 /** 需要析域帳號的區塊（工具與公開設定）是否鎖住 */
 export function isLocked(overview: PersonalOverview): boolean {

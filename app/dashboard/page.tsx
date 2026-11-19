@@ -4,13 +4,14 @@ import { useCallback, useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { AccountSection } from "@/components/dashboard/personal/account"
 import { AssetsSection } from "@/components/dashboard/personal/assets"
+import { ChannelsSection } from "@/components/dashboard/personal/channels"
 import { DriveSection } from "@/components/dashboard/personal/drive"
 import { NetbirdSection } from "@/components/dashboard/personal/netbird"
 import { PlaylistsSection } from "@/components/dashboard/personal/playlists"
 import { PublicSettingsSection } from "@/components/dashboard/personal/public-settings"
 import { RecordsSection } from "@/components/dashboard/personal/records"
 import { dashboardFetch } from "@/lib/dashboard-api"
-import { type PersonalOverview, guildListRedirect } from "@/lib/dashboard-personal"
+import { type PersonalOverview, guildListRedirect, hasDiscord } from "@/lib/dashboard-personal"
 import { useDashboardUser } from "@/lib/dashboard-user"
 import { useLoad } from "@/lib/use-load"
 
@@ -48,19 +49,25 @@ export default function PersonalPage() {
       {overview && (
         <>
           <AccountSection overview={overview} />
-          <AssetsSection overview={overview} />
-          {/* 主欄放瀏覽與編輯為主的紀錄、歌單；側欄放設定型的工具與公開頁 */}
-          <div className="grid gap-10 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)] lg:gap-12 items-start empty:hidden">
-            <div className="grid gap-10 min-w-0 empty:hidden">
-              <RecordsSection overview={overview} />
-              <PlaylistsSection overview={overview} />
-            </div>
-            <aside className="grid gap-10 min-w-0 empty:hidden">
-              <DriveSection overview={overview} />
-              <NetbirdSection overview={overview} />
-              <PublicSettingsSection overview={overview} />
-            </aside>
-          </div>
+          <ChannelsSection overview={overview} />
+          {/* 沒有 Discord 身分（只連結 Twitch 的析域帳號）時，以下 Discord 相關的區塊都不顯示 */}
+          {hasDiscord(overview) && (
+            <>
+              <AssetsSection overview={overview} />
+              {/* 主欄放瀏覽與編輯為主的紀錄、歌單；側欄放設定型的工具與公開頁 */}
+              <div className="grid gap-10 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)] lg:gap-12 items-start empty:hidden">
+                <div className="grid gap-10 min-w-0 empty:hidden">
+                  <RecordsSection overview={overview} />
+                  <PlaylistsSection overview={overview} />
+                </div>
+                <aside className="grid gap-10 min-w-0 empty:hidden">
+                  <DriveSection overview={overview} />
+                  <NetbirdSection overview={overview} />
+                  <PublicSettingsSection overview={overview} />
+                </aside>
+              </div>
+            </>
+          )}
         </>
       )}
     </div>
