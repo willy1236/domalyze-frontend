@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest"
 import { DashboardApiError, dashboardFetch } from "./dashboard-api"
 import {
   EVENT_KINDS,
+  conflictPanel,
   eventMeta,
   formatConflictField,
   fromConflictValues,
@@ -36,6 +37,23 @@ describe("submitEventOperation", () => {
       method: "DELETE",
       json: { original: latest },
     })
+  })
+})
+
+describe("conflictPanel", () => {
+  const draft = { enabled: true, template: "我舊的自訂文字" }
+  it("儲存：顯示草稿，按鈕是以我的內容覆蓋", () => {
+    expect(conflictPanel("save", draft)).toEqual({
+      mineTitle: "你的輸入",
+      mine: { enabled: "true", response: "我舊的自訂文字" },
+      overwriteLabel: "以我的內容覆蓋",
+    })
+  })
+  it("恢復預設：不顯示草稿，說明要做的操作，按鈕是仍要恢復預設", () => {
+    const panel = conflictPanel("reset", draft)
+    expect(panel.mine).toEqual({ response: "恢復成預設文字" })
+    expect(JSON.stringify(panel)).not.toContain("我舊的自訂文字")
+    expect(panel.overwriteLabel).toBe("仍要恢復預設")
   })
 })
 

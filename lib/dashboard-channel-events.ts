@@ -86,6 +86,18 @@ export function submitEventOperation(
     : resetEventResponse(channelId, kind, original)
 }
 
+/** 衝突提示面板的使用者那一欄與覆蓋按鈕：要與按下後實際送出的操作一致 */
+export function conflictPanel(operation: EventOperation, draft: EventValues) {
+  if (operation === "reset") {
+    return {
+      mineTitle: "你要做的操作",
+      mine: { response: "恢復成預設文字" } as ConflictValues,
+      overwriteLabel: "仍要恢復預設",
+    }
+  }
+  return { mineTitle: "你的輸入", mine: toConflictValues(draft), overwriteLabel: "以我的內容覆蓋" }
+}
+
 /** 衝突提示用的字串形式，和後端 twitch_event_responses.comparable 一致（文字的欄位名是 response） */
 export type ConflictValues = Record<string, string | null>
 

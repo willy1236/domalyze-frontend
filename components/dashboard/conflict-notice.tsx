@@ -46,6 +46,10 @@ interface Props {
   busy?: boolean
   /** 衝突提示裡的主詞，預設「這筆通知」 */
   subject?: string
+  /** 使用者那一欄的標題，預設「你的輸入」 */
+  mineTitle?: string
+  /** 覆蓋按鈕的文字（資料還在時），預設「以我的內容覆蓋」 */
+  overwriteLabel?: string
 }
 
 const defaultFormat = (_field: string, value: string | null): ReactNode => (value === null || value === "" ? "無" : value)
@@ -83,6 +87,8 @@ export function ConflictNotice({
   onRecreate,
   busy,
   subject = "這筆通知",
+  mineTitle = "你的輸入",
+  overwriteLabel = "以我的內容覆蓋",
 }: Props) {
   const deleted = current === null
   return (
@@ -93,7 +99,7 @@ export function ConflictNotice({
       </p>
       <div className={`mt-3 grid gap-3 ${deleted ? "" : "sm:grid-cols-2"}`}>
         {current && <Column title="最新版本" values={current} format={format} />}
-        <Column title="你的輸入" values={mine} format={format} />
+        <Column title={mineTitle} values={mine} format={format} />
       </div>
       <Button
         type="button"
@@ -101,7 +107,7 @@ export function ConflictNotice({
         onClick={() => (current ? onOverwrite(current) : onRecreate?.())}
         className="mt-4"
       >
-        {deleted ? "重新新增" : "以我的內容覆蓋"}
+        {deleted ? "重新新增" : overwriteLabel}
       </Button>
     </div>
   )

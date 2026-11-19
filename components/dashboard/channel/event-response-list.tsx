@@ -13,13 +13,13 @@ import {
   type EventValues,
   eventMeta,
   fetchEventResponses,
+  conflictPanel,
   formatConflictField,
   fromConflictValues,
   isDirty,
   parseSaveProblem,
   submitEventOperation,
   TEMPLATE_MAX,
-  toConflictValues,
   valuesOf,
 } from "@/lib/dashboard-channel-events"
 import { charLength } from "@/lib/dashboard-message"
@@ -211,7 +211,7 @@ function EventRow({ channelId, response, readOnly, onNotEnabled }: RowProps) {
           <div className="mt-3">
             <ConflictNotice
               current={conflict.current}
-              mine={toConflictValues(conflict.mine)}
+              {...conflictPanel(conflict.operation, conflict.mine)}
               format={formatConflictField}
               busy={busy}
               subject="這個事件回應"
