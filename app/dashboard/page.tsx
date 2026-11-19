@@ -17,26 +17,25 @@ import { useLoad } from "@/lib/use-load"
 
 export default function PersonalPage() {
   const router = useRouter()
-  // Twitch 登入沒有個人區，直接到頻道
-  const twitchLogin = useDashboardUser()?.login_method === "twitch"
+  const user = useDashboardUser()
   // 舊網址 /dashboard?notice= 是伺服器清單的通知，轉過去並保留參數
   const [redirecting, setRedirecting] = useState(false)
   useEffect(() => {
-    const target = twitchLogin ? "/dashboard/channels" : guildListRedirect(window.location.search)
+    const target = guildListRedirect(window.location.search)
     if (target) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setRedirecting(true)
       router.replace(target)
     }
-  }, [router, twitchLogin])
+  }, [router])
 
   const fetcher = useCallback(
     (signal: AbortSignal) => dashboardFetch<PersonalOverview>("/dashboard/personal/overview", {}, { signal }),
     [],
   )
-  const { data: overview, failed } = useLoad(redirecting || twitchLogin ? null : fetcher)
+  const { data: overview, failed } = useLoad(redirecting ? null : fetcher)
 
-  if (redirecting || twitchLogin) return null
+  if (redirecting) return null
 
   return (
     <div className="grid gap-10">
@@ -48,9 +47,9 @@ export default function PersonalPage() {
       )}
       {overview && (
         <>
-          <AccountSection overview={overview} />
+          <AccountSection overview={overview} user={user} />
           <ChannelsSection overview={overview} />
-          {/* 沒有 Discord 身分（只連結 Twitch 的析域帳號）時，以下 Discord 相關的區塊都不顯示 */}
+          {/* 沒有 Discord 身分（Twitch 登入、只連結 Twitch 的析域帳號）時，以下 Discord 相關的區塊都不顯示 */}
           {hasDiscord(overview) && (
             <>
               <AssetsSection overview={overview} />

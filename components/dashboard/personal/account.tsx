@@ -1,5 +1,8 @@
+import Link from "next/link"
+import { UserAvatar } from "@/components/user-avatar"
 import { DOMALYZE_ACCOUNT_URL } from "@/lib/dashboard-login"
 import { type PersonalDiscord, type PersonalOverview, accountLabel } from "@/lib/dashboard-personal"
+import type { DashboardUser } from "@/lib/dashboard-user"
 import { LinkAccountEntry } from "./link-entry"
 
 function DiscordChip({ discord }: { discord: PersonalDiscord }) {
@@ -13,14 +16,17 @@ function DiscordChip({ discord }: { discord: PersonalDiscord }) {
   )
 }
 
-/** 個人區頂部：析域帳號（或目前的 Discord）與連結的 Discord；沒有析域帳號時附連結入口 */
-export function AccountSection({ overview }: { overview: PersonalOverview }) {
+/** 個人區頂部：析域帳號（或目前的 Discord、Twitch）與連結的 Discord；沒有析域帳號時附連結入口 */
+export function AccountSection({ overview, user = null }: { overview: PersonalOverview; user?: DashboardUser | null }) {
   const { account, partial, discords } = overview
   const current = discords.find((d) => d.current) ?? discords[0]
+  // Twitch 登入沒有 Discord 也沒有析域帳號：顯示 Twitch 的名稱與頭像，並引導改用析域登入
+  const twitch = user?.login_method === "twitch" ? user : null
   return (
     <section aria-labelledby="personal-title" className="grid gap-6">
       <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-5 min-w-0">
+          {twitch && <UserAvatar src={twitch.avatar_url} name={twitch.name} className="w-16 h-16 sm:w-[72px] sm:h-[72px]" />}
           {current && (
             // eslint-disable-next-line @next/next/no-img-element
             <img
@@ -33,7 +39,7 @@ export function AccountSection({ overview }: { overview: PersonalOverview }) {
           )}
           <div className="min-w-0">
             <h1 id="personal-title" className="text-2xl sm:text-3xl font-serif truncate">
-              {account ? accountLabel(account) : (current?.name ?? "我的")}
+              {account ? accountLabel(account) : (current?.name ?? twitch?.name ?? "我的")}
             </h1>
             <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
               {account ? (
@@ -45,6 +51,14 @@ export function AccountSection({ overview }: { overview: PersonalOverview }) {
                 >
                   管理析域帳號
                 </a>
+              ) : twitch ? (
+                <>
+                  用 Twitch 登入。改用
+                  <Link href="/dashboard-login" className="text-champagne underline underline-offset-4 hover:opacity-80">
+                    析域帳號登入
+                  </Link>
+                  ，能同時管理伺服器與頻道。
+                </>
               ) : (
                 "尚未連結析域帳號"
               )}
@@ -52,22 +66,24 @@ export function AccountSection({ overview }: { overview: PersonalOverview }) {
           </div>
         </div>
 
-        <div className="text-sm min-w-0 sm:max-w-[50%]">
-          <h2 className="sr-only">Discord</h2>
-          <ul className="flex flex-wrap gap-2 sm:justify-end">
-            {discords.map((d) => (
-              <DiscordChip key={d.id} discord={d} />
-            ))}
-          </ul>
-          {partial && (
-            <p role="status" className="mt-2 text-gray-500 dark:text-gray-400 sm:text-right">
-              其他 Discord 帳號的資料暫時無法載入。
-            </p>
-          )}
-        </div>
+        {discords.length > 0 && (
+          <div className="text-sm min-w-0 sm:max-w-[50%]">
+            <h2 className="sr-only">Discord</h2>
+            <ul className="flex flex-wrap gap-2 sm:justify-end">
+              {discords.map((d) => (
+                <DiscordChip key={d.id} discord={d} />
+              ))}
+            </ul>
+            {partial && (
+              <p role="status" className="mt-2 text-gray-500 dark:text-gray-400 sm:text-right">
+                其他 Discord 帳號的資料暫時無法載入。
+              </p>
+            )}
+          </div>
+        )}
       </div>
 
-      {!account && (
+      {!account && !twitch && (
         <p className="text-sm text-gray-500 dark:text-gray-400 max-w-prose">
           連結後可以一起查看其他 Discord 的資料，並使用歌單、雲端資料夾共用、NetBird 與公開頁。<LinkAccountEntry />
         </p>
