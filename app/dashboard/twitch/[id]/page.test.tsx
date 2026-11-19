@@ -21,7 +21,7 @@ const detail = (state: ChannelDetail["state"]): ChannelDetail => ({
 function statusText(state: ChannelDetail["state"]): string {
   channel.value = detail(state)
   const html = renderToStaticMarkup(<ChannelOverviewPage />)
-  const match = /<p[^>]*>(.*?)<\/p>/s.exec(html)
+  const match = /<p[^>]*>([^<]*)<\/p>/.exec(html)
   if (!match) throw new Error("找不到狀態說明")
   return match[1]
 }
