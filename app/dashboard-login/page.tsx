@@ -59,16 +59,24 @@ export default function DashboardLoginPage() {
         </LoginNoticeBox>
       )}
       <div className="flex flex-col gap-3">
-        <LinkButton variant="outline" className={PROVIDER_CLASS} href={href("discord")} onClick={forgetNext}>
-          以 Discord 登入
-        </LinkButton>
         <LinkButton
-          variant="outline"
-          className={PROVIDER_CLASS}
+          variant="primary"
+          className="block w-full text-center px-4 py-3"
           href={href("domalyze")}
           onClick={() => rememberNext(next)}
         >
           以析域帳號登入
+        </LinkButton>
+        <p className="text-sm text-center text-gray-600 dark:text-gray-400">
+          析域帳號能使用後台的完整功能，一次管理 Discord 伺服器與 Twitch 頻道。用 Discord 或 Twitch 登入，只能管理該平台的部分。
+        </p>
+        <div role="separator" className="flex items-center gap-3 my-1 text-xs text-gray-500 dark:text-gray-400">
+          <span aria-hidden className="h-px flex-1 bg-champagne/30" />
+          或
+          <span aria-hidden className="h-px flex-1 bg-champagne/30" />
+        </div>
+        <LinkButton variant="outline" className={PROVIDER_CLASS} href={href("discord")} onClick={forgetNext}>
+          以 Discord 登入
         </LinkButton>
         <LinkButton variant="outline" className={PROVIDER_CLASS} href={href("twitch")} onClick={forgetNext}>
           以 Twitch 登入
