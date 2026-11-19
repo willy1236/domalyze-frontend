@@ -11,7 +11,7 @@ export default function ChannelEventsPage() {
     <section>
       <h2 className="text-2xl font-serif mb-2">事件回應</h2>
       <p className="mb-6 text-sm text-gray-600 dark:text-gray-400">
-        發生這些事件時，星羽會在聊天室回應；沒有改過就使用預設文字，也可以個別關閉。
+        這些事件預設都是關閉，開啟後星羽才會在聊天室回應；沒有改過文字就使用預設文字。
       </p>
       <EventResponseList channelId={channel.id} readOnly={channel.state !== "enabled"} onNotEnabled={() => void reloadChannel()} />
     </section>

@@ -189,7 +189,7 @@ function EventRow({ channelId, response, readOnly, onNotEnabled }: RowProps) {
   }
 
   function reset() {
-    if (!window.confirm(`確定要把「${eventMeta(base.kind).label}」恢復成預設文字嗎？目前自訂的文字會被刪除。`)) return
+    if (!window.confirm(`確定要把「${eventMeta(base.kind).label}」恢復成預設文字嗎？目前自訂的文字會被取代，開關不變。`)) return
     void run("reset", valuesOf(base))
   }
 

@@ -41,6 +41,15 @@ describe("EventRowView", () => {
       expect(html).toContain(text)
     }
   })
+  it("沒有設定過的事件是關閉的預設文字", () => {
+    const r = response({ enabled: false })
+    const html = render({ response: r, draft: { enabled: false, template: r.template } })
+    expect(html).not.toContain("checked")
+    expect(html).toContain("（預設文字）")
+  })
+  it("開啟的事件勾選啟用", () => {
+    expect(render()).toContain("checked")
+  })
   it("續訂那列提示觀眾發出續訂訊息時才會回應", () => {
     expect(render()).toContain("觀眾發出續訂訊息時才會回應")
   })

@@ -13,7 +13,7 @@ export interface EventResponse {
   kind: string
   enabled: boolean
   template: string
-  /** 沒有自訂過，正在使用預設文字 */
+  /** 文字就是預設文字（沒有設定時開關是關閉） */
   is_default: boolean
   variables: EventVariable[]
 }
@@ -61,7 +61,7 @@ export function saveEventResponse(
   return dashboardFetch(`${base(channelId)}/${encodeURIComponent(kind)}`, { method: "PUT", json: { values, original } })
 }
 
-/** 恢復預設：刪除自訂的設定 */
+/** 恢復預設文字，開關不變 */
 export function resetEventResponse(
   channelId: string,
   kind: string,
