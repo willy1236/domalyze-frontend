@@ -2,11 +2,14 @@ import { describe, expect, it } from "vitest"
 import { DashboardApiError } from "./dashboard-api"
 import {
   type ChannelInfo,
+  channelAction,
   channelListView,
   channelPath,
   channelStatusLabel,
+  enableUrl,
   forwardAccessNotice,
   isChannelForbidden,
+  parseChannelNotices,
 } from "./dashboard-channel"
 
 const channel = (id: string): ChannelInfo => ({ id, login: "l", name: "N", avatar_url: null, state: "inactive" })
@@ -21,10 +24,38 @@ describe("isChannelForbidden", () => {
 })
 
 describe("channelStatusLabel", () => {
-  it("只分已啟用與未啟用", () => {
+  it("未啟用、已啟用、已停用各有標籤", () => {
     expect(channelStatusLabel("enabled")).toBe("bot 已啟用")
     expect(channelStatusLabel("inactive")).toBe("bot 未啟用")
-    expect(channelStatusLabel("disabled")).toBe("bot 未啟用")
+    expect(channelStatusLabel("disabled")).toBe("bot 已停用")
+  })
+})
+
+describe("channelAction", () => {
+  it("未啟用與已停用是（重新）啟用，已啟用是停用", () => {
+    expect(channelAction("inactive")).toEqual({ kind: "enable", label: "啟用 bot" })
+    expect(channelAction("disabled")).toEqual({ kind: "enable", label: "重新啟用" })
+    expect(channelAction("enabled")).toEqual({ kind: "disable", label: "停用 bot" })
+  })
+})
+
+describe("enableUrl", () => {
+  it("帶頻道與前端 origin", () => {
+    const url = new URL(enableUrl("123", "https://localhost:3001"), "https://api.example")
+    expect(url.pathname).toBe("/to/dashboard-twitch-enable")
+    expect(url.searchParams.get("channel")).toBe("123")
+    expect(url.searchParams.get("origin")).toBe("https://localhost:3001")
+  })
+})
+
+describe("parseChannelNotices", () => {
+  it("沒有參數是空的", () => {
+    expect(parseChannelNotices(null)).toEqual([])
+    expect(parseChannelNotices("")).toEqual([])
+  })
+  it("多個代碼依序解析，不認得的忽略", () => {
+    expect(parseChannelNotices("mod_failed,bot_offline")).toEqual(["mod_failed", "bot_offline"])
+    expect(parseChannelNotices("wrong_account,nope,toString")).toEqual(["wrong_account"])
   })
 })
 

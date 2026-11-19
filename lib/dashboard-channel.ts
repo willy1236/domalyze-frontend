@@ -1,6 +1,6 @@
 // 實況主頻道後台的資料與共用判斷。
 
-import { DashboardApiError, dashboardFetch } from "./dashboard-api"
+import { API_BASE, DashboardApiError, dashboardFetch } from "./dashboard-api"
 
 export type ChannelState = "inactive" | "enabled" | "disabled"
 
@@ -36,9 +36,62 @@ export function isChannelForbidden(error: unknown): boolean {
   return error instanceof DashboardApiError && error.code === "channel_forbidden"
 }
 
-/** bot 狀態的簡短說明；完整判定由 W-08 擴充，這裡只分啟用與未啟用 */
+/** bot 狀態的簡短說明；完整判定由 W-08 擴充，這裡只依 state 分未啟用、已啟用、已停用 */
 export function channelStatusLabel(state: ChannelState): string {
-  return state === "enabled" ? "bot 已啟用" : "bot 未啟用"
+  switch (state) {
+    case "enabled":
+      return "bot 已啟用"
+    case "disabled":
+      return "bot 已停用"
+    case "inactive":
+      return "bot 未啟用"
+  }
+}
+
+export type ChannelAction = { kind: "enable"; label: string } | { kind: "disable"; label: string }
+
+/** 目前 state 該提供的操作：未啟用與已停用都是（重新）啟用，已啟用只能停用 */
+export function channelAction(state: ChannelState): ChannelAction {
+  switch (state) {
+    case "enabled":
+      return { kind: "disable", label: "停用 bot" }
+    case "disabled":
+      return { kind: "enable", label: "重新啟用" }
+    case "inactive":
+      return { kind: "enable", label: "啟用 bot" }
+  }
+}
+
+/** 後端的啟用入口：整頁導向 Twitch 授權，完成後回到頻道頁 */
+export function enableUrl(channelId: string, origin: string): string {
+  const params = new URLSearchParams({ channel: channelId, origin })
+  return `${API_BASE}/to/dashboard-twitch-enable?${params.toString()}`
+}
+
+export interface DisableResult {
+  state: ChannelState
+  /** bot 沒有完成同步（離線或內部出錯）；state 已經改好，bot 上線後依資料庫為準 */
+  bot_offline: boolean
+}
+
+export function disableChannel(channelId: string): Promise<DisableResult> {
+  return dashboardFetch(`/dashboard/channels/${encodeURIComponent(channelId)}/disable`, { method: "POST" })
+}
+
+/** 啟用流程導回頻道頁時，網址 `?notice=` 帶的代碼（多個以逗號分隔） */
+export type ChannelNotice = "wrong_account" | "bot_offline" | "mod_failed" | "enable_failed"
+
+export const CHANNEL_NOTICES: Record<ChannelNotice, string> = {
+  wrong_account: "請用頻道本人的帳號授權。",
+  bot_offline: "bot 暫時離線，上線後自動生效。",
+  mod_failed: "bot 沒有自動成為頻道 mod。請在聊天室輸入 /mod xingyu1016；若 bot 目前是你的 VIP，請先移除 VIP。",
+  enable_failed: "啟用沒有完成，請再試一次。",
+}
+
+/** 解析網址的 notice 參數；不認得的代碼忽略 */
+export function parseChannelNotices(value: string | null): ChannelNotice[] {
+  if (value === null) return []
+  return value.split(",").filter((code): code is ChannelNotice => Object.hasOwn(CHANNEL_NOTICES, code))
 }
 
 export function forwardAccessNotice(access: ForwardAccess): { title: string; body: string } | null {
