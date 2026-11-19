@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it } from "vitest"
 import {
   LOGIN_NEXT_KEY,
+  LOGIN_NOTICES,
   forgetNext,
   isLoginNotice,
   loginPageUrl,
@@ -67,6 +68,12 @@ describe("resolveNext", () => {
     rememberNext("/dashboard/guilds/2")
     forgetNext()
     expect(resolveNext(new URLSearchParams({ notice: "domalyze_expired" }))).toBe("/dashboard")
+  })
+})
+
+describe("LOGIN_NOTICES", () => {
+  it("沒有連結 Discord 也沒有連結 Twitch 時，提示先連結其中一個", () => {
+    expect(LOGIN_NOTICES.domalyze_no_discord).toContain("連結 Discord 或 Twitch")
   })
 })
 

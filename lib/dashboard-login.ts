@@ -17,7 +17,7 @@ export type LoginNotice = "domalyze_denied" | "domalyze_unavailable" | "domalyze
 export const LOGIN_NOTICES: Record<LoginNotice, string> = {
   domalyze_denied: "無法以這個析域帳號登入。",
   domalyze_unavailable: "析域帳號暫時無法登入，請稍後再試，或改用 Discord 登入。",
-  domalyze_no_discord: "這個析域帳號還沒有連結 Discord。請先到析域帳號頁連結 Discord，或改用 Discord 登入。",
+  domalyze_no_discord: "這個析域帳號還沒有連結 Discord 或 Twitch。請先到析域帳號頁連結 Discord 或 Twitch，或改用 Discord 登入。",
   domalyze_expired: "登入已逾時，請重新開始。",
 }
 
