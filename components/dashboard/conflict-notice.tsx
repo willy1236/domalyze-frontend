@@ -27,6 +27,9 @@ const FIELD_LABELS: Record<string, string> = {
   global_cooldown: "全體冷卻",
   user_cooldown: "個人冷卻",
   permission: "權限",
+  // 計時訊息
+  interval_minutes: "發送間隔",
+  min_chat_lines: "最少聊天量",
 }
 
 interface Props {
