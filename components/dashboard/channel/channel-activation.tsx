@@ -9,6 +9,7 @@ import {
   CHANNEL_NOTICES,
   channelAction,
   disableChannel,
+  disableNotices,
   enableUrl,
   parseChannelNotices,
 } from "@/lib/dashboard-channel"
@@ -31,7 +32,9 @@ function useChannelNotices(): ChannelNotice[] {
 
 /** 啟用、停用、重新啟用 bot 的操作，以及啟用流程回來時的提示。要在 ChannelAccessGuard 內使用。 */
 export function ChannelActivation({ channelId, state }: { channelId: string; state: ChannelState }) {
-  const notices = useChannelNotices()
+  const urlNotices = useChannelNotices()
+  const [disableResult, setDisableResult] = useState<ChannelNotice[]>([])
+  const notices = [...urlNotices, ...disableResult]
   const reload = useReloadChannel()
   const [origin, setOrigin] = useState<string | null>(null)
   const [confirming, setConfirming] = useState(false)
@@ -48,8 +51,9 @@ export function ChannelActivation({ channelId, state }: { channelId: string; sta
   async function disable() {
     setBusy(true)
     setFailed(false)
+    setDisableResult([])
     try {
-      await disableChannel(channelId)
+      setDisableResult(disableNotices(await disableChannel(channelId)))
       setConfirming(false)
       await reload()
     } catch (error) {

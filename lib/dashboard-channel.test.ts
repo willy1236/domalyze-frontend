@@ -6,6 +6,7 @@ import {
   channelListView,
   channelPath,
   channelStatusLabel,
+  disableNotices,
   enableUrl,
   forwardAccessNotice,
   isChannelForbidden,
@@ -80,5 +81,20 @@ describe("forwardAccessNotice", () => {
 describe("channelPath", () => {
   it("組出頻道頁網址", () => {
     expect(channelPath("123")).toBe("/dashboard/channels/123")
+  })
+})
+
+describe("disableNotices", () => {
+  it("bot 離線或沒完成同步時提醒會晚一點才離開", () => {
+    expect(disableNotices({ state: "disabled", bot_offline: true })).toEqual(["disable_bot_offline"])
+  })
+  it("bot 已處理就沒有提示", () => {
+    expect(disableNotices({ state: "disabled", bot_offline: false })).toEqual([])
+  })
+})
+
+describe("CHANNEL_NOTICES", () => {
+  it("停用用的代碼也能從網址解析", () => {
+    expect(parseChannelNotices("disable_bot_offline")).toEqual(["disable_bot_offline"])
   })
 })

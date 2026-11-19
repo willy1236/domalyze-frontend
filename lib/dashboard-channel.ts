@@ -79,13 +79,24 @@ export function disableChannel(channelId: string): Promise<DisableResult> {
 }
 
 /** 啟用流程導回頻道頁時，網址 `?notice=` 帶的代碼（多個以逗號分隔） */
-export type ChannelNotice = "wrong_account" | "bot_offline" | "mod_failed" | "enable_failed"
+export type ChannelNotice =
+  | "wrong_account"
+  | "bot_offline"
+  | "mod_failed"
+  | "enable_failed"
+  | "disable_bot_offline"
 
 export const CHANNEL_NOTICES: Record<ChannelNotice, string> = {
   wrong_account: "請用頻道本人的帳號授權。",
   bot_offline: "bot 暫時離線，上線後自動生效。",
   mod_failed: "bot 沒有自動成為頻道 mod。請在聊天室輸入 /mod xingyu1016；若 bot 目前是你的 VIP，請先移除 VIP。",
   enable_failed: "啟用沒有完成，請再試一次。",
+  disable_bot_offline: "已停用，但 bot 暫時離線，上線後會離開聊天室。",
+}
+
+/** 停用成功後要顯示的提示：bot 沒有完成同步時，state 已經是已停用，但 bot 還在聊天室，要等它上線才會離開 */
+export function disableNotices(result: DisableResult): ChannelNotice[] {
+  return result.bot_offline ? ["disable_bot_offline"] : []
 }
 
 /** 解析網址的 notice 參數；不認得的代碼忽略 */
