@@ -70,6 +70,22 @@ export function resetEventResponse(
   return dashboardFetch(`${base(channelId)}/${encodeURIComponent(kind)}`, { method: "DELETE", json: { original } })
 }
 
+/** 使用者在這一列做的操作：儲存草稿，或恢復預設。衝突後「以我的內容覆蓋」要重做同一種操作 */
+export type EventOperation = "save" | "reset"
+
+/** 送出操作；original 是這次要比對的有效設定（衝突後覆蓋時是最新版本）。恢復預設不帶草稿 */
+export function submitEventOperation(
+  operation: EventOperation,
+  channelId: string,
+  kind: string,
+  draft: EventValues,
+  original: EventValues,
+): Promise<{ event_response: EventResponse }> {
+  return operation === "save"
+    ? saveEventResponse(channelId, kind, draft, original)
+    : resetEventResponse(channelId, kind, original)
+}
+
 /** 衝突提示用的字串形式，和後端 twitch_event_responses.comparable 一致（文字的欄位名是 response） */
 export type ConflictValues = Record<string, string | null>
 

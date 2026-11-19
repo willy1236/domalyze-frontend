@@ -1,5 +1,5 @@
-import { describe, expect, it } from "vitest"
-import { DashboardApiError } from "./dashboard-api"
+import { beforeEach, describe, expect, it, vi } from "vitest"
+import { DashboardApiError, dashboardFetch } from "./dashboard-api"
 import {
   EVENT_KINDS,
   eventMeta,
@@ -7,9 +7,37 @@ import {
   fromConflictValues,
   isDirty,
   parseSaveProblem,
+  submitEventOperation,
   toConflictValues,
   valuesOf,
 } from "./dashboard-channel-events"
+
+vi.mock("./dashboard-api", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("./dashboard-api")>()),
+  dashboardFetch: vi.fn().mockResolvedValue({}),
+}))
+
+describe("submitEventOperation", () => {
+  const draft = { enabled: true, template: "我舊的自訂文字" }
+  const latest = { enabled: false, template: "別人剛改的" }
+  beforeEach(() => vi.mocked(dashboardFetch).mockClear())
+
+  it("儲存：PUT 草稿與 original", async () => {
+    await submitEventOperation("save", "7", "follow", draft, latest)
+    expect(dashboardFetch).toHaveBeenCalledWith("/dashboard/channels/7/event-responses/follow", {
+      method: "PUT",
+      json: { values: draft, original: latest },
+    })
+  })
+  it("恢復預設撞到衝突後覆蓋：用最新版本當 original 再 DELETE，不送草稿", async () => {
+    await submitEventOperation("reset", "7", "follow", draft, latest)
+    expect(dashboardFetch).toHaveBeenCalledTimes(1)
+    expect(dashboardFetch).toHaveBeenCalledWith("/dashboard/channels/7/event-responses/follow", {
+      method: "DELETE",
+      json: { original: latest },
+    })
+  })
+})
 
 describe("EVENT_KINDS", () => {
   it("順序與後端的六種事件一致", () => {

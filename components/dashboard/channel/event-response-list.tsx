@@ -8,6 +8,7 @@ import { WarnIcon } from "@/components/dashboard/icons"
 import { DashboardApiError } from "@/lib/dashboard-api"
 import {
   type ConflictValues,
+  type EventOperation,
   type EventResponse,
   type EventValues,
   eventMeta,
@@ -16,8 +17,7 @@ import {
   fromConflictValues,
   isDirty,
   parseSaveProblem,
-  resetEventResponse,
-  saveEventResponse,
+  submitEventOperation,
   TEMPLATE_MAX,
   toConflictValues,
   valuesOf,
@@ -143,18 +143,19 @@ function EventRow({ channelId, response, readOnly, onNotEnabled }: RowProps) {
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [notice, setNotice] = useState<string | null>(null)
-  const [conflict, setConflict] = useState<{ current: ConflictValues; mine: EventValues } | null>(null)
+  const [conflict, setConflict] = useState<{ current: ConflictValues; mine: EventValues; operation: EventOperation } | null>(null)
 
-  async function run(request: Promise<{ event_response: EventResponse }>, mine: EventValues) {
+  async function run(operation: EventOperation, original: EventValues) {
+    start()
     try {
-      const saved = (await request).event_response
+      const saved = (await submitEventOperation(operation, channelId, base.kind, draft, original)).event_response
       setBase(saved)
       setDraft(valuesOf(saved))
     } catch (e) {
       if (leaveIfUnlinked(e)) return
       const problem = parseSaveProblem(e)
       if (problem?.kind === "conflict" && problem.current) {
-        setConflict({ current: problem.current, mine })
+        setConflict({ current: problem.current, mine: draft, operation })
       } else if (problem?.kind === "invalid_field") {
         setError(problem.reason)
       } else if (problem?.kind === "automod_blocked") {
@@ -184,14 +185,12 @@ function EventRow({ channelId, response, readOnly, onNotEnabled }: RowProps) {
       setError("請輸入回應文字")
       return
     }
-    start()
-    void run(saveEventResponse(channelId, base.kind, draft, original), draft)
+    void run("save", original)
   }
 
   function reset() {
     if (!window.confirm(`確定要把「${eventMeta(base.kind).label}」恢復成預設文字嗎？目前自訂的文字會被刪除。`)) return
-    start()
-    void run(resetEventResponse(channelId, base.kind, valuesOf(base)), draft)
+    void run("reset", valuesOf(base))
   }
 
   return (
@@ -219,7 +218,8 @@ function EventRow({ channelId, response, readOnly, onNotEnabled }: RowProps) {
               onOverwrite={(latest) => {
                 const original = fromConflictValues(latest)
                 setBase({ ...base, ...original })
-                save(original)
+                // 重做原本的操作：恢復預設撞到衝突，覆蓋就是用最新版本再恢復一次預設，不是把草稿存回去
+                void run(conflict.operation, original)
               }}
             />
           </div>
