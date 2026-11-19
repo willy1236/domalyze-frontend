@@ -19,6 +19,14 @@ const FIELD_LABELS: Record<string, string> = {
   manager_roles: "管理身分組",
   limits: "開單限制",
   button_label: "開單按鈕文字",
+  // 頻道的自訂指令
+  name: "指令名稱",
+  response: "回應內容",
+  aliases: "別名",
+  enabled: "啟用",
+  global_cooldown: "全體冷卻",
+  user_cooldown: "個人冷卻",
+  permission: "權限",
 }
 
 interface Props {
