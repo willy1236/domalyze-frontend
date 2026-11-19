@@ -4,7 +4,7 @@ vi.mock("./dashboard-api", () => ({ dashboardFetch: vi.fn() }))
 
 import { dashboardFetch } from "./dashboard-api"
 import {
-  DELETE_BOT_OFFLINE,
+  DELETE_BOT_NOT_SYNCED,
   DELETE_DONE,
   confirmMatches,
   deleteChannelData,
@@ -40,6 +40,6 @@ describe("deleteChannelData", () => {
 describe("deleteNotices", () => {
   it("星羽離線時多一則提示", () => {
     expect(deleteNotices({ state: "inactive", bot_offline: false })).toEqual([DELETE_DONE])
-    expect(deleteNotices({ state: "inactive", bot_offline: true })).toEqual([DELETE_DONE, DELETE_BOT_OFFLINE])
+    expect(deleteNotices({ state: "inactive", bot_offline: true })).toEqual([DELETE_DONE, DELETE_BOT_NOT_SYNCED])
   })
 })
