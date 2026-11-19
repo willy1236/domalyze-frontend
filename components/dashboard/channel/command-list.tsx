@@ -12,6 +12,7 @@ import {
   valuesOf,
 } from "@/lib/dashboard-channel-commands"
 import { useLoad } from "@/lib/use-load"
+import { useChannelError } from "./channel-access-guard"
 import { CommandForm } from "./command-form"
 
 interface RowsProps {
@@ -74,6 +75,7 @@ export function CommandList({ channelId, readOnly, onNotEnabled }: Props) {
   const { data, error, reload } = useLoad(fetcher)
   // undefined：沒有開表單；null：新增；指令：編輯
   const [editing, setEditing] = useState<ChannelCommand | null | undefined>(undefined)
+  const leaveIfUnlinked = useChannelError()
   const [busy, setBusy] = useState(false)
   const [notice, setNotice] = useState<string | null>(null)
 
@@ -84,6 +86,7 @@ export function CommandList({ channelId, readOnly, onNotEnabled }: Props) {
     try {
       await saveCommand(channelId, command.name, { ...original, enabled: !command.enabled }, original)
     } catch (e) {
+      if (leaveIfUnlinked(e)) return
       const problem = parseSaveProblem(e)
       if (problem?.kind === "not_enabled") onNotEnabled()
       else if (problem?.kind === "conflict") setNotice("這個指令剛被別人修改，已重新載入，請確認後再操作。")

@@ -30,6 +30,7 @@ import {
   valuesOf,
 } from "@/lib/dashboard-channel-commands"
 import { charLength } from "@/lib/dashboard-message"
+import { useChannelError } from "./channel-access-guard"
 
 interface Props {
   channelId: string
@@ -85,6 +86,7 @@ export function CommandForm({ channelId, original, onClose, onChanged, onNotEnab
   const [globalCooldown, setGlobalCooldown] = useState(String(initial.global_cooldown))
   const [userCooldown, setUserCooldown] = useState(String(initial.user_cooldown))
   const [permission, setPermission] = useState<CommandPermission>(initial.permission)
+  const leaveIfUnlinked = useChannelError()
   const [busy, setBusy] = useState(false)
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
   const [notice, setNotice] = useState<string | null>(null)
@@ -145,6 +147,7 @@ export function CommandForm({ channelId, original, onClose, onChanged, onNotEnab
       onChanged()
       onClose()
     } catch (e) {
+      if (leaveIfUnlinked(e)) return
       const problem = parseSaveProblem(e)
       if (problem?.kind === "conflict") {
         setConflict({ current: problem.current, mine })
@@ -175,6 +178,7 @@ export function CommandForm({ channelId, original, onClose, onChanged, onNotEnab
       onChanged()
       onClose()
     } catch (e) {
+      if (leaveIfUnlinked(e)) return
       const problem = parseSaveProblem(e)
       if (problem?.kind === "conflict" && problem.current === null) {
         // 已被別人刪除：目的已達成，重新載入清單

@@ -4,8 +4,10 @@ import {
   type ChannelInfo,
   channelAction,
   channelLeaveTarget,
+  leaveIfUnlinked,
   channelListView,
   channelPath,
+  CHANNEL_UNLINKED_URL,
   channelStatusLabel,
   disableNotices,
   enableUrl,
@@ -88,6 +90,23 @@ describe("channelLeaveTarget", () => {
     expect(channelLeaveTarget(forbidden, undefined)).toBeNull()
     expect(channelLeaveTarget(new Error("x"), "domalyze")).toBeNull()
     expect(channelLeaveTarget(null, "domalyze")).toBeNull()
+  })
+})
+
+describe("leaveIfUnlinked", () => {
+  const forbidden = new DashboardApiError(403, "channel_forbidden", null, false)
+  it("析域登入收到 channel_forbidden：導到頻道清單並回 true", () => {
+    const visited: string[] = []
+    expect(leaveIfUnlinked(forbidden, "domalyze", (url) => visited.push(url))).toBe(true)
+    expect(visited).toEqual([CHANNEL_UNLINKED_URL])
+  })
+  it("其他情況不導頁、回 false，呼叫端照常處理錯誤", () => {
+    const visited: string[] = []
+    const replace = (url: string) => visited.push(url)
+    expect(leaveIfUnlinked(forbidden, "twitch", replace)).toBe(false)
+    expect(leaveIfUnlinked(new DashboardApiError(409, "conflict", null, false), "domalyze", replace)).toBe(false)
+    expect(leaveIfUnlinked(new Error("x"), "domalyze", replace)).toBe(false)
+    expect(visited).toEqual([])
   })
 })
 

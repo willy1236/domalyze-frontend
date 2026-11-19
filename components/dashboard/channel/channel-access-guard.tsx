@@ -4,7 +4,7 @@ import { createContext, useCallback, useContext, useEffect, useRef } from "react
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { Button } from "@/components/ui"
-import { type ChannelDetail, channelLeaveTarget, fetchChannel, isChannelForbidden } from "@/lib/dashboard-channel"
+import { type ChannelDetail, channelLeaveTarget, fetchChannel, isChannelForbidden, leaveIfUnlinked } from "@/lib/dashboard-channel"
 import { useDashboardUser } from "@/lib/dashboard-user"
 import { useLoad } from "@/lib/use-load"
 
@@ -32,6 +32,17 @@ export function useReloadChannel(): () => Promise<void> {
   const reload = useContext(ChannelReloadContext)
   if (!reload) throw new Error("useReloadChannel 必須在 ChannelAccessGuard 內使用")
   return reload
+}
+
+/**
+ * 頻道頁的寫入操作（存檔、開關、刪除）的 catch 先呼叫回傳的函式：
+ * 析域登入的頻道被解除連結時回到頻道清單並提示，回傳 true，呼叫端直接結束；回傳 false 就照常處理錯誤。
+ * W-05～W-07 的頁面共用。
+ */
+export function useChannelError(): (error: unknown) => boolean {
+  const router = useRouter()
+  const loginMethod = useDashboardUser()?.login_method
+  return useCallback((error: unknown) => leaveIfUnlinked(error, loginMethod, (url) => router.replace(url)), [loginMethod, router])
 }
 
 /** 載入頻道資料並擋下沒有權限的人；通過後把頻道資料提供給底下所有頁面。 */

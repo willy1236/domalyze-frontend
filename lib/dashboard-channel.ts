@@ -152,3 +152,14 @@ export function parseChannelListNotice(value: string | null): ChannelListNotice 
 export function channelLeaveTarget(error: unknown, loginMethod: string | undefined): string | null {
   return loginMethod === "domalyze" && isChannelForbidden(error) ? CHANNEL_UNLINKED_URL : null
 }
+
+/**
+ * 頻道頁的寫入操作收到錯誤時先呼叫：析域登入的頻道被解除連結（channel_forbidden）時，
+ * 用 replace 回到頻道清單並提示，回傳 true，呼叫端不必再處理這個錯誤；其他情況回傳 false。
+ */
+export function leaveIfUnlinked(error: unknown, loginMethod: string | undefined, replace: (url: string) => void): boolean {
+  const target = channelLeaveTarget(error, loginMethod)
+  if (target === null) return false
+  replace(target)
+  return true
+}
