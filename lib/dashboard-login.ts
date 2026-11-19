@@ -10,7 +10,7 @@ export const LOGIN_NEXT_KEY = "dashboard:login-next"
 
 const DEFAULT_NEXT = "/dashboard"
 
-export type LoginProvider = "discord" | "domalyze"
+export type LoginProvider = "discord" | "domalyze" | "twitch"
 
 export type LoginNotice = "domalyze_denied" | "domalyze_unavailable" | "domalyze_no_discord" | "domalyze_expired"
 
@@ -42,9 +42,15 @@ export function loginPageUrl(next: string, notice?: LoginNotice): string {
   return `/dashboard-login?${params.toString()}`
 }
 
-/** 後端的登入入口：Discord 或析域 */
+const LOGIN_PATHS: Record<LoginProvider, string> = {
+  discord: "/to/dashboard-login",
+  domalyze: "/to/dashboard-domalyze-login",
+  twitch: "/to/dashboard-twitch-login",
+}
+
+/** 後端的登入入口：Discord、析域或 Twitch */
 export function providerLoginUrl(provider: LoginProvider, next: string, origin: string): string {
-  const path = provider === "discord" ? "/to/dashboard-login" : "/to/dashboard-domalyze-login"
+  const path = LOGIN_PATHS[provider]
   const params = new URLSearchParams({ next: sanitizeNext(next), origin })
   return `${API_BASE}${path}?${params.toString()}`
 }

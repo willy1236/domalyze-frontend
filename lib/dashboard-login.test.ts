@@ -32,12 +32,15 @@ describe("網址", () => {
     expect(loginPageUrl("/dashboard/guilds/1")).toBe("/dashboard-login?next=%2Fdashboard%2Fguilds%2F1")
     expect(loginPageUrl("/x", "domalyze_expired")).toBe("/dashboard-login?notice=domalyze_expired&next=%2Fdashboard")
   })
-  it("兩種登入入口都帶 next 與 origin", () => {
+  it("各登入入口都帶 next 與 origin", () => {
     expect(providerLoginUrl("discord", "/dashboard/guilds/1", "https://a.test")).toBe(
       "/to/dashboard-login?next=%2Fdashboard%2Fguilds%2F1&origin=https%3A%2F%2Fa.test",
     )
     expect(providerLoginUrl("domalyze", "/dashboard", "https://a.test")).toBe(
       "/to/dashboard-domalyze-login?next=%2Fdashboard&origin=https%3A%2F%2Fa.test",
+    )
+    expect(providerLoginUrl("twitch", "/dashboard/channels/1", "https://a.test")).toBe(
+      "/to/dashboard-twitch-login?next=%2Fdashboard%2Fchannels%2F1&origin=https%3A%2F%2Fa.test",
     )
   })
 })

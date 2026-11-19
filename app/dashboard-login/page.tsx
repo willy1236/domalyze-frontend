@@ -70,6 +70,9 @@ export default function DashboardLoginPage() {
         >
           以析域帳號登入
         </LinkButton>
+        <LinkButton variant="outline" className={PROVIDER_CLASS} href={href("twitch")} onClick={forgetNext}>
+          以 Twitch 登入
+        </LinkButton>
       </div>
     </LoginShell>
   )
