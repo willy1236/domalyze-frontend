@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react"
 import Link from "next/link"
-import { useRouter } from "next/navigation"
 import { LinkButton } from "@/components/ui"
 import {
   CHANNEL_LIST_NOTICES,
@@ -44,7 +43,6 @@ function ChannelRow({ channel }: { channel: ChannelInfo }) {
 }
 
 export default function ChannelListPage() {
-  const router = useRouter()
   // 登入入口要帶前端的 origin；等 hydration 後才有，之前按鈕沒有連結
   const [origin, setOrigin] = useState<string | null>(null)
   useEffect(() => {
@@ -66,11 +64,7 @@ export default function ChannelListPage() {
 
   const domalyzeLogin = useDashboardUser()?.login_method === "domalyze"
   const { data, failed } = useLoad(fetchChannels)
-  const view = data === null ? null : channelListView(data.channels, notice !== null)
-
-  useEffect(() => {
-    if (view?.kind === "redirect") router.replace(channelPath(view.channelId))
-  }, [view, router])
+  const view = data === null ? null : channelListView(data.channels)
 
   return (
     <section>

@@ -65,17 +65,10 @@ describe("parseChannelNotices", () => {
 })
 
 describe("channelListView", () => {
-  it("沒有頻道顯示空狀態，一個直接進去，多個才列出", () => {
+  it("沒有頻道顯示空狀態，有頻道（含只有一個）一律列出，不自動導入", () => {
     expect(channelListView([])).toEqual({ kind: "empty" })
-    expect(channelListView([channel("1")])).toEqual({ kind: "redirect", channelId: "1" })
+    expect(channelListView([channel("1")])).toEqual({ kind: "list" })
     expect(channelListView([channel("1"), channel("2")])).toEqual({ kind: "list" })
-  })
-})
-
-describe("channelListView 帶提示", () => {
-  it("帶提示時只有一個頻道也列出，提示才看得到", () => {
-    expect(channelListView([channel("1")], true)).toEqual({ kind: "list" })
-    expect(channelListView([], true)).toEqual({ kind: "empty" })
   })
 })
 
