@@ -5,19 +5,9 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { Button } from "@/components/ui"
 import { LAST_USER_KEY, dashboardFetch, discardDrafts } from "@/lib/dashboard-api"
+import { type DashboardUser, dashboardNav } from "@/lib/dashboard-user"
 
-export interface DashboardUser {
-  id: string
-  name: string
-  avatar_url: string
-  /** 這個 session 帶的析域帳號；username 為 null 表示代號暫時無法載入 */
-  account: { username: string | null } | null
-}
-
-const NAV = [
-  { href: "/dashboard", label: "我的", active: (path: string) => path === "/dashboard" },
-  { href: "/dashboard/guilds", label: "伺服器", active: (path: string) => path.startsWith("/dashboard/guilds") },
-]
+export type { DashboardUser }
 
 export function DashboardHeader({ user }: { user: DashboardUser }) {
   const [busy, setBusy] = useState(false)
@@ -55,7 +45,7 @@ export function DashboardHeader({ user }: { user: DashboardUser }) {
           <span className="hidden sm:inline">Xingyu</span>
         </a>
         <nav className="flex items-center gap-4 sm:gap-6 mr-auto ml-2 sm:ml-6">
-          {NAV.map((item) => {
+          {dashboardNav(user).map((item) => {
             const active = item.active(pathname)
             return (
               <Link

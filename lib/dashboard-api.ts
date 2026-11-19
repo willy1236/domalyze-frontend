@@ -5,7 +5,7 @@ import { loginPageUrl } from "./dashboard-login"
 
 export const API_BASE = process.env.NEXT_PUBLIC_BASE_API_URL ?? ""
 
-/** 換帳號偵測用：導向登入前存下目前的 Discord user ID */
+/** 換帳號偵測用：導向登入前存下目前的主身分 key（/dashboard/me 的 id） */
 export const LAST_USER_KEY = "dashboard:last-user-id"
 
 /** T-04 的暫存介面與換帳號偵測共用的 sessionStorage 前綴 */
@@ -71,7 +71,7 @@ export function setDashboardHooks(next: DashboardHooks): void {
   hooks = { ...next }
 }
 
-/** 目前登入的 Discord user ID；尚未取得為 null */
+/** 目前登入的主身分 key（/dashboard/me 的 id）；尚未取得為 null */
 export function getDashboardUserId(): string | null {
   return currentUserId
 }
@@ -96,6 +96,14 @@ export function redirectToLogin(): Promise<never> {
   const next = window.location.pathname + window.location.search
   window.location.href = loginPageUrl(next)
   return new Promise<never>(() => {})
+}
+
+/**
+ * 只有 Twitch 身分的 session 打了需要 Discord 的端點時要回去的頁面。
+ * 已經在個人區就不再導，免得每次載入都重新整理；呼叫端會收到一般錯誤。
+ */
+export function discordRequiredTarget(pathname: string): string | null {
+  return pathname === "/dashboard" ? null : "/dashboard"
 }
 
 function redirectToDashboard(): Promise<never> {
@@ -193,6 +201,12 @@ export async function dashboardFetch<T = unknown>(
       }
       window.alert("你沒有這個伺服器的管理權限。")
       return redirectToDashboard()
+    case "discord_required": {
+      const target = discordRequiredTarget(window.location.pathname)
+      if (target === null) throw new DashboardApiError(res.status, code, data, false)
+      window.location.href = target
+      return new Promise<never>(() => {})
+    }
     case "bot_not_in_guild":
       window.alert("星羽已不在這個伺服器。")
       return redirectToDashboard()

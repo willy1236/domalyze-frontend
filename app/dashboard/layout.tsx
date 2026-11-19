@@ -7,6 +7,7 @@ import { DashboardHeader, type DashboardUser } from "@/components/dashboard/dash
 import { LAST_USER_KEY, dashboardFetch, discardDrafts, setDashboardHooks, setDashboardUserId } from "@/lib/dashboard-api"
 import { createDraftHooks } from "@/lib/dashboard-draft"
 import { forgetNext } from "@/lib/dashboard-login"
+import { DashboardUserContext } from "@/lib/dashboard-user"
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter()
@@ -65,9 +66,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   }
 
   return (
-    <div className="min-h-screen">
-      <DashboardHeader user={user} />
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 py-8">{children}</main>
-    </div>
+    <DashboardUserContext.Provider value={user}>
+      <div className="min-h-screen">
+        <DashboardHeader user={user} />
+        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 py-8">{children}</main>
+      </div>
+    </DashboardUserContext.Provider>
   )
 }
