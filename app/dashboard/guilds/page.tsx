@@ -86,7 +86,7 @@ export default function GuildListPage() {
   return (
     <section>
       <div className="flex items-center justify-between gap-3 mb-6">
-        <h1 className="text-2xl font-serif">伺服器</h1>
+        <h1 className="text-2xl font-serif">Discord 伺服器</h1>
         {list && !isEmpty && (
           <LinkButton variant="outline" href={inviteUrl()}>
             邀請星羽

@@ -45,7 +45,7 @@ export function DashboardHeader({ user }: { user: DashboardUser }) {
           <img src="/xingyu-mark.svg" alt="" width={28} height={28} className="w-7 h-7 dark:brightness-[1.3]" />
           <span className="hidden sm:inline">Xingyu</span>
         </a>
-        <nav className="flex items-center gap-4 sm:gap-6 mr-auto ml-2 sm:ml-6">
+        <nav className="flex items-center gap-3 sm:gap-6 mr-auto ml-1 sm:ml-6 min-w-0 overflow-x-auto">
           {dashboardNav(user).map((item) => {
             const active = item.active(pathname)
             return (
@@ -53,7 +53,7 @@ export function DashboardHeader({ user }: { user: DashboardUser }) {
                 key={item.href}
                 href={item.href}
                 aria-current={active ? "page" : undefined}
-                className={`text-sm whitespace-nowrap transition-colors ${active ? "text-champagne" : "text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"}`}
+                className={`text-xs sm:text-sm whitespace-nowrap transition-colors ${active ? "text-champagne" : "text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"}`}
               >
                 {item.label}
               </Link>
@@ -61,7 +61,10 @@ export function DashboardHeader({ user }: { user: DashboardUser }) {
           })}
         </nav>
         <div className="flex items-center gap-3 min-w-0">
-          <UserAvatar src={user.avatar_url} name={user.name} />
+          {/* 360px 寬放不下頭像：導覽項目變長後，手機版只留登出按鈕 */}
+          <span className="hidden sm:inline-flex">
+            <UserAvatar src={user.avatar_url} name={user.name} />
+          </span>
           <span className="hidden sm:inline text-sm truncate max-w-64">{user.name}</span>
           <Button
             type="button"

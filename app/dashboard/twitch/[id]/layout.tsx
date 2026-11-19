@@ -23,7 +23,7 @@ export default function ChannelLayout({ children }: { children: React.ReactNode 
             className={`inline-flex items-center gap-1.5 text-sm text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-champagne ${linkClass}`}
           >
             <BackIcon width={15} height={15} />
-            頻道清單
+            Twitch 頻道
           </Link>
           <div className="mt-4">
             <ChannelHeader />

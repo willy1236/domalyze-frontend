@@ -26,16 +26,16 @@ const twitchUser: DashboardUser = {
 
 describe("dashboardNav", () => {
   it("有 Discord 身分時顯示「我的」與「伺服器」", () => {
-    expect(dashboardNav(discordUser).map((i) => i.label)).toEqual(["我的", "伺服器"])
+    expect(dashboardNav(discordUser).map((i) => i.label)).toEqual(["我的", "Discord 伺服器"])
   })
   it("只有 Twitch 身分時不顯示「伺服器」，有頻道所以顯示「頻道」", () => {
-    expect(dashboardNav(twitchUser).map((i) => i.label)).toEqual(["我的", "頻道"])
+    expect(dashboardNav(twitchUser).map((i) => i.label)).toEqual(["我的", "Twitch 頻道"])
   })
   it("沒有可管理的頻道時不顯示「頻道」", () => {
-    expect(dashboardNav(discordUser).map((i) => i.label)).not.toContain("頻道")
+    expect(dashboardNav(discordUser).map((i) => i.label)).not.toContain("Twitch 頻道")
   })
   it("Discord 與 Twitch 並存時照常顯示「伺服器」", () => {
-    expect(dashboardNav({ ...discordUser, twitch: twitchUser.twitch }).map((i) => i.label)).toEqual(["我的", "伺服器"])
+    expect(dashboardNav({ ...discordUser, twitch: twitchUser.twitch }).map((i) => i.label)).toEqual(["我的", "Discord 伺服器"])
   })
   it("active 依路徑判斷", () => {
     const [mine, guilds] = dashboardNav(discordUser)

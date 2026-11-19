@@ -31,13 +31,13 @@ const NAV: (DashboardNavItem & { visible: (user: DashboardUser) => boolean })[] 
   { href: "/dashboard", label: "我的", active: (path) => path === "/dashboard", visible: () => true },
   {
     href: "/dashboard/guilds",
-    label: "伺服器",
+    label: "Discord 伺服器",
     active: (path) => path.startsWith("/dashboard/guilds"),
     visible: (user) => user.discord !== null,
   },
   {
     href: CHANNEL_LIST_PATH,
-    label: "頻道",
+    label: "Twitch 頻道",
     active: (path) => path.startsWith(CHANNEL_LIST_PATH),
     visible: (user) => user.has_channels,
   },

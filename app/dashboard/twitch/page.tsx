@@ -68,7 +68,7 @@ export default function ChannelListPage() {
 
   return (
     <section>
-      <h1 className="text-2xl font-serif mb-6">頻道</h1>
+      <h1 className="text-2xl font-serif mb-6">Twitch 頻道</h1>
 
       {notice && (
         <p role="status" className="mb-4 border border-champagne/30 px-4 py-3">
