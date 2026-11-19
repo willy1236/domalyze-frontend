@@ -1,5 +1,6 @@
 import { renderToStaticMarkup } from "react-dom/server"
 import { describe, expect, it, vi } from "vitest"
+import { channelPath } from "@/lib/dashboard-channel"
 import type { PersonalOverview } from "@/lib/dashboard-personal"
 import { type DashboardUser, DashboardUserContext } from "@/lib/dashboard-user"
 
@@ -37,7 +38,7 @@ describe("個人區頁面", () => {
     )
     expect(html).toContain("Streamer")
     expect(html).toContain("我的頻道")
-    expect(html).toContain('href="/dashboard/channels/777"')
+    expect(html).toContain(`href="${channelPath("777")}"`)
     expect(html).not.toContain("紀錄")
     expect(html).not.toContain("歌單")
   })

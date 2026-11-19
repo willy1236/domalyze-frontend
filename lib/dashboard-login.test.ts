@@ -40,8 +40,8 @@ describe("網址", () => {
     expect(providerLoginUrl("domalyze", "/dashboard", "https://a.test")).toBe(
       "/to/dashboard-domalyze-login?next=%2Fdashboard&origin=https%3A%2F%2Fa.test",
     )
-    expect(providerLoginUrl("twitch", "/dashboard/channels/1", "https://a.test")).toBe(
-      "/to/dashboard-twitch-login?next=%2Fdashboard%2Fchannels%2F1&origin=https%3A%2F%2Fa.test",
+    expect(providerLoginUrl("twitch", "/dashboard/twitch/1", "https://a.test")).toBe(
+      "/to/dashboard-twitch-login?next=%2Fdashboard%2Ftwitch%2F1&origin=https%3A%2F%2Fa.test",
     )
   })
 })

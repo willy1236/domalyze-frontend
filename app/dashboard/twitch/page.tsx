@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation"
 import { LinkButton } from "@/components/ui"
 import {
   CHANNEL_LIST_NOTICES,
+  CHANNEL_LIST_PATH,
   type ChannelInfo,
   type ChannelListNotice,
   channelListView,
@@ -109,7 +110,7 @@ export default function ChannelListPage() {
           </p>
           <LinkButton
             variant="outline"
-            href={origin === null ? undefined : providerLoginUrl("twitch", "/dashboard/channels", origin)}
+            href={origin === null ? undefined : providerLoginUrl("twitch", CHANNEL_LIST_PATH, origin)}
           >
             以 Twitch 登入
           </LinkButton>

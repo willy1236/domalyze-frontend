@@ -1,5 +1,6 @@
 import { renderToStaticMarkup } from "react-dom/server"
 import { describe, expect, it } from "vitest"
+import { channelPath } from "@/lib/dashboard-channel"
 import type { PersonalOverview } from "@/lib/dashboard-personal"
 import { ChannelsSection } from "./channels"
 
@@ -21,10 +22,10 @@ describe("ChannelsSection", () => {
       />,
     )
     expect(html).toContain("我的頻道")
-    expect(html).toContain('href="/dashboard/channels/1"')
+    expect(html).toContain(`href="${channelPath("1")}"`)
     expect(html).toContain("Alpha")
     expect(html).toContain("bot 已啟用")
-    expect(html).toContain('href="/dashboard/channels/2"')
+    expect(html).toContain(`href="${channelPath("2")}"`)
     expect(html).toContain("bot 未啟用")
   })
 

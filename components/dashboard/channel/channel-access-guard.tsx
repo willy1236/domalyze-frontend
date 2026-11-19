@@ -4,7 +4,10 @@ import { createContext, useCallback, useContext, useEffect, useRef } from "react
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { Button } from "@/components/ui"
-import { type ChannelDetail, channelLeaveTarget, fetchChannel, isChannelForbidden, leaveIfUnlinked } from "@/lib/dashboard-channel"
+import {
+  CHANNEL_LIST_PATH,
+  type ChannelDetail,
+  channelLeaveTarget, fetchChannel, isChannelForbidden, leaveIfUnlinked } from "@/lib/dashboard-channel"
 import { useDashboardUser } from "@/lib/dashboard-user"
 import { useLoad } from "@/lib/use-load"
 
@@ -72,7 +75,7 @@ export function ChannelAccessGuard({ channelId, children }: { channelId: string;
     return (
       <div className="border border-champagne/30 px-4 py-8 text-center">
         <p className="mb-4">沒有這個頻道的權限</p>
-        <Link href="/dashboard/channels" className="text-champagne underline underline-offset-4">
+        <Link href={CHANNEL_LIST_PATH} className="text-champagne underline underline-offset-4">
           回到頻道清單
         </Link>
       </div>

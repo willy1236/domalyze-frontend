@@ -1,6 +1,7 @@
 "use client"
 
 import { createContext, useContext } from "react"
+import { CHANNEL_LIST_PATH } from "./dashboard-channel"
 
 /** /dashboard/me 的回應：session 的登入身分 */
 export interface DashboardUser {
@@ -35,9 +36,9 @@ const NAV: (DashboardNavItem & { visible: (user: DashboardUser) => boolean })[] 
     visible: (user) => user.discord !== null,
   },
   {
-    href: "/dashboard/channels",
+    href: CHANNEL_LIST_PATH,
     label: "頻道",
-    active: (path) => path.startsWith("/dashboard/channels"),
+    active: (path) => path.startsWith(CHANNEL_LIST_PATH),
     visible: (user) => user.has_channels,
   },
 ]
