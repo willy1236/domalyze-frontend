@@ -10,6 +10,7 @@ const discordUser: DashboardUser = {
   twitch: null,
   account: null,
   login_method: "discord",
+  has_channels: false,
 }
 
 const twitchUser: DashboardUser = {
@@ -20,14 +21,18 @@ const twitchUser: DashboardUser = {
   twitch: { id: "777", login: "streamer" },
   account: null,
   login_method: "twitch",
+  has_channels: true,
 }
 
 describe("dashboardNav", () => {
   it("有 Discord 身分時顯示「我的」與「伺服器」", () => {
     expect(dashboardNav(discordUser).map((i) => i.label)).toEqual(["我的", "伺服器"])
   })
-  it("只有 Twitch 身分時不顯示「伺服器」", () => {
-    expect(dashboardNav(twitchUser).map((i) => i.label)).toEqual(["我的"])
+  it("只有 Twitch 身分時不顯示「伺服器」，有頻道所以顯示「頻道」", () => {
+    expect(dashboardNav(twitchUser).map((i) => i.label)).toEqual(["我的", "頻道"])
+  })
+  it("沒有可管理的頻道時不顯示「頻道」", () => {
+    expect(dashboardNav(discordUser).map((i) => i.label)).not.toContain("頻道")
   })
   it("Discord 與 Twitch 並存時照常顯示「伺服器」", () => {
     expect(dashboardNav({ ...discordUser, twitch: twitchUser.twitch }).map((i) => i.label)).toEqual(["我的", "伺服器"])
@@ -37,6 +42,9 @@ describe("dashboardNav", () => {
     expect(mine.active("/dashboard")).toBe(true)
     expect(mine.active("/dashboard/guilds")).toBe(false)
     expect(guilds.active("/dashboard/guilds/1")).toBe(true)
+    const channels = dashboardNav(twitchUser)[1]
+    expect(channels.active("/dashboard/channels/777/commands")).toBe(true)
+    expect(channels.active("/dashboard/guilds")).toBe(false)
   })
 })
 

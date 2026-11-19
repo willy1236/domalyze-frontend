@@ -15,6 +15,8 @@ export interface DashboardUser {
   /** 這個 session 帶的析域帳號；username 為 null 表示代號暫時無法載入 */
   account: { username: string | null } | null
   login_method: "discord" | "domalyze" | "twitch"
+  /** 這個 session 有可以管理的 Twitch 頻道 */
+  has_channels: boolean
 }
 
 export interface DashboardNavItem {
@@ -23,19 +25,25 @@ export interface DashboardNavItem {
   active: (path: string) => boolean
 }
 
-const NAV: (DashboardNavItem & { needsDiscord: boolean })[] = [
-  { href: "/dashboard", label: "我的", active: (path) => path === "/dashboard", needsDiscord: false },
+const NAV: (DashboardNavItem & { visible: (user: DashboardUser) => boolean })[] = [
+  { href: "/dashboard", label: "我的", active: (path) => path === "/dashboard", visible: () => true },
   {
     href: "/dashboard/guilds",
     label: "伺服器",
     active: (path) => path.startsWith("/dashboard/guilds"),
-    needsDiscord: true,
+    visible: (user) => user.discord !== null,
+  },
+  {
+    href: "/dashboard/channels",
+    label: "頻道",
+    active: (path) => path.startsWith("/dashboard/channels"),
+    visible: (user) => user.has_channels,
   },
 ]
 
-/** 後台頂端導覽；伺服器相關的項目只在有 Discord 身分時顯示 */
+/** 後台頂端導覽；伺服器項目只在有 Discord 身分時顯示，頻道項目只在有可管理的頻道時顯示 */
 export function dashboardNav(user: DashboardUser): DashboardNavItem[] {
-  return NAV.filter((item) => !item.needsDiscord || user.discord !== null)
+  return NAV.filter((item) => item.visible(user))
 }
 
 export const DashboardUserContext = createContext<DashboardUser | null>(null)

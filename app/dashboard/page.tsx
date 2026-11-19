@@ -11,28 +11,31 @@ import { PublicSettingsSection } from "@/components/dashboard/personal/public-se
 import { RecordsSection } from "@/components/dashboard/personal/records"
 import { dashboardFetch } from "@/lib/dashboard-api"
 import { type PersonalOverview, guildListRedirect } from "@/lib/dashboard-personal"
+import { useDashboardUser } from "@/lib/dashboard-user"
 import { useLoad } from "@/lib/use-load"
 
 export default function PersonalPage() {
   const router = useRouter()
+  // Twitch 登入沒有個人區，直接到頻道
+  const twitchLogin = useDashboardUser()?.login_method === "twitch"
   // 舊網址 /dashboard?notice= 是伺服器清單的通知，轉過去並保留參數
   const [redirecting, setRedirecting] = useState(false)
   useEffect(() => {
-    const target = guildListRedirect(window.location.search)
+    const target = twitchLogin ? "/dashboard/channels" : guildListRedirect(window.location.search)
     if (target) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setRedirecting(true)
       router.replace(target)
     }
-  }, [router])
+  }, [router, twitchLogin])
 
   const fetcher = useCallback(
     (signal: AbortSignal) => dashboardFetch<PersonalOverview>("/dashboard/personal/overview", {}, { signal }),
     [],
   )
-  const { data: overview, failed } = useLoad(redirecting ? null : fetcher)
+  const { data: overview, failed } = useLoad(redirecting || twitchLogin ? null : fetcher)
 
-  if (redirecting) return null
+  if (redirecting || twitchLogin) return null
 
   return (
     <div className="grid gap-10">
