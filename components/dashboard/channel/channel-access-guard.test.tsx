@@ -2,11 +2,13 @@ import { renderToStaticMarkup } from "react-dom/server"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { DashboardApiError } from "@/lib/dashboard-api"
 import type { ChannelDetail } from "@/lib/dashboard-channel"
+import { type DashboardUser, DashboardUserContext } from "@/lib/dashboard-user"
 
 const load = vi.hoisted(() => ({
   value: { data: null as ChannelDetail | null, error: null as unknown, reload: async () => {} },
 }))
 vi.mock("@/lib/use-load", () => ({ useLoad: () => load.value }))
+vi.mock("next/navigation", () => ({ useRouter: () => ({ replace: () => {} }), usePathname: () => "/dashboard/channels/777" }))
 
 import { ChannelAccessGuard, channelGuardView, useChannel } from "./channel-access-guard"
 
@@ -24,11 +26,24 @@ function Probe() {
   return <p>{useChannel().name}</p>
 }
 
-const render = () =>
+const user = (login_method: DashboardUser["login_method"]): DashboardUser => ({
+  id: "u",
+  name: "u",
+  avatar_url: null,
+  discord: null,
+  twitch: null,
+  account: null,
+  login_method,
+  has_channels: true,
+})
+
+const render = (loginMethod?: DashboardUser["login_method"]) =>
   renderToStaticMarkup(
-    <ChannelAccessGuard channelId="777">
-      <Probe />
-    </ChannelAccessGuard>,
+    <DashboardUserContext.Provider value={loginMethod ? user(loginMethod) : null}>
+      <ChannelAccessGuard channelId="777">
+        <Probe />
+      </ChannelAccessGuard>
+    </DashboardUserContext.Provider>,
   )
 
 describe("channelGuardView", () => {
@@ -50,6 +65,18 @@ describe("ChannelAccessGuard", () => {
     const html = render()
     expect(html).toContain("沒有這個頻道的權限")
     expect(html).not.toContain("Streamer")
+  })
+
+  it("Twitch 登入收到 channel_forbidden 仍顯示沒有權限，不離開", () => {
+    load.value = { ...load.value, error: forbidden }
+    expect(render("twitch")).toContain("沒有這個頻道的權限")
+  })
+
+  it("析域登入收到 channel_forbidden 不顯示沒有權限，等導回頻道清單", () => {
+    load.value = { ...load.value, error: forbidden }
+    const html = render("domalyze")
+    expect(html).toContain('aria-busy="true"')
+    expect(html).not.toContain("沒有這個頻道的權限")
   })
 
   it("其他錯誤顯示載入失敗與重新載入", () => {

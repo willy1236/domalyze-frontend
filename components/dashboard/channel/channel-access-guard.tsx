@@ -1,9 +1,11 @@
 "use client"
 
-import { createContext, useCallback, useContext } from "react"
+import { createContext, useCallback, useContext, useEffect, useRef } from "react"
 import Link from "next/link"
+import { usePathname, useRouter } from "next/navigation"
 import { Button } from "@/components/ui"
-import { type ChannelDetail, fetchChannel, isChannelForbidden } from "@/lib/dashboard-channel"
+import { type ChannelDetail, channelLeaveTarget, fetchChannel, isChannelForbidden } from "@/lib/dashboard-channel"
+import { useDashboardUser } from "@/lib/dashboard-user"
 import { useLoad } from "@/lib/use-load"
 
 export type ChannelGuardView = "forbidden" | "failed" | "loading" | "ready"
@@ -38,6 +40,23 @@ export function ChannelAccessGuard({ channelId, children }: { channelId: string;
   const { data, error, reload } = useLoad(fetcher)
   const view = channelGuardView(data, error)
 
+  // 析域登入的頻道被解除連結：回到頻道清單並提示
+  const leaveTarget = channelLeaveTarget(error, useDashboardUser()?.login_method)
+  const router = useRouter()
+  useEffect(() => {
+    if (leaveTarget) router.replace(leaveTarget)
+  }, [leaveTarget, router])
+
+  // 在頻道內換頁時重新確認權限，解除連結後的下一次操作才會被導走（layout 不會重新掛載）
+  const pathname = usePathname()
+  const lastPathname = useRef(pathname)
+  useEffect(() => {
+    if (lastPathname.current === pathname) return
+    lastPathname.current = pathname
+    void reload()
+  }, [pathname, reload])
+
+  if (leaveTarget) return <div className="min-h-[40vh]" aria-busy="true" />
   if (view === "forbidden") {
     return (
       <div className="border border-champagne/30 px-4 py-8 text-center">

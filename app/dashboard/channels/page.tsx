@@ -4,8 +4,17 @@ import { useEffect, useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { LinkButton } from "@/components/ui"
-import { type ChannelInfo, channelListView, channelPath, fetchChannels } from "@/lib/dashboard-channel"
-import { providerLoginUrl } from "@/lib/dashboard-login"
+import {
+  CHANNEL_LIST_NOTICES,
+  type ChannelInfo,
+  type ChannelListNotice,
+  channelListView,
+  channelPath,
+  fetchChannels,
+  parseChannelListNotice,
+} from "@/lib/dashboard-channel"
+import { DOMALYZE_ACCOUNT_URL, providerLoginUrl } from "@/lib/dashboard-login"
+import { useDashboardUser } from "@/lib/dashboard-user"
 import { useLoad } from "@/lib/use-load"
 
 function ChannelRow({ channel }: { channel: ChannelInfo }) {
@@ -42,8 +51,21 @@ export default function ChannelListPage() {
     setOrigin(window.location.origin)
   }, [])
 
+  // 被導回來的提示：讀完從網址移除，重新整理時不再顯示
+  const [notice, setNotice] = useState<ChannelListNotice | null>(null)
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    if (!params.has("notice")) return
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setNotice(parseChannelListNotice(params.get("notice")))
+    params.delete("notice")
+    const query = params.toString()
+    window.history.replaceState(null, "", `${window.location.pathname}${query ? `?${query}` : ""}`)
+  }, [])
+
+  const domalyzeLogin = useDashboardUser()?.login_method === "domalyze"
   const { data, failed } = useLoad(fetchChannels)
-  const view = data === null ? null : channelListView(data.channels)
+  const view = data === null ? null : channelListView(data.channels, notice !== null)
 
   useEffect(() => {
     if (view?.kind === "redirect") router.replace(channelPath(view.channelId))
@@ -52,6 +74,12 @@ export default function ChannelListPage() {
   return (
     <section>
       <h1 className="text-2xl font-serif mb-6">頻道</h1>
+
+      {notice && (
+        <p role="status" className="mb-4 border border-champagne/30 px-4 py-3">
+          {CHANNEL_LIST_NOTICES[notice]}
+        </p>
+      )}
 
       {failed && <p className="text-gray-500 dark:text-gray-400">無法載入頻道清單，請稍後重新整理頁面再試。</p>}
 
@@ -63,7 +91,17 @@ export default function ChannelListPage() {
         </ul>
       )}
 
-      {view?.kind === "empty" && (
+      {view?.kind === "empty" && domalyzeLogin && (
+        <div className="border border-champagne/30 px-4 py-8 text-center">
+          <p className="mb-2">還沒有頻道</p>
+          <p className="text-gray-500 dark:text-gray-400 mb-4">這個析域帳號還沒有連結 Twitch。連結後約 1 分鐘內會出現在這裡。</p>
+          <LinkButton variant="outline" href={DOMALYZE_ACCOUNT_URL} target="_blank" rel="noopener noreferrer">
+            前往析域帳號頁
+          </LinkButton>
+        </div>
+      )}
+
+      {view?.kind === "empty" && !domalyzeLogin && (
         <div className="border border-champagne/30 px-4 py-8 text-center">
           <p className="mb-2">還沒有頻道</p>
           <p className="text-gray-500 dark:text-gray-400 mb-4">

@@ -124,9 +124,31 @@ export function forwardAccessNotice(access: ForwardAccess): { title: string; bod
 
 export type ChannelListView = { kind: "empty" } | { kind: "redirect"; channelId: string } | { kind: "list" }
 
-/** 頻道清單頁怎麼呈現：沒有頻道、只有一個時直接進去，多個才列出 */
-export function channelListView(channels: readonly ChannelInfo[]): ChannelListView {
+/** 頻道清單頁怎麼呈現：沒有頻道、只有一個時直接進去，多個才列出；帶著提示時只有一個也列出，提示才看得到 */
+export function channelListView(channels: readonly ChannelInfo[], hasNotice = false): ChannelListView {
   if (channels.length === 0) return { kind: "empty" }
-  if (channels.length === 1) return { kind: "redirect", channelId: channels[0].id }
+  if (channels.length === 1 && !hasNotice) return { kind: "redirect", channelId: channels[0].id }
   return { kind: "list" }
+}
+
+/** 頻道清單頁網址 `?notice=` 帶的代碼 */
+export type ChannelListNotice = "channel_unlinked"
+
+export const CHANNEL_LIST_NOTICES: Record<ChannelListNotice, string> = {
+  channel_unlinked: "剛才的頻道已不在這個析域帳號的連結裡，已回到頻道清單。",
+}
+
+export const CHANNEL_UNLINKED_URL = "/dashboard/channels?notice=channel_unlinked"
+
+/** 解析頻道清單頁的 notice 參數；不認得的代碼回 null */
+export function parseChannelListNotice(value: string | null): ChannelListNotice | null {
+  return value !== null && Object.hasOwn(CHANNEL_LIST_NOTICES, value) ? (value as ChannelListNotice) : null
+}
+
+/**
+ * 頻道頁收到錯誤後該不該離開：用析域登入、頻道被解除連結（沒有權限）時回到頻道清單並提示；
+ * 其他登入方式或其他錯誤留在原頁，由頁面顯示錯誤。
+ */
+export function channelLeaveTarget(error: unknown, loginMethod: string | undefined): string | null {
+  return loginMethod === "domalyze" && isChannelForbidden(error) ? CHANNEL_UNLINKED_URL : null
 }

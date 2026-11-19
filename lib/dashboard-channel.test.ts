@@ -3,6 +3,7 @@ import { DashboardApiError } from "./dashboard-api"
 import {
   type ChannelInfo,
   channelAction,
+  channelLeaveTarget,
   channelListView,
   channelPath,
   channelStatusLabel,
@@ -11,6 +12,7 @@ import {
   forwardAccessNotice,
   isChannelForbidden,
   parseChannelNotices,
+  parseChannelListNotice,
 } from "./dashboard-channel"
 
 const channel = (id: string): ChannelInfo => ({ id, login: "l", name: "N", avatar_url: null, state: "inactive" })
@@ -65,6 +67,35 @@ describe("channelListView", () => {
     expect(channelListView([])).toEqual({ kind: "empty" })
     expect(channelListView([channel("1")])).toEqual({ kind: "redirect", channelId: "1" })
     expect(channelListView([channel("1"), channel("2")])).toEqual({ kind: "list" })
+  })
+})
+
+describe("channelListView 帶提示", () => {
+  it("帶提示時只有一個頻道也列出，提示才看得到", () => {
+    expect(channelListView([channel("1")], true)).toEqual({ kind: "list" })
+    expect(channelListView([], true)).toEqual({ kind: "empty" })
+  })
+})
+
+describe("channelLeaveTarget", () => {
+  const forbidden = new DashboardApiError(403, "channel_forbidden", null, false)
+  it("析域登入的頻道被解除連結時回到頻道清單並帶提示", () => {
+    expect(channelLeaveTarget(forbidden, "domalyze")).toBe("/dashboard/channels?notice=channel_unlinked")
+  })
+  it("其他登入方式或其他錯誤留在原頁", () => {
+    expect(channelLeaveTarget(forbidden, "twitch")).toBeNull()
+    expect(channelLeaveTarget(forbidden, "discord")).toBeNull()
+    expect(channelLeaveTarget(forbidden, undefined)).toBeNull()
+    expect(channelLeaveTarget(new Error("x"), "domalyze")).toBeNull()
+    expect(channelLeaveTarget(null, "domalyze")).toBeNull()
+  })
+})
+
+describe("parseChannelListNotice", () => {
+  it("只認得已知的提示", () => {
+    expect(parseChannelListNotice("channel_unlinked")).toBe("channel_unlinked")
+    expect(parseChannelListNotice("toString")).toBeNull()
+    expect(parseChannelListNotice(null)).toBeNull()
   })
 })
 
