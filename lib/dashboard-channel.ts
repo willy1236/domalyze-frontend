@@ -1,6 +1,7 @@
 // 實況主頻道後台的資料與共用判斷。
 
 import { API_BASE, DashboardApiError, dashboardFetch } from "./dashboard-api"
+import type { ChannelHealth } from "./dashboard-channel-health"
 
 export type ChannelState = "inactive" | "enabled" | "disabled"
 
@@ -17,6 +18,8 @@ export type ForwardAccess = "ok" | "need_domalyze" | "need_discord"
 
 export interface ChannelDetail extends ChannelInfo {
   forward_access: ForwardAccess
+  /** 權限問題與暫停的功能（即時判定，不存 DB） */
+  health: ChannelHealth
 }
 
 /** 頻道清單頁；頻道後台的前端網址都從這裡與 channelPath 組出，後端 API 仍在 /dashboard/channels */
@@ -39,7 +42,7 @@ export function isChannelForbidden(error: unknown): boolean {
   return error instanceof DashboardApiError && error.code === "channel_forbidden"
 }
 
-/** 星羽狀態的簡短說明；完整判定由 W-08 擴充，這裡只依 state 分未啟用、已啟用、已停用 */
+/** 星羽狀態的簡短說明，依 DB 的 state 分未啟用、已啟用、已停用；部分暫停見 healthStatusLabel */
 export function channelStatusLabel(state: ChannelState): string {
   switch (state) {
     case "enabled":

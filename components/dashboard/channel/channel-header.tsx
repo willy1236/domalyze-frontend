@@ -22,7 +22,7 @@ export function ChannelHeader() {
       <div className="min-w-0">
         <h1 className="font-serif text-2xl leading-tight text-primary dark:text-silver truncate">{channel.name}</h1>
         <div className="mt-1">
-          <ChannelStatus state={channel.state} channelId={channel.id} />
+          <ChannelStatus state={channel.state} channelId={channel.id} health={channel.health} />
         </div>
       </div>
     </div>

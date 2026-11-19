@@ -15,6 +15,7 @@ const detail = (state: ChannelDetail["state"]): ChannelDetail => ({
   avatar_url: null,
   state,
   forward_access: "ok",
+  health: { state: "inactive", issues: [], paused_features: [] },
 })
 
 /** 狀態說明那一段的文字（總覽頁裡唯一的 <p>） */

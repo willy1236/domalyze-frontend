@@ -19,6 +19,7 @@ const detail: ChannelDetail = {
   avatar_url: null,
   state: "inactive",
   forward_access: "need_domalyze",
+  health: { state: "inactive", issues: [], paused_features: [] },
 }
 const forbidden = new DashboardApiError(403, "channel_forbidden", null, false)
 
