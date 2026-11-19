@@ -34,7 +34,7 @@ export function AutomodBlockList({ blocks }: { blocks: AutomodBlock[] }) {
   )
 }
 
-/** 頻道總覽的「最近被擋下的訊息」：bot 發言前被頻道 AutoMod 擋下的最近 20 則。 */
+/** 頻道總覽的「最近被擋下的訊息」：星羽發言前被頻道 AutoMod 擋下的最近 20 則。 */
 export function AutomodBlocks({ channelId }: { channelId: string }) {
   const fetcher = useCallback((signal: AbortSignal) => fetchAutomodBlocks(channelId, signal), [channelId])
   const { data, error, reload } = useLoad(fetcher)
@@ -42,7 +42,7 @@ export function AutomodBlocks({ channelId }: { channelId: string }) {
     <section className="mt-8">
       <h3 className="text-xl font-serif mb-2">最近被擋下的訊息</h3>
       <p className="mb-4 text-sm text-gray-500 dark:text-gray-400">
-        bot 發言前會用頻道的 AutoMod 設定檢查帶有觀眾輸入的訊息，沒通過的不會送出，列在這裡，最多 20 則。
+        星羽發言前會用頻道的 AutoMod 設定檢查帶有觀眾輸入的訊息，沒通過的不會送出，列在這裡，最多 20 則。
       </p>
       {error ? (
         <div className="border border-champagne/30 px-4 py-6 text-center">

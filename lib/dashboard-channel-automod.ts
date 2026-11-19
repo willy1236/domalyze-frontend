@@ -1,4 +1,4 @@
-// 頻道後台的「最近被擋下的訊息」：bot 發言前被頻道 AutoMod 擋下，或檢查失敗而沒送出的訊息。
+// 頻道後台的「最近被擋下的訊息」：星羽發言前被頻道 AutoMod 擋下，或檢查失敗而沒送出的訊息。
 
 import { dashboardFetch } from "./dashboard-api"
 

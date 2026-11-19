@@ -67,7 +67,7 @@ export function CommandVariables() {
           </li>
         ))}
       </ul>
-      <p className="mt-2">不認得的變數會原樣送出。含 {"{touser}"} 或 {"{args}"} 的回應，bot 發言前會再檢查一次頻道的 AutoMod。</p>
+      <p className="mt-2">不認得的變數會原樣送出。含 {"{touser}"} 或 {"{args}"} 的回應，星羽發言前會再檢查一次頻道的 AutoMod。</p>
     </details>
   )
 }

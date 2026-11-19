@@ -17,7 +17,7 @@ import { CommandForm } from "./command-form"
 
 interface RowsProps {
   commands: ChannelCommand[]
-  /** 頻道的 bot 還沒啟用：只能看，不能改 */
+  /** 頻道的星羽還沒啟用：只能看，不能改 */
   readOnly: boolean
   busy?: boolean
   onEdit: (command: ChannelCommand) => void
@@ -104,7 +104,7 @@ export function CommandList({ channelId, readOnly, onNotEnabled }: Props) {
     <div>
       {readOnly && (
         <p className="mb-4 border border-champagne/30 px-4 py-3 text-sm text-gray-600 dark:text-gray-400">
-          bot 還沒有在這個頻道啟用，啟用後才能修改指令。
+          星羽還沒有在這個頻道啟用，啟用後才能修改指令。
         </p>
       )}
       {error ? (

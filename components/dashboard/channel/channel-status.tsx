@@ -2,7 +2,7 @@ import { type ChannelState, channelStatusLabel } from "@/lib/dashboard-channel"
 import { ChannelActivation } from "./channel-activation"
 
 /**
- * bot 狀態標籤；完整的狀態判定之後擴充。
+ * 星羽狀態標籤；完整的狀態判定之後擴充。
  * 給 channelId 時，標籤下方多出啟用、停用的按鈕與啟用流程的提示（要在 ChannelAccessGuard 內）。
  */
 export function ChannelStatus({ state, channelId }: { state: ChannelState; channelId?: string }) {

@@ -40,7 +40,7 @@ describe("CommandRows", () => {
     expect(html).toContain("已關閉")
     expect(html).not.toContain("checked")
   })
-  it("bot 沒啟用時開關與編輯按鈕都停用", () => {
+  it("星羽沒啟用時開關與編輯按鈕都停用", () => {
     const html = renderToStaticMarkup(<CommandRows commands={[command()]} readOnly onEdit={noop} onToggle={noop} />)
     expect(html.match(/disabled=""/g)).toHaveLength(2)
   })

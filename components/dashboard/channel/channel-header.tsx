@@ -3,7 +3,7 @@
 import { ChannelStatus } from "./channel-status"
 import { useChannel } from "./channel-access-guard"
 
-/** 頻道頁頂端：頭像、名稱與 bot 狀態。 */
+/** 頻道頁頂端：頭像、名稱與星羽狀態。 */
 export function ChannelHeader() {
   const channel = useChannel()
   return (

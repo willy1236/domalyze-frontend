@@ -30,17 +30,17 @@ describe("isChannelForbidden", () => {
 
 describe("channelStatusLabel", () => {
   it("未啟用、已啟用、已停用各有標籤", () => {
-    expect(channelStatusLabel("enabled")).toBe("bot 已啟用")
-    expect(channelStatusLabel("inactive")).toBe("bot 未啟用")
-    expect(channelStatusLabel("disabled")).toBe("bot 已停用")
+    expect(channelStatusLabel("enabled")).toBe("星羽已啟用")
+    expect(channelStatusLabel("inactive")).toBe("星羽未啟用")
+    expect(channelStatusLabel("disabled")).toBe("星羽已停用")
   })
 })
 
 describe("channelAction", () => {
   it("未啟用與已停用是（重新）啟用，已啟用是停用", () => {
-    expect(channelAction("inactive")).toEqual({ kind: "enable", label: "啟用 bot" })
+    expect(channelAction("inactive")).toEqual({ kind: "enable", label: "啟用星羽" })
     expect(channelAction("disabled")).toEqual({ kind: "enable", label: "重新啟用" })
-    expect(channelAction("enabled")).toEqual({ kind: "disable", label: "停用 bot" })
+    expect(channelAction("enabled")).toEqual({ kind: "disable", label: "停用星羽" })
   })
 })
 
@@ -135,10 +135,10 @@ describe("channelPath", () => {
 })
 
 describe("disableNotices", () => {
-  it("bot 離線或沒完成同步時提醒會晚一點才離開", () => {
+  it("星羽離線或沒完成同步時提醒會晚一點才離開", () => {
     expect(disableNotices({ state: "disabled", bot_offline: true })).toEqual(["disable_bot_offline"])
   })
-  it("bot 已處理就沒有提示", () => {
+  it("星羽已處理就沒有提示", () => {
     expect(disableNotices({ state: "disabled", bot_offline: false })).toEqual([])
   })
 })

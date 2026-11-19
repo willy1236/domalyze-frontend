@@ -12,7 +12,7 @@ const overview = (channels: PersonalOverview["channels"]): PersonalOverview => (
 })
 
 describe("ChannelsSection", () => {
-  it("列出每個頻道的名稱、bot 狀態與頻道後台連結", () => {
+  it("列出每個頻道的名稱、星羽狀態與頻道後台連結", () => {
     const html = renderToStaticMarkup(
       <ChannelsSection
         overview={overview([
@@ -24,9 +24,9 @@ describe("ChannelsSection", () => {
     expect(html).toContain("我的頻道")
     expect(html).toContain(`href="${channelPath("1")}"`)
     expect(html).toContain("Alpha")
-    expect(html).toContain("bot 已啟用")
+    expect(html).toContain("星羽已啟用")
     expect(html).toContain(`href="${channelPath("2")}"`)
-    expect(html).toContain("bot 未啟用")
+    expect(html).toContain("星羽未啟用")
   })
 
   it("沒有頻道時不顯示區塊", () => {

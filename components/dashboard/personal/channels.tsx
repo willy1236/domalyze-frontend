@@ -4,7 +4,7 @@ import type { PersonalOverview } from "@/lib/dashboard-personal"
 import { PersonalSection } from "./personal-section"
 import { UserAvatar } from "@/components/user-avatar"
 
-/** 我的頻道：析域帳號連結的 Twitch 頻道與 bot 狀態，連到頻道後台；沒有頻道時不顯示 */
+/** 我的頻道：析域帳號連結的 Twitch 頻道與星羽狀態，連到頻道後台；沒有頻道時不顯示 */
 export function ChannelsSection({ overview }: { overview: PersonalOverview }) {
   if (overview.channels.length === 0) return null
   return (

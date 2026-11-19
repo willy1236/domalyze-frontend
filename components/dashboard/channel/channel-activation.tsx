@@ -30,7 +30,7 @@ function useChannelNotices(): ChannelNotice[] {
   return notices
 }
 
-/** 啟用、停用、重新啟用 bot 的操作，以及啟用流程回來時的提示。要在 ChannelAccessGuard 內使用。 */
+/** 啟用、停用、重新啟用星羽的操作，以及啟用流程回來時的提示。要在 ChannelAccessGuard 內使用。 */
 export function ChannelActivation({ channelId, state }: { channelId: string; state: ChannelState }) {
   const urlNotices = useChannelNotices()
   const [disableResult, setDisableResult] = useState<ChannelNotice[]>([])
@@ -83,7 +83,7 @@ export function ChannelActivation({ channelId, state }: { channelId: string; sta
       ) : confirming ? (
         <div className="space-y-2">
           <p className="text-xs text-gray-600 dark:text-gray-400">
-            bot 會離開聊天室並停止回應，指令與設定會保留，之後可以重新啟用。
+            星羽會離開聊天室並停止回應，指令與設定會保留，之後可以重新啟用。
           </p>
           <div className="flex flex-wrap gap-2">
             <Button type="button" variant="danger" disabled={busy} onClick={() => void disable()}>
