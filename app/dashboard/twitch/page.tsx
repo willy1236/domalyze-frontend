@@ -13,7 +13,8 @@ import {
   fetchChannels,
   parseChannelListNotice,
 } from "@/lib/dashboard-channel"
-import { DOMALYZE_ACCOUNT_URL, providerLoginUrl } from "@/lib/dashboard-login"
+import { LinkTwitchAccount } from "@/components/dashboard/channel/link-twitch-account"
+import { providerLoginUrl } from "@/lib/dashboard-login"
 import { useDashboardUser } from "@/lib/dashboard-user"
 import { useLoad } from "@/lib/use-load"
 
@@ -86,13 +87,19 @@ export default function ChannelListPage() {
         </ul>
       )}
 
+      {view?.kind === "list" && (
+        <div className="mt-6">
+          <LinkTwitchAccount />
+        </div>
+      )}
+
       {view?.kind === "empty" && domalyzeLogin && (
         <div className="border border-champagne/30 px-4 py-8 text-center">
           <p className="mb-2">還沒有頻道</p>
-          <p className="text-gray-500 dark:text-gray-400 mb-4">這個析域帳號還沒有連結 Twitch。連結後約 1 分鐘內會出現在這裡。</p>
-          <LinkButton variant="outline" href={DOMALYZE_ACCOUNT_URL} target="_blank" rel="noopener noreferrer">
-            前往析域帳號頁
-          </LinkButton>
+          <p className="text-gray-500 dark:text-gray-400 mb-4">這個析域帳號還沒有連結 Twitch。</p>
+          <div className="flex justify-center">
+            <LinkTwitchAccount label="連結 Twitch 帳號" />
+          </div>
         </div>
       )}
 
@@ -108,6 +115,9 @@ export default function ChannelListPage() {
           >
             以 Twitch 登入
           </LinkButton>
+          <div className="mt-6 pt-6 border-t border-champagne/20 flex justify-center">
+            <LinkTwitchAccount label="連結 Twitch 帳號" />
+          </div>
         </div>
       )}
     </section>

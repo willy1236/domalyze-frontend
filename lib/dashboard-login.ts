@@ -5,6 +5,9 @@ const API_BASE = process.env.NEXT_PUBLIC_BASE_API_URL ?? ""
 /** 析域帳號頁：連結 Discord、管理析域帳號 */
 export const DOMALYZE_ACCOUNT_URL = "https://auth.domalyze.net"
 
+/** auth server 上連結 Twitch 的入口（路徑的 twitch 是 login_provider.slug，與後端 AUTH_TWITCH_PROVIDER 同值）；未登入時 auth server 會先要求登入 */
+export const DOMALYZE_LINK_TWITCH_URL = `${DOMALYZE_ACCOUNT_URL}/account/link/twitch`
+
 /** 析域登入逾時回到登入頁時，網址可能沒有 next，用這裡存的值接回去 */
 export const LOGIN_NEXT_KEY = "dashboard:login-next"
 

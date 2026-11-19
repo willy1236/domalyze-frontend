@@ -132,6 +132,13 @@ export function channelListView(channels: readonly ChannelInfo[]): ChannelListVi
   return channels.length === 0 ? { kind: "empty" } : { kind: "list" }
 }
 
+/** 連結 Twitch 帳號的說明：析域登入連結後會出現在清單；其他登入方式要改用析域帳號登入才看得到 */
+export function linkTwitchNote(loginMethod: "discord" | "domalyze" | "twitch" | undefined): string {
+  return loginMethod === "domalyze"
+    ? "連結後 60 秒內會出現在這裡。"
+    : "連結到析域帳號後，用析域帳號登入就能在這裡管理所有頻道。"
+}
+
 /** 頻道清單頁網址 `?notice=` 帶的代碼 */
 export type ChannelListNotice = "channel_unlinked"
 
