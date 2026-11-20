@@ -30,7 +30,7 @@ describe("個人區頁面", () => {
       account: null,
       partial: false,
       discords: [],
-      channels: [{ id: "777", login: "streamer", name: "Streamer", avatar_url: null, state: "enabled" }],
+      channels: [{ id: "777", login: "streamer", name: "Streamer", avatar_url: null, role: "owner", state: "enabled" }],
     } satisfies PersonalOverview
     const html = renderToStaticMarkup(
       <DashboardUserContext.Provider value={twitchUser}>

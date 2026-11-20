@@ -73,3 +73,22 @@ describe("ChannelStatus 的權限問題", () => {
     expect(html).not.toContain('role="status"')
   })
 })
+
+describe("ChannelStatus 的 mod", () => {
+  it("看得到問題與暫停的功能，沒有修復與停用", () => {
+    const health: ChannelHealth = { state: "partial", issues: ["not_mod"], paused_features: ["follow_response"] }
+    const html = renderToStaticMarkup(<ChannelStatus state="enabled" channelId="777" health={health} role="mod" />)
+    expect(html).toContain("bot 不是 mod")
+    expect(html).toContain("暫停中的功能")
+    expect(html).toContain("要由實況主按「修復」處理")
+    expect(html).not.toContain(">修復</a>")
+    expect(html).not.toContain("停用星羽")
+  })
+  it("未啟用與已停用時沒有啟用的按鈕", () => {
+    for (const state of ["inactive", "disabled"] as const) {
+      const html = renderToStaticMarkup(<ChannelStatus state={state} channelId="777" role="mod" />)
+      expect(html).not.toContain("啟用星羽")
+      expect(html).not.toContain("重新啟用")
+    }
+  })
+})

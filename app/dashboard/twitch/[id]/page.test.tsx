@@ -13,6 +13,7 @@ const detail = (state: ChannelDetail["state"]): ChannelDetail => ({
   login: "streamer",
   name: "Streamer",
   avatar_url: null,
+  role: "owner",
   state,
   forward_access: "ok",
   health: { state: "inactive", issues: [], paused_features: [] },

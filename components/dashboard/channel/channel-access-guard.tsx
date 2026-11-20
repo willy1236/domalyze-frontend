@@ -39,13 +39,17 @@ export function useReloadChannel(): () => Promise<void> {
 
 /**
  * 頻道頁的寫入操作（存檔、開關、刪除）的 catch 先呼叫回傳的函式：
- * 析域登入的頻道被解除連結時回到頻道清單並提示，回傳 true，呼叫端直接結束；回傳 false 就照常處理錯誤。
- * W-05～W-07 的頁面共用。
+ * mod 已不能管理這個頻道、或析域登入的頻道被解除連結時，回到頻道清單並提示，回傳 true，呼叫端直接結束；
+ * 回傳 false 就照常處理錯誤。W-05～W-07 的頁面共用。
  */
 export function useChannelError(): (error: unknown) => boolean {
   const router = useRouter()
   const loginMethod = useDashboardUser()?.login_method
-  return useCallback((error: unknown) => leaveIfUnlinked(error, loginMethod, (url) => router.replace(url)), [loginMethod, router])
+  const role = useContext(ChannelContext)?.role
+  return useCallback(
+    (error: unknown) => leaveIfUnlinked(error, loginMethod, (url) => router.replace(url), role),
+    [loginMethod, role, router],
+  )
 }
 
 /** 載入頻道資料並擋下沒有權限的人；通過後把頻道資料提供給底下所有頁面。 */
@@ -54,8 +58,8 @@ export function ChannelAccessGuard({ channelId, children }: { channelId: string;
   const { data, error, reload } = useLoad(fetcher)
   const view = channelGuardView(data, error)
 
-  // 析域登入的頻道被解除連結：回到頻道清單並提示
-  const leaveTarget = channelLeaveTarget(error, useDashboardUser()?.login_method)
+  // 原本是 mod 頻道、或析域登入的頻道被解除連結：回到頻道清單並提示（重新載入失敗時 data 保留上次的結果）
+  const leaveTarget = channelLeaveTarget(error, useDashboardUser()?.login_method, data?.role)
   const router = useRouter()
   useEffect(() => {
     if (leaveTarget) router.replace(leaveTarget)
@@ -74,7 +78,10 @@ export function ChannelAccessGuard({ channelId, children }: { channelId: string;
   if (view === "forbidden") {
     return (
       <div className="border border-champagne/30 px-4 py-8 text-center">
-        <p className="mb-4">沒有這個頻道的權限</p>
+        <p className="mb-2">沒有這個頻道的權限</p>
+        <p className="mb-4 text-sm text-gray-500 dark:text-gray-400">
+          如果你是這個頻道的 mod，可能已不是 mod，或實況主關閉了 mod 協作。
+        </p>
         <Link href={CHANNEL_LIST_PATH} className="text-champagne underline underline-offset-4">
           回到頻道清單
         </Link>
