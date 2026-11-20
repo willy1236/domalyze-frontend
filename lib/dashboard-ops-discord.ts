@@ -196,7 +196,8 @@ const SNOWFLAKE_MAX = "18446744073709551615"
 
 /** 1 到 2^64-1 的整數 ID（與後端的 invalid_id 判斷一致） */
 export function isValidId(value: string): boolean {
-  if (!/^\d+$/.test(value)) return false
+  // 後端先擋超過 20 位的字串（含前導 0），這裡一致
+  if (value.length > SNOWFLAKE_MAX.length || !/^\d+$/.test(value)) return false
   const digits = value.replace(/^0+/, "")
   if (digits === "") return false
   return digits.length < SNOWFLAKE_MAX.length || (digits.length === SNOWFLAKE_MAX.length && digits <= SNOWFLAKE_MAX)

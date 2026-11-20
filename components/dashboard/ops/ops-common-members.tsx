@@ -94,6 +94,8 @@ function GuildSelect({
       <span>{label}</span>
       <Select value={value} onChange={(e) => onChange(e.target.value)}>
         {value === "" && <option value="">請選擇伺服器</option>}
+        {/* 網址或主伺服器的 ID 不在星羽所在的伺服器裡時，照實顯示，不讓選單停在第一個選項 */}
+        {value !== "" && !guilds.some((g) => g.id === value) && <option value={value}>{value}（星羽不在此伺服器）</option>}
         {guilds.map((guild) => (
           <option key={guild.id} value={guild.id}>
             {guild.name}
