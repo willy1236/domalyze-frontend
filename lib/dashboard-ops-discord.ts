@@ -10,6 +10,8 @@ export interface OpsGuild {
   icon_url: string | null
   member_count: number | null
   joined_at: string | null
+  /** 群主；成員快取沒有群主時 name、avatar_url 為 null */
+  owner: { id: string; name: string | null; avatar_url: string | null } | null
 }
 
 export interface DailyCount {
@@ -55,6 +57,11 @@ export function fetchOpsDiscord(days: number, signal?: AbortSignal): Promise<Ops
 
 export function fetchGuildEvents(page: number, signal?: AbortSignal): Promise<GuildEventPage> {
   return dashboardFetch(`/dashboard/ops/discord/events?page=${page}`, {}, { signal })
+}
+
+/** Discord 使用者個人資料頁 */
+export function discordUserUrl(userId: string): string {
+  return `https://discord.com/users/${encodeURIComponent(userId)}`
 }
 
 /** 加入離開紀錄一列的事件文字；啟動時補記的離開只知道發生在離線期間 */
