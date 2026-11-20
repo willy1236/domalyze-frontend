@@ -54,8 +54,9 @@ export function HomeFeaturesSection() {
             )
           })}
         </div>
-        <div className="text-center mt-16">
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-6 mt-16">
           <LinkButton href="/features">查看完整功能</LinkButton>
+          <LinkButton href="/twitch" variant="text">Twitch bot 介紹</LinkButton>
         </div>
       </div>
     </section>
