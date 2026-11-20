@@ -6,7 +6,9 @@ import {
   createLimiter,
   isNotBotOwner,
   opsAuditPath,
+  parseTokenProblemFilter,
   totalPages,
+  withTokenProblemFilter,
 } from "./dashboard-ops"
 
 describe("isNotBotOwner", () => {
@@ -100,5 +102,19 @@ describe("createLimiter", () => {
     const after = run(async () => "next", signal)
     await expect(failed).rejects.toThrow("boom")
     await expect(after).resolves.toBe("next")
+  })
+})
+
+describe("token 問題篩選的網址參數", () => {
+  it("只認 token_problem=1", () => {
+    expect(parseTokenProblemFilter("?token_problem=1")).toBe(true)
+    expect(parseTokenProblemFilter("?token_problem=0")).toBe(false)
+    expect(parseTokenProblemFilter("")).toBe(false)
+  })
+
+  it("切換時保留其他參數，關掉後沒有參數就是空字串", () => {
+    expect(withTokenProblemFilter("?x=2", true)).toBe("?x=2&token_problem=1")
+    expect(withTokenProblemFilter("?token_problem=1&x=2", false)).toBe("?x=2")
+    expect(withTokenProblemFilter("?token_problem=1", false)).toBe("")
   })
 })

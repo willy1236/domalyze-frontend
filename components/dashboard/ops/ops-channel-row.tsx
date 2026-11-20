@@ -5,7 +5,16 @@ import Link from "next/link"
 import { Button } from "@/components/ui"
 import { DashboardApiError } from "@/lib/dashboard-api"
 import { healthStatusLabel, issueText, pausedFeatureNames, type ChannelHealth } from "@/lib/dashboard-channel-health"
-import { type BanResult, type OpsChannel, banNotice, fetchOpsHealth, opsAuditPath, unbanChannel } from "@/lib/dashboard-ops"
+import {
+  type BanResult,
+  type OpsChannel,
+  type OpsChannelToken,
+  TOKEN_PROBLEM_LABELS,
+  banNotice,
+  fetchOpsHealth,
+  opsAuditPath,
+  unbanChannel,
+} from "@/lib/dashboard-ops"
 import { BanForm } from "./ban-form"
 
 type Limiter = <T>(task: () => Promise<T>, signal: AbortSignal) => Promise<T>
@@ -44,6 +53,17 @@ function Avatar({ channel }: { channel: OpsChannel }) {
     >
       {Array.from(channel.name)[0] ?? "?"}
     </span>
+  )
+}
+
+/** DB 判定的 token 問題；正常時不顯示 */
+function TokenProblemLine({ token }: { token: OpsChannelToken }) {
+  if (token.state === "ok") return null
+  return (
+    <p className="text-xs text-red-600 dark:text-red-400">
+      token：{TOKEN_PROBLEM_LABELS[token.state]}
+      {token.state === "scope_missing" && token.missing_scopes.length > 0 && `（缺 ${token.missing_scopes.join("、")}）`}
+    </p>
   )
 }
 
@@ -98,6 +118,7 @@ export function OpsChannelRow({
         <span className="text-xs shrink-0 text-champagne">{healthStatusLabel(channel.state, health ?? undefined)}</span>
       </div>
 
+      {channel.state === "enabled" && channel.token && <TokenProblemLine token={channel.token} />}
       {channel.state === "enabled" && !health && !healthFailed && (
         <p className="text-xs text-gray-600 dark:text-gray-400">判定中…</p>
       )}
