@@ -330,12 +330,12 @@ function LookupForm({ initialId, initialChannelId }: { initialId: string; initia
   return (
     <form onSubmit={submit} className="space-y-2">
       <div className="flex flex-wrap items-end gap-3">
-        <label className="block text-xs space-y-1 min-w-0 flex-1 basis-56">
-          <span>ID</span>
+        <label className="block min-w-0 flex-1 basis-56">
+          <span className="block mb-1.5 text-sm text-gray-600 dark:text-gray-400">ID</span>
           <Input value={id} inputMode="numeric" autoComplete="off" onChange={(e) => setId(e.target.value)} />
         </label>
-        <label className="block text-xs space-y-1 min-w-0 flex-1 basis-56">
-          <span>頻道 ID（查訊息時填）</span>
+        <label className="block min-w-0 flex-1 basis-56">
+          <span className="block mb-1.5 text-sm text-gray-600 dark:text-gray-400">頻道 ID（查訊息時填）</span>
           <Input value={channelId} inputMode="numeric" autoComplete="off" onChange={(e) => setChannelId(e.target.value)} />
         </label>
         <Button type="submit">查詢</Button>

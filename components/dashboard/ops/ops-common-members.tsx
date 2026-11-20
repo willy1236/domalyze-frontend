@@ -90,8 +90,8 @@ function GuildSelect({
   onChange: (id: string) => void
 }) {
   return (
-    <label className="block text-xs space-y-1 min-w-0 flex-1 basis-56">
-      <span>{label}</span>
+    <label className="block min-w-0 flex-1 basis-56">
+      <span className="block mb-1.5 text-sm text-gray-600 dark:text-gray-400">{label}</span>
       <Select value={value} onChange={(e) => onChange(e.target.value)}>
         {value === "" && <option value="">請選擇伺服器</option>}
         {/* 網址或主伺服器的 ID 不在星羽所在的伺服器裡時，照實顯示，不讓選單停在第一個選項 */}
