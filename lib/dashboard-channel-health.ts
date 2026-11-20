@@ -51,7 +51,7 @@ export const ISSUE_TEXTS = {
 
 export type ChannelIssue = keyof typeof ISSUE_TEXTS
 
-export type ChannelHealthState = "inactive" | "enabled" | "partial" | "disabled"
+export type ChannelHealthState = "inactive" | "enabled" | "partial" | "disabled" | "banned"
 
 export interface ChannelHealth {
   state: ChannelHealthState

@@ -33,6 +33,7 @@ describe("channelStatusLabel", () => {
     expect(channelStatusLabel("enabled")).toBe("星羽已啟用")
     expect(channelStatusLabel("inactive")).toBe("星羽未啟用")
     expect(channelStatusLabel("disabled")).toBe("星羽已停用")
+    expect(channelStatusLabel("banned")).toBe("星羽已停權")
   })
 })
 
@@ -40,6 +41,7 @@ describe("channelAction", () => {
   it("未啟用與已停用是（重新）啟用，已啟用是停用", () => {
     expect(channelAction("inactive")).toEqual({ kind: "enable", label: "啟用星羽" })
     expect(channelAction("disabled")).toEqual({ kind: "enable", label: "重新啟用" })
+    expect(channelAction("banned")).toEqual({ kind: "none" })
     expect(channelAction("enabled")).toEqual({ kind: "disable", label: "停用星羽" })
   })
 })
@@ -61,6 +63,7 @@ describe("parseChannelNotices", () => {
   it("多個代碼依序解析，不認得的忽略", () => {
     expect(parseChannelNotices("mod_failed,bot_offline")).toEqual(["mod_failed", "bot_offline"])
     expect(parseChannelNotices("wrong_account,nope,toString")).toEqual(["wrong_account"])
+    expect(parseChannelNotices("channel_banned")).toEqual(["channel_banned"])
   })
 })
 

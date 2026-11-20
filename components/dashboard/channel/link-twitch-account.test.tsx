@@ -14,6 +14,7 @@ const user = (login_method: DashboardUser["login_method"]): DashboardUser => ({
   account: null,
   login_method,
   has_channels: false,
+  is_bot_owner: false,
 })
 
 const render = (method: DashboardUser["login_method"], label?: string) =>

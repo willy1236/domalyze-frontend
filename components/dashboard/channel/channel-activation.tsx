@@ -73,7 +73,7 @@ export function ChannelActivation({ channelId, state }: { channelId: string; sta
           ))}
         </div>
       )}
-      {action.kind === "enable" ? (
+      {action.kind === "none" ? null : action.kind === "enable" ? (
         <LinkButton
           variant="outline"
           href={origin === null ? undefined : enableUrl(channelId, origin)}
