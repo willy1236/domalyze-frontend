@@ -3,7 +3,8 @@
 export interface AuditEntry {
   id: number
   at: string
-  actor: { platform: "twitch" | "discord" | "domalyze"; id: string; name: string }
+  /** 頻道後台的回應不帶操作者的 id，營運入口有 */
+  actor: { platform: "twitch" | "discord" | "domalyze"; id?: string; name: string }
   source: "dashboard" | "chat"
   target_kind: string
   target_key: string
@@ -25,6 +26,7 @@ const TARGET_KINDS: Record<string, string> = {
   event_response: "事件回應",
   forward: "轉發",
   channel: "頻道",
+  mod_collab: "mod 協作開關",
 }
 
 const CHANNEL_KEYS: Record<string, string> = {
@@ -50,8 +52,10 @@ export function auditLabels(entry: AuditEntry): { target: string; action: string
     entry.target_kind === "channel" && Object.hasOwn(CHANNEL_KEYS, entry.target_key)
       ? CHANNEL_KEYS[entry.target_key]
       : entry.target_key
+  // mod 協作開關只有一個 key，不再顯示 key
+  const target = entry.target_kind === "mod_collab" && entry.target_key === "enabled" ? kind : `${kind}：${key}`
   return {
-    target: `${kind}：${key}`,
+    target,
     action: ACTIONS[entry.action] ?? entry.action,
     source: SOURCES[entry.source] ?? entry.source,
     actor: `${PLATFORMS[entry.actor.platform] ?? entry.actor.platform} ${entry.actor.name}`,

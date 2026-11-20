@@ -31,6 +31,13 @@ describe("auditLabels", () => {
       actor: "Discord Owner",
     })
   })
+  it("mod 協作開關只顯示名稱", () => {
+    expect(auditLabels(entry({ target_kind: "mod_collab", target_key: "enabled" })).target).toBe("mod 協作開關")
+    expect(auditLabels(entry({ target_kind: "mod_collab", target_key: "other" })).target).toBe("mod 協作開關：other")
+  })
+  it("頻道後台的操作者沒有 id 也能顯示", () => {
+    expect(auditLabels(entry({ actor: { platform: "twitch", name: "Ann" } })).actor).toBe("Twitch Ann")
+  })
   it("不認得的代碼直接顯示", () => {
     expect(auditLabels(entry({ target_kind: "future", target_key: "k" })).target).toBe("future：k")
   })

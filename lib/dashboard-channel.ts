@@ -1,6 +1,7 @@
 // 實況主頻道後台的資料與共用判斷。
 
 import { API_BASE, DashboardApiError, dashboardFetch } from "./dashboard-api"
+import type { AuditEntriesPage } from "./dashboard-audit"
 import type { ChannelHealth } from "./dashboard-channel-health"
 
 export type ChannelState = "inactive" | "enabled" | "disabled" | "banned"
@@ -42,6 +43,11 @@ export function fetchChannels(signal?: AbortSignal): Promise<{ channels: Channel
 
 export function fetchChannel(channelId: string, signal?: AbortSignal): Promise<ChannelDetail> {
   return dashboardFetch(`/dashboard/channels/${encodeURIComponent(channelId)}`, {}, { signal })
+}
+
+/** 頻道保留的整份修改紀錄（新的在前，每頁 50 筆）；實況主與 mod 都看得到 */
+export function fetchChannelAudit(channelId: string, page: number, signal?: AbortSignal): Promise<AuditEntriesPage> {
+  return dashboardFetch(`/dashboard/channels/${encodeURIComponent(channelId)}/audit?page=${page}`, {}, { signal })
 }
 
 /** 沒有這個頻道的權限；不在全域處理，由頻道頁自己顯示 */

@@ -4,8 +4,16 @@ import { CHANNEL_NAV, channelSectionHref, isChannelSectionActive } from "./dashb
 const item = (key: string) => CHANNEL_NAV.find((i) => i.key === key)!
 
 describe("CHANNEL_NAV", () => {
-  it("包含總覽、指令、計時訊息、事件回應、轉發 Discord、設定", () => {
-    expect(CHANNEL_NAV.map((i) => i.label)).toEqual(["總覽", "指令", "計時訊息", "事件回應", "轉發 Discord", "設定"])
+  it("包含總覽、指令、計時訊息、事件回應、轉發 Discord、修改紀錄、設定", () => {
+    expect(CHANNEL_NAV.map((i) => i.label)).toEqual([
+      "總覽",
+      "指令",
+      "計時訊息",
+      "事件回應",
+      "轉發 Discord",
+      "修改紀錄",
+      "設定",
+    ])
   })
 })
 
