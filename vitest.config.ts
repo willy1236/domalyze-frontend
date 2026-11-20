@@ -8,6 +8,7 @@ export default defineConfig({
   test: {
     environment: "jsdom",
     include: ["**/*.test.ts", "**/*.test.tsx"],
-    exclude: ["node_modules/**", ".next/**"],
+    // .orca/worktrees 底下是其他分支的 worktree，掃進來會重複跑、跑到別的分支的測試
+    exclude: ["node_modules/**", ".next/**", ".orca/**"],
   },
 })
