@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest"
 import {
   type GuildEvent,
+  commonMembersPath,
   discordUserUrl,
   guildEventLabel,
   isLookupFailure,
@@ -84,5 +85,12 @@ describe("messageContentText", () => {
     expect(messageContentText({ content: "", content_hidden: true })).toBe("讀不到內容（未開啟 message content intent）")
     expect(messageContentText({ content: "", content_hidden: false })).toBeNull()
     expect(messageContentText({ content: "嗨", content_hidden: false })).toBe("嗨")
+  })
+})
+
+describe("commonMembersPath", () => {
+  it("省略 b 時交給後端用主伺服器", () => {
+    expect(commonMembersPath("10")).toBe("/dashboard/ops/discord/common?a=10")
+    expect(commonMembersPath("10", "11")).toBe("/dashboard/ops/discord/common?a=10&b=11")
   })
 })

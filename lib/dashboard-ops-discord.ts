@@ -23,7 +23,13 @@ export interface DailyCount {
 
 export interface OpsDiscordOverview {
   /** 星羽沒有就緒時為 null */
-  live: { guild_count: number; user_count: number; guilds: OpsGuild[] } | null
+  live: {
+    /** 主伺服器（共通成員的預設對照）；沒有設定時為 null */
+    main_guild_id: string | null
+    guild_count: number
+    user_count: number
+    guilds: OpsGuild[]
+  } | null
   daily: DailyCount[]
 }
 
@@ -228,4 +234,34 @@ export function memberStatusLabel(status: string | null): string {
 export function messageContentText(message: Pick<MessageMatch, "content" | "content_hidden">): string | null {
   if (message.content_hidden) return "讀不到內容（未開啟 message content intent）"
   return message.content === "" ? null : message.content
+}
+
+// ====== 共通成員 ======
+
+export const OPS_COMMON_PATH = `${OPS_DISCORD_PATH}/common`
+
+export interface CommonMember {
+  id: string
+  name: string
+  avatar_url: string
+  joined_a: string | null
+  joined_b: string | null
+}
+
+export interface CommonMembers {
+  a: GuildRef
+  b: GuildRef
+  /** 依 a 邊的加入時間排序 */
+  members: CommonMember[]
+}
+
+/** b 省略時後端用主伺服器 */
+export function commonMembersPath(a: string, b?: string): string {
+  const params = new URLSearchParams({ a })
+  if (b) params.set("b", b)
+  return `${OPS_COMMON_PATH}?${params}`
+}
+
+export function fetchCommonMembers(a: string, b: string, signal?: AbortSignal): Promise<CommonMembers> {
+  return dashboardFetch(`/dashboard/ops/discord/common-members?${new URLSearchParams({ a, b })}`, {}, { signal })
 }

@@ -8,6 +8,7 @@ import {
   type GuildEvent,
   type OpsGuild,
   RANGES,
+  commonMembersPath,
   discordUserUrl,
   fetchGuildEvents,
   fetchOpsDiscord,
@@ -96,12 +97,12 @@ function Trends() {
           <TrendChart title="使用者數" points={data.daily.map((d) => ({ date: d.date, value: d.users }))} />
         </div>
       </div>
-      {live && <GuildList guilds={live.guilds} />}
+      {live && <GuildList guilds={live.guilds} mainGuildId={live.main_guild_id} />}
     </>
   )
 }
 
-function GuildList({ guilds }: { guilds: OpsGuild[] }) {
+function GuildList({ guilds, mainGuildId }: { guilds: OpsGuild[]; mainGuildId: string | null }) {
   return (
     <section className="space-y-3">
       <div className="flex flex-wrap items-baseline justify-between gap-3">
@@ -129,6 +130,11 @@ function GuildList({ guilds }: { guilds: OpsGuild[] }) {
                 <Link href={lookupPath(guild.id)} className={linkClass}>
                   查詢
                 </Link>
+                {mainGuildId !== null && guild.id !== mainGuildId && (
+                  <Link href={commonMembersPath(guild.id)} className={linkClass}>
+                    共通成員
+                  </Link>
+                )}
               </nav>
             </li>
           ))}
