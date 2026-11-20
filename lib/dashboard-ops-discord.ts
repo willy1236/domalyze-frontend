@@ -64,8 +64,6 @@ export function discordUserUrl(userId: string): string {
   return `https://discord.com/users/${encodeURIComponent(userId)}`
 }
 
-/** 加入離開紀錄一列的事件文字；啟動時補記的離開只知道發生在離線期間 */
 export function guildEventLabel(event: GuildEvent): string {
-  if (event.event === "join") return event.source === "startup" ? "加入（啟動時補記）" : "加入"
-  return event.source === "startup" ? "離開（離線期間，啟動時發現）" : "離開"
+  return event.event === "join" ? "加入" : "離開"
 }
