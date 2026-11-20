@@ -62,13 +62,13 @@ function ChannelBanned() {
 
 /**
  * 星羽狀態標籤。給 channelId 時，標籤下方多出權限問題與「修復」、啟用、停用的按鈕與啟用流程的提示
- * （要在 ChannelAccessGuard 內）；role 是 mod 時只顯示狀態與問題，沒有修復、啟用、停用的按鈕。
+ * （要在 ChannelAccessGuard 內）；這時要傳 role，沒傳視為 mod（只顯示狀態與問題，沒有修復、啟用、停用的按鈕）。
  */
 export function ChannelStatus({
   state,
   channelId,
   health,
-  role = "owner",
+  role = "mod",
 }: {
   state: ChannelState
   channelId?: string

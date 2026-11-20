@@ -8,16 +8,16 @@ import { ChannelStatus } from "./channel-status"
 
 describe("ChannelActivation", () => {
   it("未啟用顯示「啟用星羽」，沒有停用按鈕", () => {
-    const html = renderToStaticMarkup(<ChannelActivation channelId="777" state="inactive" />)
+    const html = renderToStaticMarkup(<ChannelActivation channelId="777" state="inactive" role="owner" />)
     expect(html).toContain("啟用星羽")
     expect(html).not.toContain("停用星羽")
   })
   it("已停用顯示「重新啟用」", () => {
-    const html = renderToStaticMarkup(<ChannelActivation channelId="777" state="disabled" />)
+    const html = renderToStaticMarkup(<ChannelActivation channelId="777" state="disabled" role="owner" />)
     expect(html).toContain("重新啟用")
   })
   it("已啟用只顯示「停用星羽」，確認前不顯示確認鈕", () => {
-    const html = renderToStaticMarkup(<ChannelActivation channelId="777" state="enabled" />)
+    const html = renderToStaticMarkup(<ChannelActivation channelId="777" state="enabled" role="owner" />)
     expect(html).toContain("停用星羽")
     expect(html).not.toContain("確認停用")
     expect(html).not.toContain("啟用星羽")
@@ -26,8 +26,13 @@ describe("ChannelActivation", () => {
 
 describe("ChannelStatus 帶 channelId", () => {
   it("標籤下方多出操作", () => {
-    const html = renderToStaticMarkup(<ChannelStatus state="inactive" channelId="777" />)
+    const html = renderToStaticMarkup(<ChannelStatus state="inactive" channelId="777" role="owner" />)
     expect(html).toContain("星羽未啟用")
     expect(html).toContain("啟用星羽")
+  })
+  it("沒傳 role 時視為 mod，不出現操作", () => {
+    const html = renderToStaticMarkup(<ChannelStatus state="inactive" channelId="777" />)
+    expect(html).toContain("星羽未啟用")
+    expect(html).not.toContain("啟用星羽")
   })
 })

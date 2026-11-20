@@ -35,11 +35,11 @@ function useChannelNotices(): ChannelNotice[] {
 export function ChannelActivation({
   channelId,
   state,
-  role = "owner",
+  role,
 }: {
   channelId: string
   state: ChannelState
-  role?: ChannelRole
+  role: ChannelRole
 }) {
   const urlNotices = useChannelNotices()
   const [disableResult, setDisableResult] = useState<ChannelNotice[]>([])
