@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest"
-import { type GuildEvent, guildEventLabel } from "./dashboard-ops-discord"
+import { type GuildEvent, discordUserUrl, guildEventLabel } from "./dashboard-ops-discord"
 
 const base: GuildEvent = {
   id: 1,
@@ -20,5 +20,11 @@ describe("guildEventLabel", () => {
   it("啟動時補記的標出來源", () => {
     expect(guildEventLabel({ ...base, source: "startup" })).toBe("加入（啟動時補記）")
     expect(guildEventLabel({ ...base, event: "leave", source: "startup" })).toBe("離開（離線期間，啟動時發現）")
+  })
+})
+
+describe("discordUserUrl", () => {
+  it("連到 Discord 個人資料頁", () => {
+    expect(discordUserUrl("419131103836635136")).toBe("https://discord.com/users/419131103836635136")
   })
 })

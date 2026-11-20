@@ -7,6 +7,7 @@ import {
   type GuildEvent,
   type OpsGuild,
   RANGES,
+  discordUserUrl,
   fetchGuildEvents,
   fetchOpsDiscord,
   guildEventLabel,
@@ -31,6 +32,26 @@ function GuildIcon({ guild }: { guild: { name: string; icon_url: string | null }
     <span aria-hidden className="flex size-9 shrink-0 items-center justify-center rounded-full bg-primary/10 dark:bg-champagne/15 text-sm">
       {guild.name.slice(0, 1)}
     </span>
+  )
+}
+
+function OwnerLink({ owner }: { owner: NonNullable<OpsGuild["owner"]> }) {
+  return (
+    <p className={`text-xs ${muted}`}>
+      群主：
+      <a
+        href={discordUserUrl(owner.id)}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="inline-flex items-center gap-1 align-middle underline-offset-2 hover:underline hover:text-primary dark:hover:text-champagne"
+      >
+        {owner.avatar_url && (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={owner.avatar_url} alt="" width={16} height={16} className="size-4 rounded-full" />
+        )}
+        {owner.name ?? owner.id}
+      </a>
+    </p>
   )
 }
 
@@ -93,6 +114,7 @@ function GuildList({ guilds }: { guilds: OpsGuild[] }) {
                   {guild.member_count === null ? "" : `${fmt.format(guild.member_count)} 位成員・`}
                   加入於 {formatTime(guild.joined_at)}
                 </p>
+                {guild.owner && <OwnerLink owner={guild.owner} />}
               </div>
             </li>
           ))}
