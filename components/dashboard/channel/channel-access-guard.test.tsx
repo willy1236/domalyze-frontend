@@ -17,8 +17,10 @@ const detail: ChannelDetail = {
   login: "streamer",
   name: "Streamer",
   avatar_url: null,
+  role: "owner",
   state: "inactive",
   forward_access: "need_domalyze",
+  mod_collab_enabled: true,
   health: { state: "inactive", issues: [], paused_features: [] },
 }
 const forbidden = new DashboardApiError(403, "channel_forbidden", null, false)
@@ -79,6 +81,22 @@ describe("ChannelAccessGuard", () => {
     const html = render("domalyze")
     expect(html).toContain('aria-busy="true"')
     expect(html).not.toContain("沒有這個頻道的權限")
+  })
+
+  it("沒有已載入的資料時，沒有權限的頁面說明可能已不是 mod 並附回到頻道清單", () => {
+    load.value = { ...load.value, error: forbidden }
+    const html = render("twitch")
+    expect(html).toContain("可能已不是 mod，或實況主關閉了 mod 協作")
+    expect(html).toContain('href="/dashboard/twitch"')
+  })
+
+  it("已載入的頻道原本是 mod 頻道，之後收到 channel_forbidden：不論登入方式都等導回頻道清單", () => {
+    load.value = { ...load.value, data: { ...detail, role: "mod" }, error: forbidden }
+    for (const method of ["twitch", "domalyze"] as const) {
+      const html = render(method)
+      expect(html).toContain('aria-busy="true"')
+      expect(html).not.toContain("沒有這個頻道的權限")
+    }
   })
 
   it("其他錯誤顯示載入失敗與重新載入", () => {

@@ -10,6 +10,7 @@ import {
   type ChannelListNotice,
   channelListView,
   channelPath,
+  channelRoleLabel,
   fetchChannels,
   parseChannelListNotice,
 } from "@/lib/dashboard-channel"
@@ -36,7 +37,10 @@ function ChannelRow({ channel }: { channel: ChannelInfo }) {
             {Array.from(channel.name)[0] ?? "?"}
           </span>
         )}
-        <span className="min-w-0 flex-1 truncate">{channel.name}</span>
+        <span className="min-w-0 flex-1">
+          <span className="block truncate">{channel.name}</span>
+          <span className="block truncate text-xs text-gray-500 dark:text-gray-400">{channelRoleLabel(channel.role)}</span>
+        </span>
         <span className="text-xs tracking-widest uppercase text-champagne shrink-0">管理</span>
       </Link>
     </li>

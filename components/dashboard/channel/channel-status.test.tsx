@@ -19,7 +19,7 @@ describe("ChannelStatus", () => {
 })
 
 describe("ChannelStatus 已停權", () => {
-  const banned = renderToStaticMarkup(<ChannelStatus state="banned" channelId="777" />)
+  const banned = renderToStaticMarkup(<ChannelStatus state="banned" channelId="777" role="owner" />)
   it("顯示停權說明與支援伺服器邀請連結", () => {
     expect(banned).toContain("星羽已停權")
     expect(banned).toContain("此頻道已被停權")
@@ -30,7 +30,7 @@ describe("ChannelStatus 已停權", () => {
   })
   it("health 是 banned 時也一樣（state 與判定不同步時以停權為準）", () => {
     const health: ChannelHealth = { state: "banned", issues: [], paused_features: [] }
-    const html = renderToStaticMarkup(<ChannelStatus state="disabled" channelId="777" health={health} />)
+    const html = renderToStaticMarkup(<ChannelStatus state="disabled" channelId="777" health={health} role="owner" />)
     expect(html).toContain("此頻道已被停權")
     expect(html).not.toContain("重新啟用")
   })
@@ -38,7 +38,7 @@ describe("ChannelStatus 已停權", () => {
 
 describe("ChannelStatus 的權限問題", () => {
   const render = (health: ChannelHealth) =>
-    renderToStaticMarkup(<ChannelStatus state="enabled" channelId="777" health={health} />)
+    renderToStaticMarkup(<ChannelStatus state="enabled" channelId="777" health={health} role="owner" />)
   const partial = (issues: ChannelHealth["issues"], paused: ChannelHealth["paused_features"]): ChannelHealth => ({
     state: "partial",
     issues,
@@ -71,5 +71,24 @@ describe("ChannelStatus 的權限問題", () => {
   it("沒有問題就不顯示問題區塊", () => {
     const html = render({ state: "enabled", issues: [], paused_features: [] })
     expect(html).not.toContain('role="status"')
+  })
+})
+
+describe("ChannelStatus 的 mod", () => {
+  it("看得到問題與暫停的功能，沒有修復與停用", () => {
+    const health: ChannelHealth = { state: "partial", issues: ["not_mod"], paused_features: ["follow_response"] }
+    const html = renderToStaticMarkup(<ChannelStatus state="enabled" channelId="777" health={health} role="mod" />)
+    expect(html).toContain("bot 不是 mod")
+    expect(html).toContain("暫停中的功能")
+    expect(html).toContain("要由實況主按「修復」處理")
+    expect(html).not.toContain(">修復</a>")
+    expect(html).not.toContain("停用星羽")
+  })
+  it("未啟用與已停用時沒有啟用的按鈕", () => {
+    for (const state of ["inactive", "disabled"] as const) {
+      const html = renderToStaticMarkup(<ChannelStatus state={state} channelId="777" role="mod" />)
+      expect(html).not.toContain("啟用星羽")
+      expect(html).not.toContain("重新啟用")
+    }
   })
 })

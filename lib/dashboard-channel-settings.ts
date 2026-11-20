@@ -1,4 +1,4 @@
-// 頻道「設定」頁：刪除頻道在星羽的所有資料。
+// 頻道「設定」頁：mod 協作開關、刪除頻道在星羽的所有資料。
 
 import { dashboardFetch } from "./dashboard-api"
 
@@ -12,6 +12,14 @@ export function deleteChannelData(channelId: string, confirmLogin: string): Prom
   return dashboardFetch(`/dashboard/channels/${encodeURIComponent(channelId)}/delete-data`, {
     method: "POST",
     json: { confirm_login: confirmLogin },
+  })
+}
+
+/** 開關 mod 協作；只限實況主 */
+export function setModCollab(channelId: string, enabled: boolean): Promise<{ mod_collab_enabled: boolean }> {
+  return dashboardFetch(`/dashboard/channels/${encodeURIComponent(channelId)}/mod-collab`, {
+    method: "PUT",
+    json: { enabled },
   })
 }
 

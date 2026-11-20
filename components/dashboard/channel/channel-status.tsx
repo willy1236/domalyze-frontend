@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { LinkButton } from "@/components/ui"
-import { SUPPORT_DISCORD_URL, type ChannelState, enableUrl } from "@/lib/dashboard-channel"
+import { SUPPORT_DISCORD_URL, type ChannelRole, type ChannelState, enableUrl } from "@/lib/dashboard-channel"
 import {
   type ChannelHealth,
   healthStatusLabel,
@@ -12,8 +12,8 @@ import {
 } from "@/lib/dashboard-channel-health"
 import { ChannelActivation } from "./channel-activation"
 
-/** 權限問題、暫停的功能與「修復」；修復就是重新走啟用流程，和「啟用星羽」同一個入口。 */
-function ChannelIssues({ channelId, health }: { channelId: string; health: ChannelHealth }) {
+/** 權限問題、暫停的功能與「修復」；修復就是重新走啟用流程，和「啟用星羽」同一個入口，只有實況主看得到。 */
+function ChannelIssues({ channelId, health, canRepair }: { channelId: string; health: ChannelHealth; canRepair: boolean }) {
   const [origin, setOrigin] = useState<string | null>(null)
   // 啟用入口要帶前端的 origin；等 hydration 後才有，之前按鈕沒有連結
   useEffect(() => {
@@ -35,7 +35,8 @@ function ChannelIssues({ channelId, health }: { channelId: string; health: Chann
         })}
       </ul>
       {paused.length > 0 && <p>暫停中的功能：{paused.join("、")}</p>}
-      {needsRepair(health.issues) && (
+      {!canRepair && needsRepair(health.issues) && <p>這些問題要由實況主按「修復」處理。</p>}
+      {canRepair && needsRepair(health.issues) && (
         <LinkButton variant="outline" href={origin === null ? undefined : enableUrl(channelId, origin)}>
           修復
         </LinkButton>
@@ -61,16 +62,18 @@ function ChannelBanned() {
 
 /**
  * 星羽狀態標籤。給 channelId 時，標籤下方多出權限問題與「修復」、啟用、停用的按鈕與啟用流程的提示
- * （要在 ChannelAccessGuard 內）。
+ * （要在 ChannelAccessGuard 內）；這時要傳 role，沒傳視為 mod（只顯示狀態與問題，沒有修復、啟用、停用的按鈕）。
  */
 export function ChannelStatus({
   state,
   channelId,
   health,
+  role = "mod",
 }: {
   state: ChannelState
   channelId?: string
   health?: ChannelHealth
+  role?: ChannelRole
 }) {
   const enabled = state === "enabled"
   const banned = state === "banned" || health?.state === "banned"
@@ -91,8 +94,10 @@ export function ChannelStatus({
     <div className="flex flex-col items-start gap-3">
       {label}
       {banned && <ChannelBanned />}
-      {!banned && health && health.issues.length > 0 && <ChannelIssues channelId={channelId} health={health} />}
-      <ChannelActivation channelId={channelId} state={banned ? "banned" : state} />
+      {!banned && health && health.issues.length > 0 && (
+        <ChannelIssues channelId={channelId} health={health} canRepair={role === "owner"} />
+      )}
+      <ChannelActivation channelId={channelId} state={banned ? "banned" : state} role={role} />
     </div>
   )
 }

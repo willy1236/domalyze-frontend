@@ -4,6 +4,8 @@ import {
   type ChannelInfo,
   channelAction,
   channelLeaveTarget,
+  channelRoleLabel,
+  CHANNEL_MOD_REMOVED_URL,
   leaveIfUnlinked,
   channelListView,
   channelPath,
@@ -17,7 +19,7 @@ import {
   parseChannelListNotice,
 } from "./dashboard-channel"
 
-const channel = (id: string): ChannelInfo => ({ id, login: "l", name: "N", avatar_url: null, state: "inactive" })
+const channel = (id: string): ChannelInfo => ({ id, login: "l", name: "N", avatar_url: null, role: "owner", state: "inactive" })
 
 describe("isChannelForbidden", () => {
   it("只認 channel_forbidden", () => {
@@ -64,6 +66,7 @@ describe("parseChannelNotices", () => {
     expect(parseChannelNotices("mod_failed,bot_offline")).toEqual(["mod_failed", "bot_offline"])
     expect(parseChannelNotices("wrong_account,nope,toString")).toEqual(["wrong_account"])
     expect(parseChannelNotices("channel_banned")).toEqual(["channel_banned"])
+    expect(parseChannelNotices("owner_only")).toEqual(["owner_only"])
   })
 })
 
@@ -89,6 +92,35 @@ describe("channelLeaveTarget", () => {
   })
 })
 
+describe("channelLeaveTarget 的 mod 頻道", () => {
+  const forbidden = new DashboardApiError(403, "channel_forbidden", null, false)
+  it("已載入的頻道是 mod 頻道時，不論登入方式都回到頻道清單並帶 mod_removed", () => {
+    for (const method of ["twitch", "domalyze", undefined]) {
+      expect(channelLeaveTarget(forbidden, method, "mod")).toBe(CHANNEL_MOD_REMOVED_URL)
+    }
+    expect(CHANNEL_MOD_REMOVED_URL).toBe("/dashboard/twitch?notice=mod_removed")
+  })
+  it("實況主的頻道照舊：只有析域登入離開", () => {
+    expect(channelLeaveTarget(forbidden, "twitch", "owner")).toBeNull()
+    expect(channelLeaveTarget(forbidden, "domalyze", "owner")).toBe(CHANNEL_UNLINKED_URL)
+  })
+  it("其他錯誤不離開", () => {
+    expect(channelLeaveTarget(new DashboardApiError(403, "channel_owner_only", null, false), "twitch", "mod")).toBeNull()
+  })
+  it("leaveIfUnlinked 帶 role 時一併判斷", () => {
+    const visited: string[] = []
+    expect(leaveIfUnlinked(forbidden, "twitch", (url) => visited.push(url), "mod")).toBe(true)
+    expect(visited).toEqual([CHANNEL_MOD_REMOVED_URL])
+  })
+})
+
+describe("channelRoleLabel", () => {
+  it("實況主是我的頻道，mod 是 mod", () => {
+    expect(channelRoleLabel("owner")).toBe("我的頻道")
+    expect(channelRoleLabel("mod")).toBe("mod")
+  })
+})
+
 describe("leaveIfUnlinked", () => {
   const forbidden = new DashboardApiError(403, "channel_forbidden", null, false)
   it("析域登入收到 channel_forbidden：導到頻道清單並回 true", () => {
@@ -109,14 +141,16 @@ describe("leaveIfUnlinked", () => {
 describe("parseChannelListNotice", () => {
   it("只認得已知的提示", () => {
     expect(parseChannelListNotice("channel_unlinked")).toBe("channel_unlinked")
+    expect(parseChannelListNotice("mod_removed")).toBe("mod_removed")
     expect(parseChannelListNotice("toString")).toBeNull()
     expect(parseChannelListNotice(null)).toBeNull()
   })
 })
 
 describe("forwardAccessNotice", () => {
-  it("可用時不顯示說明", () => {
+  it("可用時與 mod 都不顯示說明", () => {
     expect(forwardAccessNotice("ok")).toBeNull()
+    expect(forwardAccessNotice("mod")).toBeNull()
   })
   it("需要析域帳號或連結 Discord 時各有說明", () => {
     expect(forwardAccessNotice("need_domalyze")?.title).toBe("需要析域帳號")

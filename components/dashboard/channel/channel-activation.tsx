@@ -5,6 +5,7 @@ import { Button, LinkButton } from "@/components/ui"
 import { DashboardApiError } from "@/lib/dashboard-api"
 import {
   type ChannelNotice,
+  type ChannelRole,
   type ChannelState,
   CHANNEL_NOTICES,
   channelAction,
@@ -30,8 +31,16 @@ function useChannelNotices(): ChannelNotice[] {
   return notices
 }
 
-/** 啟用、停用、重新啟用星羽的操作，以及啟用流程回來時的提示。要在 ChannelAccessGuard 內使用。 */
-export function ChannelActivation({ channelId, state }: { channelId: string; state: ChannelState }) {
+/** 啟用、停用、重新啟用星羽的操作，以及啟用流程回來時的提示；mod 只有提示、沒有操作。要在 ChannelAccessGuard 內使用。 */
+export function ChannelActivation({
+  channelId,
+  state,
+  role,
+}: {
+  channelId: string
+  state: ChannelState
+  role: ChannelRole
+}) {
   const urlNotices = useChannelNotices()
   const [disableResult, setDisableResult] = useState<ChannelNotice[]>([])
   const notices = [...urlNotices, ...disableResult]
@@ -40,7 +49,7 @@ export function ChannelActivation({ channelId, state }: { channelId: string; sta
   const [confirming, setConfirming] = useState(false)
   const [busy, setBusy] = useState(false)
   const [failed, setFailed] = useState(false)
-  const action = channelAction(state)
+  const action = role === "owner" ? channelAction(state) : ({ kind: "none" } as const)
 
   // 啟用入口要帶前端的 origin；等 hydration 後才有，之前按鈕沒有連結
   useEffect(() => {

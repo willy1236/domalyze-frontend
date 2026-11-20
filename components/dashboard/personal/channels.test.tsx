@@ -16,12 +16,14 @@ describe("ChannelsSection", () => {
     const html = renderToStaticMarkup(
       <ChannelsSection
         overview={overview([
-          { id: "1", login: "a", name: "Alpha", avatar_url: null, state: "enabled" },
-          { id: "2", login: "b", name: "Bravo", avatar_url: null, state: "inactive" },
+          { id: "1", login: "a", name: "Alpha", avatar_url: null, role: "owner", state: "enabled" },
+          { id: "2", login: "b", name: "Bravo", avatar_url: null, role: "mod", state: "inactive" },
         ])}
       />,
     )
-    expect(html).toContain("我的頻道")
+    expect(html).toContain("Twitch 頻道")
+    expect(html).toContain("我的頻道 · 星羽已啟用")
+    expect(html).toContain("mod · 星羽未啟用")
     expect(html).toContain(`href="${channelPath("1")}"`)
     expect(html).toContain("Alpha")
     expect(html).toContain("星羽已啟用")
