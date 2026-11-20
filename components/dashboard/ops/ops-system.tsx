@@ -36,9 +36,10 @@ async function load(signal: AbortSignal): Promise<{ status: SystemStatus; at: nu
   return { status, at: Date.now() }
 }
 
-/** 每隔 interval 呼叫一次 reload；分頁在背景時瀏覽器會自行放慢計時器。 */
-function useInterval(reload: () => Promise<void>, interval: number) {
+/** 每隔 interval 呼叫一次 reload，interval 為 null 時停止；分頁在背景時瀏覽器會自行放慢計時器。 */
+function useInterval(reload: () => Promise<void>, interval: number | null) {
   useEffect(() => {
+    if (interval === null) return
     const id = setInterval(() => void reload(), interval)
     return () => clearInterval(id)
   }, [reload, interval])
@@ -115,10 +116,13 @@ export function OpsSystem() {
   const { data, error, failed, reload } = useLoad(load)
   const jobs = useLoad(fetchSystemJobs)
   const reloadJobs = jobs.reload
-  useInterval(reload, SYSTEM_REFRESH_MS)
-  useInterval(reloadJobs, SYSTEM_REFRESH_MS)
+  // 不是 bot owner 就不再定時重打端點
+  const forbidden = isNotBotOwner(error) || isNotBotOwner(jobs.error)
+  const interval = forbidden ? null : SYSTEM_REFRESH_MS
+  useInterval(reload, interval)
+  useInterval(reloadJobs, interval)
 
-  if (isNotBotOwner(error) || isNotBotOwner(jobs.error)) return <OpsForbidden />
+  if (forbidden) return <OpsForbidden />
 
   return (
     <div className="space-y-8">
@@ -139,7 +143,10 @@ export function OpsSystem() {
         )}
       </section>
       <section className="space-y-3">
-        <h2 className="text-lg font-serif">排程任務</h2>
+        <div className="flex flex-wrap items-baseline justify-between gap-3">
+          <h2 className="text-lg font-serif">排程任務</h2>
+          {jobs.data && jobs.failed && <p className={`text-xs ${muted}`}>更新失敗，顯示的是上次的結果</p>}
+        </div>
         {jobs.data === null ? (
           <p className={muted}>{jobs.failed ? "無法取得，稍後會自動重試。" : "載入中…"}</p>
         ) : (
