@@ -1,11 +1,10 @@
-import type { Metadata } from "next"
+"use client"
+
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
 import { FeaturesGrid } from "@/components/features"
 import { TwitchCTA, TwitchHero, TwitchSteps } from "@/components/twitch"
 import { TWITCH_FEATURES } from "@/lib/features-data"
-
-export const metadata: Metadata = { title: "星羽 Xingyu｜Twitch bot" }
 
 export default function TwitchPage() {
   return (
