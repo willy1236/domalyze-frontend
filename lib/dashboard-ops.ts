@@ -55,6 +55,8 @@ export interface OpsChannelPage {
   total: number
   /** 所有已啟用頻道（不限這一頁）的問題數 */
   token_problems: Record<TokenProblem, number>
+  /** 所有已啟用、沒有停權的頻道數 */
+  enabled_count: number
 }
 
 export interface BanResult {

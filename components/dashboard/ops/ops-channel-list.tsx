@@ -32,8 +32,9 @@ function useTokenProblemFilter(): [boolean | null, (on: boolean) => void] {
   return [filter, update]
 }
 
-function TokenProblemSummary({ problems }: { problems: Record<TokenProblem, number> }) {
+function TokenProblemSummary({ problems, enabledCount }: { problems: Record<TokenProblem, number>; enabledCount: number }) {
   const total = TOKEN_PROBLEMS.reduce((sum, key) => sum + problems[key], 0)
+  if (enabledCount === 0) return <p className="text-sm text-gray-600 dark:text-gray-400">沒有已啟用的頻道</p>
   if (total === 0) return <p className="text-sm text-gray-600 dark:text-gray-400">已啟用的頻道 token 都正常</p>
   return (
     <p className="text-sm">
@@ -68,7 +69,7 @@ export function OpsChannelList() {
   return (
     <div className="space-y-4">
       <div className="space-y-2">
-        <TokenProblemSummary problems={data.token_problems} />
+        <TokenProblemSummary problems={data.token_problems} enabledCount={data.enabled_count} />
         <label className="flex items-center gap-2 text-sm">
           <input
             type="checkbox"
