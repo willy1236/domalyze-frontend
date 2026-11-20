@@ -34,11 +34,13 @@ describe("API", () => {
     ])
   })
 
-  it("儲存：PUT 數字 id；沒選頻道就是清除", async () => {
-    await saveForward("7", { guildId: "1", channelId: "11" })
-    await saveForward("7", { guildId: "1", channelId: null })
+  it("儲存：PUT 字串 id（超過 2^53 不失真）；沒選頻道就是清除", async () => {
+    const guildId = "566533708371329026"
+    const channelId = "566533708371329027"
+    await saveForward("7", { guildId, channelId })
+    await saveForward("7", { guildId, channelId: null })
     const calls = vi.mocked(dashboardFetch).mock.calls
-    expect(calls[0]).toEqual(["/dashboard/channels/7/forward", { method: "PUT", json: { guild_id: 1, channel_id: 11 } }])
+    expect(calls[0]).toEqual(["/dashboard/channels/7/forward", { method: "PUT", json: { guild_id: guildId, channel_id: channelId } }])
     expect(calls[1][1]).toEqual({ method: "PUT", json: { guild_id: null, channel_id: null } })
   })
 })

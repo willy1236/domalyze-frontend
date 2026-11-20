@@ -49,7 +49,8 @@ export function saveForward(channelId: string, values: ForwardValues): Promise<F
   const json =
     values.channelId === null
       ? { guild_id: null, channel_id: null }
-      : { guild_id: Number(values.guildId), channel_id: Number(values.channelId) }
+      : // Discord ID 超過 2^53，要以字串送出，轉成 Number 會被捨入
+        { guild_id: values.guildId, channel_id: values.channelId }
   return dashboardFetch(base(channelId), { method: "PUT", json })
 }
 
