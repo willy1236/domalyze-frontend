@@ -68,7 +68,7 @@ export const FEATURES_DATA = [
     icon: MessageSquare,
     title: "Twitch 聊天室",
     description:
-      "自訂聊天指令、追隨與訂閱事件、頻道點數兌換。開台訊息同步發送至 Discord。",
+      "自訂聊天指令、計時訊息，以及追隨、訂閱等事件的聊天室回應。開台訊息同步發送至 Discord。",
   },
   {
     icon: Pickaxe,
@@ -83,7 +83,7 @@ export const CORE_ADVANTAGES = [
     title: "不只在 Discord",
     icon: Network,
     items: [
-      "Twitch 聊天室自訂指令、追隨與訂閱事件、頻道點數兌換",
+      "Twitch 聊天室自訂指令、計時訊息，以及追隨、訂閱事件的回應",
       "開台訊息同步發送至 Twitch 聊天室與 Discord 通知頻道",
       "LINE 上可傳網址給星羽，取得風險檢查報告",
       "歌單綁定於雲端帳號，更換 Discord 帳號後仍可存取",
