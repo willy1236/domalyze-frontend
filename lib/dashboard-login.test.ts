@@ -1,9 +1,11 @@
 import { beforeEach, describe, expect, it } from "vitest"
+import { CHANNEL_LIST_PATH } from "./dashboard-channel"
 import {
   LOGIN_NEXT_KEY,
   LOGIN_NOTICES,
   forgetNext,
   isLoginNotice,
+  loginProviderOrder,
   loginPageUrl,
   providerLoginUrl,
   rememberNext,
@@ -26,6 +28,24 @@ describe("sanitizeNext", () => {
       expect(sanitizeNext(v)).toBe("/dashboard")
     },
   )
+})
+
+describe("loginProviderOrder", () => {
+  it.each(["/dashboard/twitch", "/dashboard/twitch/7", "/dashboard/twitch/7/commands", "/dashboard/twitch?notice=x"])(
+    "要去頻道後台時 Twitch 排第一：%s",
+    (next) => {
+      expect(loginProviderOrder(next)).toEqual(["twitch", "domalyze", "discord"])
+    },
+  )
+  it.each(["/dashboard", "/dashboard/guilds/1", "/dashboard/twitchx", "/dashboard/channels"])(
+    "其他頁面維持析域、Discord、Twitch：%s",
+    (next) => {
+      expect(loginProviderOrder(next)).toEqual(["domalyze", "discord", "twitch"])
+    },
+  )
+  it("頻道後台的網址與 CHANNEL_LIST_PATH 相同", () => {
+    expect(loginProviderOrder(CHANNEL_LIST_PATH)[0]).toBe("twitch")
+  })
 })
 
 describe("網址", () => {

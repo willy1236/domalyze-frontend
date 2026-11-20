@@ -51,6 +51,16 @@ const LOGIN_PATHS: Record<LoginProvider, string> = {
   twitch: "/to/dashboard-twitch-login",
 }
 
+/** 頻道後台的前端網址；與 lib/dashboard-channel 的 CHANNEL_LIST_PATH 相同（那邊匯入 dashboard-api，這裡再匯入會形成循環，由測試保證一致） */
+const CHANNEL_NEXT_PREFIX = "/dashboard/twitch"
+
+/** 登入頁按鈕的順序：要去頻道後台時 Twitch 排第一，其餘維持析域、Discord、Twitch。第一顆用主要按鈕樣式 */
+export function loginProviderOrder(next: string): LoginProvider[] {
+  const rest = next.startsWith(CHANNEL_NEXT_PREFIX) ? next.slice(CHANNEL_NEXT_PREFIX.length) : null
+  const toChannels = rest !== null && (rest === "" || rest[0] === "/" || rest[0] === "?")
+  return toChannels ? ["twitch", "domalyze", "discord"] : ["domalyze", "discord", "twitch"]
+}
+
 /** 後端的登入入口：Discord、析域或 Twitch */
 export function providerLoginUrl(provider: LoginProvider, next: string, origin: string): string {
   const path = LOGIN_PATHS[provider]
