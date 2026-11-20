@@ -11,7 +11,7 @@ describe("formatVoiceMinutes", () => {
 
 describe("formatVoiceRank", () => {
   it("顯示名次與人數，bot 已離開的伺服器沒有名次", () => {
-    expect(formatVoiceRank({ rank: 3, ranked: 12 })).toBe("第 3 名／共 12 人")
+    expect(formatVoiceRank({ rank: 3, ranked: 12 })).toBe("第 3／12 名")
     expect(formatVoiceRank({ rank: null, ranked: null })).toBeNull()
   })
 })

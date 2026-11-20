@@ -107,10 +107,10 @@ export function formatVoiceMinutes(minutes: number): string {
   return `${Math.floor(minutes / 60)} 小時 ${minutes % 60} 分`
 }
 
-/** 「第 N 名／共 M 人」；沒有名次時為 null */
+/** 「第 N／M 名」；沒有名次時為 null */
 export function formatVoiceRank(v: Pick<VoiceRecord, "rank" | "ranked">): string | null {
   if (v.rank === null || v.ranked === null) return null
-  return `第 ${v.rank} 名／共 ${v.ranked} 人`
+  return `第 ${v.rank}／${v.ranked} 名`
 }
 
 /** 禁言時長：「1 天 2 小時 3 分」，不足一分鐘顯示「不到 1 分」 */
