@@ -11,6 +11,7 @@ const discordUser: DashboardUser = {
   account: null,
   login_method: "discord",
   has_channels: false,
+  is_bot_owner: false,
 }
 
 const twitchUser: DashboardUser = {
@@ -22,6 +23,7 @@ const twitchUser: DashboardUser = {
   account: null,
   login_method: "twitch",
   has_channels: true,
+  is_bot_owner: false,
 }
 
 describe("dashboardNav", () => {
@@ -36,6 +38,13 @@ describe("dashboardNav", () => {
   })
   it("Discord 與 Twitch 並存時照常顯示「伺服器」", () => {
     expect(dashboardNav({ ...discordUser, twitch: twitchUser.twitch }).map((i) => i.label)).toEqual(["我的", "Discord 伺服器"])
+  })
+  it("只有 bot owner 看得到「營運」", () => {
+    expect(dashboardNav(discordUser).map((i) => i.label)).not.toContain("營運")
+    const owner = dashboardNav({ ...discordUser, is_bot_owner: true })
+    expect(owner.map((i) => i.label)).toEqual(["我的", "Discord 伺服器", "營運"])
+    expect(owner[2].active("/dashboard/ops/channels/777")).toBe(true)
+    expect(owner[2].active("/dashboard/twitch")).toBe(false)
   })
   it("active 依路徑判斷", () => {
     const [mine, guilds] = dashboardNav(discordUser)

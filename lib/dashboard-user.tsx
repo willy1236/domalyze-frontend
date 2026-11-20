@@ -2,6 +2,7 @@
 
 import { createContext, useContext } from "react"
 import { CHANNEL_LIST_PATH } from "./dashboard-channel"
+import { OPS_PATH } from "./dashboard-ops"
 
 /** /dashboard/me 的回應：session 的登入身分 */
 export interface DashboardUser {
@@ -19,6 +20,8 @@ export interface DashboardUser {
   login_method: "discord" | "domalyze" | "twitch"
   /** 這個 session 有可以管理的 Twitch 頻道 */
   has_channels: boolean
+  /** 是 bot owner：頁首才有「營運」 */
+  is_bot_owner: boolean
 }
 
 export interface DashboardNavItem {
@@ -41,9 +44,15 @@ const NAV: (DashboardNavItem & { visible: (user: DashboardUser) => boolean })[] 
     active: (path) => path.startsWith(CHANNEL_LIST_PATH),
     visible: (user) => user.has_channels,
   },
+  {
+    href: OPS_PATH,
+    label: "營運",
+    active: (path) => path.startsWith(OPS_PATH),
+    visible: (user) => user.is_bot_owner,
+  },
 ]
 
-/** 後台頂端導覽；伺服器項目只在有 Discord 身分時顯示，頻道項目只在有可管理的頻道時顯示 */
+/** 後台頂端導覽；伺服器項目只在有 Discord 身分時顯示，頻道項目只在有可管理的頻道時顯示，營運項目只給 bot owner */
 export function dashboardNav(user: DashboardUser): DashboardNavItem[] {
   return NAV.filter((item) => item.visible(user))
 }

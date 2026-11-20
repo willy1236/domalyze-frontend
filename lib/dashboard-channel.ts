@@ -3,7 +3,10 @@
 import { API_BASE, DashboardApiError, dashboardFetch } from "./dashboard-api"
 import type { ChannelHealth } from "./dashboard-channel-health"
 
-export type ChannelState = "inactive" | "enabled" | "disabled"
+export type ChannelState = "inactive" | "enabled" | "disabled" | "banned"
+
+/** 星羽支援 Discord 伺服器的邀請連結；停權頁讓實況主來詢問 */
+export const SUPPORT_DISCORD_URL = "https://discord.gg/P4jqdcMxkH"
 
 export interface ChannelInfo {
   id: string
@@ -51,12 +54,14 @@ export function channelStatusLabel(state: ChannelState): string {
       return "星羽已停用"
     case "inactive":
       return "星羽未啟用"
+    case "banned":
+      return "星羽已停權"
   }
 }
 
-export type ChannelAction = { kind: "enable"; label: string } | { kind: "disable"; label: string }
+export type ChannelAction = { kind: "enable"; label: string } | { kind: "disable"; label: string } | { kind: "none" }
 
-/** 目前 state 該提供的操作：未啟用與已停用都是（重新）啟用，已啟用只能停用 */
+/** 目前 state 該提供的操作：未啟用與已停用都是（重新）啟用，已啟用只能停用，已停權沒有操作 */
 export function channelAction(state: ChannelState): ChannelAction {
   switch (state) {
     case "enabled":
@@ -65,6 +70,8 @@ export function channelAction(state: ChannelState): ChannelAction {
       return { kind: "enable", label: "重新啟用" }
     case "inactive":
       return { kind: "enable", label: "啟用星羽" }
+    case "banned":
+      return { kind: "none" }
   }
 }
 
@@ -90,6 +97,7 @@ export type ChannelNotice =
   | "bot_offline"
   | "mod_failed"
   | "enable_failed"
+  | "channel_banned"
   | "disable_bot_offline"
 
 export const CHANNEL_NOTICES: Record<ChannelNotice, string> = {
@@ -97,6 +105,7 @@ export const CHANNEL_NOTICES: Record<ChannelNotice, string> = {
   bot_offline: "星羽暫時離線，上線後自動生效。",
   mod_failed: "星羽沒有自動成為頻道 mod。請在聊天室輸入 /mod xingyu1016；若星羽目前是你的 VIP，請先移除 VIP。",
   enable_failed: "啟用沒有完成，請再試一次。",
+  channel_banned: "這個頻道已被停權，不能啟用星羽。",
   disable_bot_offline: "已停用，但星羽暫時離線，上線後會離開聊天室。",
 }
 

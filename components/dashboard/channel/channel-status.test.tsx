@@ -18,6 +18,24 @@ describe("ChannelStatus", () => {
   })
 })
 
+describe("ChannelStatus 已停權", () => {
+  const banned = renderToStaticMarkup(<ChannelStatus state="banned" channelId="777" />)
+  it("顯示停權說明與支援伺服器邀請連結", () => {
+    expect(banned).toContain("星羽已停權")
+    expect(banned).toContain("此頻道已被停權")
+    expect(banned).toContain('href="https://discord.gg/P4jqdcMxkH"')
+  })
+  it("沒有啟用、重新啟用、停用與修復的按鈕", () => {
+    for (const text of ["啟用星羽", "重新啟用", "停用星羽", "修復"]) expect(banned).not.toContain(text)
+  })
+  it("health 是 banned 時也一樣（state 與判定不同步時以停權為準）", () => {
+    const health: ChannelHealth = { state: "banned", issues: [], paused_features: [] }
+    const html = renderToStaticMarkup(<ChannelStatus state="disabled" channelId="777" health={health} />)
+    expect(html).toContain("此頻道已被停權")
+    expect(html).not.toContain("重新啟用")
+  })
+})
+
 describe("ChannelStatus 的權限問題", () => {
   const render = (health: ChannelHealth) =>
     renderToStaticMarkup(<ChannelStatus state="enabled" channelId="777" health={health} />)

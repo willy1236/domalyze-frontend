@@ -12,6 +12,7 @@ const twitchUser: DashboardUser = {
   account: null,
   login_method: "twitch",
   has_channels: true,
+  is_bot_owner: false,
 }
 
 describe("AccountSection", () => {

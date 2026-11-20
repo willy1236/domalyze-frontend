@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { LinkButton } from "@/components/ui"
-import { type ChannelState, enableUrl } from "@/lib/dashboard-channel"
+import { SUPPORT_DISCORD_URL, type ChannelState, enableUrl } from "@/lib/dashboard-channel"
 import {
   type ChannelHealth,
   healthStatusLabel,
@@ -44,6 +44,21 @@ function ChannelIssues({ channelId, health }: { channelId: string; health: Chann
   )
 }
 
+/** 停權說明與支援伺服器的邀請連結；停權的頻道沒有啟用與修復的按鈕。 */
+function ChannelBanned() {
+  return (
+    <div role="status" className="border border-champagne/30 px-3 py-2 text-xs space-y-2">
+      <p>
+        <strong className="font-medium">此頻道已被停權</strong>
+        <span className="text-gray-600 dark:text-gray-400">：星羽不會在這個頻道運作，也不能啟用。有疑問請到支援伺服器詢問。</span>
+      </p>
+      <LinkButton variant="outline" href={SUPPORT_DISCORD_URL} external>
+        加入支援伺服器
+      </LinkButton>
+    </div>
+  )
+}
+
 /**
  * 星羽狀態標籤。給 channelId 時，標籤下方多出權限問題與「修復」、啟用、停用的按鈕與啟用流程的提示
  * （要在 ChannelAccessGuard 內）。
@@ -58,6 +73,7 @@ export function ChannelStatus({
   health?: ChannelHealth
 }) {
   const enabled = state === "enabled"
+  const banned = state === "banned" || health?.state === "banned"
   const label = (
     <span
       className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs ${
@@ -74,8 +90,9 @@ export function ChannelStatus({
   return (
     <div className="flex flex-col items-start gap-3">
       {label}
-      {health && health.issues.length > 0 && <ChannelIssues channelId={channelId} health={health} />}
-      <ChannelActivation channelId={channelId} state={state} />
+      {banned && <ChannelBanned />}
+      {!banned && health && health.issues.length > 0 && <ChannelIssues channelId={channelId} health={health} />}
+      <ChannelActivation channelId={channelId} state={banned ? "banned" : state} />
     </div>
   )
 }
