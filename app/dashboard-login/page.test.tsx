@@ -1,6 +1,7 @@
 import { renderToStaticMarkup } from "react-dom/server"
 import { describe, expect, it } from "vitest"
 import DashboardLoginPage from "./page"
+import { LoginProviders } from "./login-providers"
 
 describe("登入頁", () => {
   const html = renderToStaticMarkup(<DashboardLoginPage />)
@@ -21,5 +22,19 @@ describe("登入頁", () => {
     expect(anchor("以析域帳號登入")).toContain("shadow-[0_0_25px")
     expect(anchor("以 Discord 登入")).not.toContain("shadow-[0_0_25px")
     expect(anchor("以 Twitch 登入")).not.toContain("shadow-[0_0_25px")
+  })
+})
+
+describe("要去頻道後台時的登入按鈕", () => {
+  const html = renderToStaticMarkup(<LoginProviders next="/dashboard/twitch" href={() => undefined} />)
+  const at = (text: string) => html.indexOf(text)
+
+  it("Twitch 在最上面並用主要按鈕樣式，其次是分隔、析域帳號與說明、Discord", () => {
+    const order = ["以 Twitch 登入", "或", "以析域帳號登入", "一次管理 Discord 伺服器與 Twitch 頻道", "以 Discord 登入"].map(at)
+    expect(order.every((i) => i >= 0)).toBe(true)
+    expect(order).toEqual([...order].sort((a, b) => a - b))
+    const anchor = (label: string) => html.slice(html.lastIndexOf("<a", at(label)), at(label))
+    expect(anchor("以 Twitch 登入")).toContain("shadow-[0_0_25px")
+    expect(anchor("以析域帳號登入")).not.toContain("shadow-[0_0_25px")
   })
 })

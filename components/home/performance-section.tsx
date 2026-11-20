@@ -39,7 +39,7 @@ export function PerformanceSection() {
             <span className="text-gray-400 dark:text-gray-300 drop-shadow-[0_0_15px_rgba(255,255,255,0.2)]">Discord。</span>
           </h2>
           <p className="text-lg text-gray-500 dark:text-gray-400 mb-8 font-light leading-relaxed">
-            星羽也在 Twitch 聊天室運作：自訂聊天指令、追隨與訂閱事件、頻道點數兌換。開台的瞬間，Twitch 聊天室與 Discord 通知頻道同步收到訊息。在 LINE 上把網址傳給她，會回一份風險檢查報告。
+            星羽也在 Twitch 聊天室運作：自訂聊天指令、計時訊息，以及追隨與訂閱事件的回應。開台的瞬間，Twitch 聊天室與 Discord 通知頻道同步收到訊息。在 LINE 上把網址傳給她，會回一份風險檢查報告。
           </p>
           <ul className="space-y-5 mb-12 text-sm font-light text-gray-500 dark:text-gray-400">
             <li className="flex items-start"><span className="text-primary dark:text-champagne mr-3 mt-0.5 text-xs drop-shadow-[0_0_5px_rgba(196,208,232,0.8)]">✦</span> Twitch 開台、影片、剪輯，YouTube 與 X 更新，各自指定推播頻道</li>

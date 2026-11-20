@@ -13,6 +13,10 @@ import {
   ShieldCheck,
   Gamepad2,
   FlaskConical,
+  Terminal,
+  Timer,
+  BellRing,
+  Share2,
 } from "lucide-react"
 
 export const FEATURES_DATA = [
@@ -68,7 +72,7 @@ export const FEATURES_DATA = [
     icon: MessageSquare,
     title: "Twitch 聊天室",
     description:
-      "自訂聊天指令、追隨與訂閱事件、頻道點數兌換。開台訊息同步發送至 Discord。",
+      "自訂聊天指令、計時訊息，以及追隨、訂閱等事件的聊天室回應。開台訊息同步發送至 Discord。",
   },
   {
     icon: Pickaxe,
@@ -83,7 +87,7 @@ export const CORE_ADVANTAGES = [
     title: "不只在 Discord",
     icon: Network,
     items: [
-      "Twitch 聊天室自訂指令、追隨與訂閱事件、頻道點數兌換",
+      "Twitch 聊天室自訂指令、計時訊息，以及追隨、訂閱事件的回應",
       "開台訊息同步發送至 Twitch 聊天室與 Discord 通知頻道",
       "LINE 上可傳網址給星羽，取得風險檢查報告",
       "歌單綁定於雲端帳號，更換 Discord 帳號後仍可存取",
@@ -119,4 +123,38 @@ export const CORE_ADVANTAGES = [
       "語音錄製：Discord 語音加密尚未相容，暫停中",
     ],
   },
+]
+
+/** Twitch bot 介紹頁的功能。只寫已上線的項目；轉發 Discord 的條件與 W-11 的 forward_access 一致 */
+export const TWITCH_FEATURES = [
+  {
+    icon: Terminal,
+    title: "自訂指令",
+    description:
+      "在後台新增聊天室指令，回覆內容可用 {user}、{args}、{count}、{uptime}、{game}、{title} 等變數。每個指令可設定全體與個人冷卻時間、使用權限（所有人、訂閱者、VIP、管理員、實況主）與最多 10 個別名。",
+  },
+  {
+    icon: Timer,
+    title: "計時訊息",
+    description:
+      "每 5 分鐘到 24 小時自動在聊天室發一則訊息，可設定聊天室至少累積幾則聊天才發送。每個頻道最多 20 則。",
+  },
+  {
+    icon: BellRing,
+    title: "事件回應",
+    description:
+      "開台、追隨、訂閱、續訂、贈訂與 Raid 時，由星羽在聊天室回應。訊息範本可帶入觀眾名稱、訂閱月數、贈送份數與 Raid 人數。追隨與訂閱類事件需要星羽擁有頻道 mod 身分，啟用時會自動設定。",
+  },
+  {
+    icon: Share2,
+    title: "轉發 Discord",
+    description:
+      "把開台、下播、追隨、訂閱、續訂、贈訂、Raid、頻道點數兌換與預測結果轉發到指定的 Discord 頻道。需要以析域帳號登入並連結 Discord，且在該伺服器有管理頻道權限。",
+  },
+]
+
+export const TWITCH_STEPS = [
+  { title: "用 Twitch 帳號登入", description: "進入頻道後台，看得到自己的頻道。" },
+  { title: "啟用星羽", description: "授權後星羽立即加入聊天室。" },
+  { title: "設定指令、計時訊息與事件回應", description: "儲存後立即生效。" },
 ]
