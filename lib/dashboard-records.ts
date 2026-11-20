@@ -8,8 +8,14 @@ export const PAGE_SIZE = 20
 export const UNKNOWN_GUILD = "無法取得名稱的伺服器"
 
 export interface VoiceRecord {
+  guild_id: string
   guild_name: string | null
   minutes: number
+  /** 名次與伺服器內有紀錄的人數；bot 已離開的伺服器為 null */
+  rank: number | null
+  ranked: number | null
+  /** 可以打開伺服器的語音排行（可見的 Discord 有一個還在該伺服器） */
+  ranking_visible: boolean
 }
 
 export interface WarningRecord {
@@ -99,6 +105,12 @@ export function fetchRecords<K extends RecordKind>(
 /** 「X 小時 Y 分」 */
 export function formatVoiceMinutes(minutes: number): string {
   return `${Math.floor(minutes / 60)} 小時 ${minutes % 60} 分`
+}
+
+/** 「第 N／M 名」；沒有名次時為 null */
+export function formatVoiceRank(v: Pick<VoiceRecord, "rank" | "ranked">): string | null {
+  if (v.rank === null || v.ranked === null) return null
+  return `第 ${v.rank}／${v.ranked} 名`
 }
 
 /** 禁言時長：「1 天 2 小時 3 分」，不足一分鐘顯示「不到 1 分」 */
