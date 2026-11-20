@@ -12,14 +12,9 @@ const base: GuildEvent = {
 }
 
 describe("guildEventLabel", () => {
-  it("即時事件只顯示加入或離開", () => {
+  it("不論來源只顯示加入或離開", () => {
     expect(guildEventLabel(base)).toBe("加入")
-    expect(guildEventLabel({ ...base, event: "leave" })).toBe("離開")
-  })
-
-  it("啟動時補記的標出來源", () => {
-    expect(guildEventLabel({ ...base, source: "startup" })).toBe("加入（啟動時補記）")
-    expect(guildEventLabel({ ...base, event: "leave", source: "startup" })).toBe("離開（離線期間，啟動時發現）")
+    expect(guildEventLabel({ ...base, event: "leave", source: "startup" })).toBe("離開")
   })
 })
 
