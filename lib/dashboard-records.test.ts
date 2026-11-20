@@ -1,11 +1,18 @@
 import { describe, expect, it } from "vitest"
-import { formatRecordTime, formatSpan, formatVoiceMinutes, guildLabel, UNKNOWN_GUILD } from "./dashboard-records"
+import { formatRecordTime, formatSpan, formatVoiceMinutes, formatVoiceRank, guildLabel, UNKNOWN_GUILD } from "./dashboard-records"
 
 describe("formatVoiceMinutes", () => {
   it("換算成「X 小時 Y 分」", () => {
     expect(formatVoiceMinutes(127)).toBe("2 小時 7 分")
     expect(formatVoiceMinutes(5)).toBe("0 小時 5 分")
     expect(formatVoiceMinutes(0)).toBe("0 小時 0 分")
+  })
+})
+
+describe("formatVoiceRank", () => {
+  it("顯示名次與人數，bot 已離開的伺服器沒有名次", () => {
+    expect(formatVoiceRank({ rank: 3, ranked: 12 })).toBe("第 3 名／共 12 人")
+    expect(formatVoiceRank({ rank: null, ranked: null })).toBeNull()
   })
 })
 

@@ -1,5 +1,6 @@
 "use client"
 
+import Link from "next/link"
 import { useCallback, useState, type ReactNode } from "react"
 import { Button } from "@/components/ui"
 import type { PersonalOverview } from "@/lib/dashboard-personal"
@@ -12,10 +13,12 @@ import {
   formatRecordTime,
   formatSpan,
   formatVoiceMinutes,
+  formatVoiceRank,
   guildLabel,
   type RecordKind,
   type RecordKinds,
 } from "@/lib/dashboard-records"
+import { voiceRankingHref } from "@/lib/dashboard-voice-ranking"
 import { useLoad } from "@/lib/use-load"
 import { DiscordIdentity } from "./discord-identity"
 import { PersonalSection } from "./personal-section"
@@ -90,9 +93,19 @@ function VoiceList({ discordId }: { discordId: string }) {
   if (data.items.length === 0) return <p className={mutedClass}>沒有紀錄</p>
   return (
     <ul>
-      {data.items.map((v, i) => (
-        <Row key={i} title={guildLabel(v.guild_name)} meta={formatVoiceMinutes(v.minutes)} />
-      ))}
+      {data.items.map((v) => {
+        const rank = formatVoiceRank(v)
+        const meta = rank ? `${formatVoiceMinutes(v.minutes)}・${rank}` : formatVoiceMinutes(v.minutes)
+        const name = guildLabel(v.guild_name)
+        const title = v.ranking_visible ? (
+          <Link href={voiceRankingHref(v.guild_id)} className="underline decoration-champagne/40 underline-offset-4 hover:text-champagne">
+            {name}
+          </Link>
+        ) : (
+          name
+        )
+        return <Row key={v.guild_id} title={title} meta={meta} />
+      })}
     </ul>
   )
 }

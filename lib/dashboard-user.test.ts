@@ -50,6 +50,7 @@ describe("dashboardNav", () => {
     const [mine, guilds] = dashboardNav(discordUser)
     expect(mine.active("/dashboard")).toBe(true)
     expect(mine.active("/dashboard/guilds")).toBe(false)
+    expect(mine.active("/dashboard/voice-ranking/123")).toBe(true)
     expect(guilds.active("/dashboard/guilds/1")).toBe(true)
     const channels = dashboardNav(twitchUser)[1]
     expect(channels.active("/dashboard/twitch/777/commands")).toBe(true)

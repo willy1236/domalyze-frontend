@@ -3,6 +3,7 @@
 import { createContext, useContext } from "react"
 import { CHANNEL_LIST_PATH } from "./dashboard-channel"
 import { OPS_PATH } from "./dashboard-ops"
+import { VOICE_RANKING_PATH } from "./dashboard-voice-ranking"
 
 /** /dashboard/me 的回應：session 的登入身分 */
 export interface DashboardUser {
@@ -31,7 +32,12 @@ export interface DashboardNavItem {
 }
 
 const NAV: (DashboardNavItem & { visible: (user: DashboardUser) => boolean })[] = [
-  { href: "/dashboard", label: "我的", active: (path) => path === "/dashboard", visible: () => true },
+  {
+    href: "/dashboard",
+    label: "我的",
+    active: (path) => path === "/dashboard" || path.startsWith(VOICE_RANKING_PATH),
+    visible: () => true,
+  },
   {
     href: "/dashboard/guilds",
     label: "Discord 伺服器",
