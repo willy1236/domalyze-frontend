@@ -80,3 +80,47 @@ export function formatUptime(startedAt: string | null, now: number): string {
   if (hours > 0) return `${hours} 小時 ${mins} 分鐘`
   return `${mins} 分鐘`
 }
+
+export type RunResult = "success" | "error" | "missed" | "skipped"
+
+export interface SystemJob {
+  id: string
+  name: string
+  /** 後端轉好的觸發規則，例如「每 3 分鐘」「每天 00:00」 */
+  trigger: string
+  /** 暫停中為 null */
+  next_run_at: string | null
+  /** 啟動後還沒執行過為 null */
+  last: {
+    at: string
+    result: RunResult
+    /** 只有成功與失敗有耗時 */
+    duration_ms: number | null
+    /** 失敗時的錯誤訊息與 traceback */
+    error: string | null
+  } | null
+}
+
+/** running 為 false：排程未啟動；running 為 true 但 jobs 為空：此環境不註冊週期任務。jobs 已把最近一次不是成功的排在前面 */
+export type SystemJobs = { state: "up"; running: boolean; jobs: SystemJob[] } | Unavailable
+
+export function fetchSystemJobs(signal?: AbortSignal): Promise<SystemJobs> {
+  return dashboardFetch("/dashboard/ops/system/jobs", {}, { signal })
+}
+
+export const RUN_RESULT_LABEL: Record<RunResult, string> = {
+  success: "成功",
+  error: "失敗",
+  missed: "錯過",
+  skipped: "上一次還沒跑完而略過",
+}
+
+/** 最近一次執行不是成功（還沒執行過不算） */
+export function isProblem(job: SystemJob): boolean {
+  return job.last !== null && job.last.result !== "success"
+}
+
+/** 耗時：不到 1 秒顯示毫秒，否則顯示到小數一位的秒數 */
+export function formatDurationMs(ms: number): string {
+  return ms < 1000 ? `${ms} ms` : `${(ms / 1000).toFixed(1)} 秒`
+}

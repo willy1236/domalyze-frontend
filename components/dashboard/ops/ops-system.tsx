@@ -3,12 +3,18 @@
 import { useEffect, type ReactNode } from "react"
 import { isNotBotOwner } from "@/lib/dashboard-ops"
 import {
+  RUN_RESULT_LABEL,
   SYSTEM_REFRESH_MS,
+  type SystemJob,
+  type SystemJobs,
   type SystemStatus,
   type Tone,
   busLabel,
+  fetchSystemJobs,
   fetchSystemStatus,
+  formatDurationMs,
   formatUptime,
+  isProblem,
   stateLabel,
 } from "@/lib/dashboard-ops-system"
 import { useLoad } from "@/lib/use-load"
@@ -104,26 +110,100 @@ function DbCard({ status }: { status: SystemStatus["db"] }) {
   )
 }
 
-/** 營運入口的系統分頁：各 process 與服務的運行狀態，每 30 秒自動更新。 */
+/** 營運入口的系統分頁：各 process 與服務的運行狀態，以及排程任務，每 30 秒自動更新。 */
 export function OpsSystem() {
   const { data, error, failed, reload } = useLoad(load)
+  const jobs = useLoad(fetchSystemJobs)
+  const reloadJobs = jobs.reload
   useInterval(reload, SYSTEM_REFRESH_MS)
+  useInterval(reloadJobs, SYSTEM_REFRESH_MS)
 
-  if (isNotBotOwner(error)) return <OpsForbidden />
-  if (data === null) return <p className={muted}>{failed ? "無法載入，稍後會自動重試。" : "載入中…"}</p>
+  if (isNotBotOwner(error) || isNotBotOwner(jobs.error)) return <OpsForbidden />
 
-  const { status, at } = data
   return (
-    <section className="space-y-3">
-      <div className="flex flex-wrap items-baseline justify-between gap-3">
-        <h2 className="text-lg font-serif">運行狀態</h2>
-        <p className={`text-xs ${muted}`}>
-          {failed ? "更新失敗，顯示的是上次的結果・" : ""}
-          {new Date(at).toLocaleTimeString("zh-TW", { hour12: false })} 更新
-        </p>
+    <div className="space-y-8">
+      <section className="space-y-3">
+        <div className="flex flex-wrap items-baseline justify-between gap-3">
+          <h2 className="text-lg font-serif">運行狀態</h2>
+          {data && (
+            <p className={`text-xs ${muted}`}>
+              {failed ? "更新失敗，顯示的是上次的結果・" : ""}
+              {new Date(data.at).toLocaleTimeString("zh-TW", { hour12: false })} 更新
+            </p>
+          )}
+        </div>
+        {data === null ? (
+          <p className={muted}>{failed ? "無法取得，稍後會自動重試。" : "載入中…"}</p>
+        ) : (
+          <SystemCards status={data.status} at={data.at} />
+        )}
+      </section>
+      <section className="space-y-3">
+        <h2 className="text-lg font-serif">排程任務</h2>
+        {jobs.data === null ? (
+          <p className={muted}>{jobs.failed ? "無法取得，稍後會自動重試。" : "載入中…"}</p>
+        ) : (
+          <JobList jobs={jobs.data} />
+        )}
+      </section>
+    </div>
+  )
+}
+
+function formatTime(iso: string): string {
+  return new Date(iso).toLocaleString("zh-TW", { hour12: false })
+}
+
+function JobRow({ job }: { job: SystemJob }) {
+  const problem = isProblem(job)
+  const last = job.last
+  return (
+    <li
+      className={`border px-4 py-3 space-y-1 min-w-0 text-sm ${
+        problem ? "border-red-500/60 bg-red-500/5" : "border-champagne/30"
+      }`}
+    >
+      <div className="flex flex-wrap items-baseline justify-between gap-x-3">
+        <p className="font-medium">{job.name}</p>
+        <p className={`text-xs ${muted}`}>{job.trigger}</p>
       </div>
-      <SystemCards status={status} at={at} />
-    </section>
+      <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-0.5 tabular-nums">
+        <dt className={muted}>下次執行</dt>
+        <dd>{job.next_run_at === null ? "已暫停" : formatTime(job.next_run_at)}</dd>
+        <dt className={muted}>最近一次</dt>
+        <dd>
+          {last === null ? (
+            "尚未執行"
+          ) : (
+            <>
+              {formatTime(last.at)}・
+              <span className={problem ? "text-red-600 dark:text-red-400" : undefined}>{RUN_RESULT_LABEL[last.result]}</span>
+              {last.duration_ms !== null && `・${formatDurationMs(last.duration_ms)}`}
+            </>
+          )}
+        </dd>
+      </dl>
+      {last?.error && (
+        <details>
+          <summary className="cursor-pointer text-xs text-red-600 dark:text-red-400">錯誤訊息</summary>
+          <pre className="mt-1 max-h-64 overflow-auto whitespace-pre-wrap break-all text-xs">{last.error}</pre>
+        </details>
+      )}
+    </li>
+  )
+}
+
+/** 排程任務清單；後端已把最近一次不是成功的排在前面。 */
+export function JobList({ jobs }: { jobs: SystemJobs }) {
+  if (jobs.state !== "up") return <p className={TONE_CLASS[stateLabel(jobs.state).tone]}>{stateLabel(jobs.state).text}</p>
+  if (!jobs.running) return <p className={muted}>排程未啟動</p>
+  if (jobs.jobs.length === 0) return <p className={muted}>此環境不執行週期任務</p>
+  return (
+    <ul className="space-y-2">
+      {jobs.jobs.map((job) => (
+        <JobRow key={job.id} job={job} />
+      ))}
+    </ul>
   )
 }
 

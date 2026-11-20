@@ -1,5 +1,13 @@
 import { describe, expect, it } from "vitest"
-import { busLabel, formatUptime, stateLabel } from "./dashboard-ops-system"
+import {
+  type RunResult,
+  type SystemJob,
+  busLabel,
+  formatDurationMs,
+  formatUptime,
+  isProblem,
+  stateLabel,
+} from "./dashboard-ops-system"
 
 const NOW = Date.parse("2026-11-20T12:00:00Z")
 
@@ -31,5 +39,21 @@ describe("stateLabel", () => {
     expect(busLabel("down").text).toBe("斷線")
     expect(busLabel("unconfigured").text).toBe("未設定 Redis")
     expect(busLabel("error").text).toBe("無法取得")
+  })
+})
+
+describe("排程任務", () => {
+  const job: SystemJob = { id: "a", name: "地震報告", trigger: "每 3 分鐘", next_run_at: null, last: null }
+  const last = (result: RunResult) => ({ at: "2026-11-20T00:00:00Z", result, duration_ms: null, error: null })
+
+  it("尚未執行與成功不算問題，失敗、錯過、略過都算", () => {
+    expect(isProblem(job)).toBe(false)
+    expect(isProblem({ ...job, last: last("success") })).toBe(false)
+    for (const result of ["error", "missed", "skipped"] as const) expect(isProblem({ ...job, last: last(result) })).toBe(true)
+  })
+
+  it("耗時不到 1 秒顯示毫秒", () => {
+    expect(formatDurationMs(830)).toBe("830 ms")
+    expect(formatDurationMs(12345)).toBe("12.3 秒")
   })
 })

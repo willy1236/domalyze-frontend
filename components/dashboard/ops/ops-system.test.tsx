@@ -1,7 +1,7 @@
 import { renderToStaticMarkup } from "react-dom/server"
 import { describe, expect, it } from "vitest"
-import type { SystemStatus } from "@/lib/dashboard-ops-system"
-import { SystemCards } from "./ops-system"
+import type { SystemJob, SystemStatus } from "@/lib/dashboard-ops-system"
+import { JobList, SystemCards } from "./ops-system"
 
 const AT = Date.parse("2026-11-20T12:00:00Z")
 
@@ -42,5 +42,45 @@ describe("SystemCards", () => {
     expect(html).toContain("未設定 Redis")
     expect(html).toContain("43 ms")
     expect(html).not.toContain("已加入聊天室")
+  })
+})
+
+describe("JobList", () => {
+  const job = (id: string, last: SystemJob["last"]): SystemJob => ({
+    id,
+    name: `任務 ${id}`,
+    trigger: "每 3 分鐘",
+    next_run_at: "2026-11-20T12:03:00Z",
+    last,
+  })
+  const at = "2026-11-20T12:00:00Z"
+
+  it("離線、無法取得、排程未啟動、沒有週期任務分別提示", () => {
+    expect(renderToStaticMarkup(<JobList jobs={{ state: "down" }} />)).toContain("離線")
+    expect(renderToStaticMarkup(<JobList jobs={{ state: "error" }} />)).toContain("無法取得")
+    expect(renderToStaticMarkup(<JobList jobs={{ state: "up", running: false, jobs: [] }} />)).toContain("排程未啟動")
+    expect(renderToStaticMarkup(<JobList jobs={{ state: "up", running: true, jobs: [] }} />)).toContain(
+      "此環境不執行週期任務",
+    )
+  })
+
+  it("每列顯示名稱、觸發規則、下次執行與最近一次結果；失敗可展開錯誤訊息", () => {
+    const html = renderToStaticMarkup(
+      <JobList
+        jobs={{
+          state: "up",
+          running: true,
+          jobs: [
+            job("a", { at, result: "error", duration_ms: 1500, error: "ValueError: 壞掉了" }),
+            job("b", { at, result: "skipped", duration_ms: null, error: null }),
+            job("c", null),
+          ],
+        }}
+      />,
+    )
+    for (const text of ["任務 a", "每 3 分鐘", "失敗", "1.5 秒", "<details>", "ValueError: 壞掉了", "上一次還沒跑完而略過", "尚未執行"]) {
+      expect(html).toContain(text)
+    }
+    expect(html.match(/border-red-500/g)).toHaveLength(2)
   })
 })
