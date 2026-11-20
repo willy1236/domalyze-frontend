@@ -4,10 +4,12 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { OPS_PATH } from "@/lib/dashboard-ops"
 import { OPS_DISCORD_PATH } from "@/lib/dashboard-ops-discord"
+import { OPS_WEBSITE_PATH } from "@/lib/dashboard-ops-website"
 
 const TABS = [
   { href: OPS_PATH, label: "Twitch 頻道", active: (p: string) => p === OPS_PATH || p.startsWith(`${OPS_PATH}/channels`) },
   { href: OPS_DISCORD_PATH, label: "Discord 伺服器", active: (p: string) => p.startsWith(OPS_DISCORD_PATH) },
+  { href: OPS_WEBSITE_PATH, label: "網站", active: (p: string) => p.startsWith(OPS_WEBSITE_PATH) },
 ]
 
 /** 營運入口的平台分頁。 */
