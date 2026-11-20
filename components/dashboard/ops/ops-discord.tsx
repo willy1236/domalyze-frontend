@@ -1,5 +1,6 @@
 "use client"
 
+import Link from "next/link"
 import { useCallback, useState } from "react"
 import { Button } from "@/components/ui"
 import { isNotBotOwner } from "@/lib/dashboard-ops"
@@ -11,6 +12,8 @@ import {
   fetchGuildEvents,
   fetchOpsDiscord,
   guildEventLabel,
+  lookupPath,
+  OPS_LOOKUP_PATH,
 } from "@/lib/dashboard-ops-discord"
 import { useLoad } from "@/lib/use-load"
 import { OpsForbidden } from "./ops-forbidden"
@@ -18,6 +21,7 @@ import { TrendChart } from "./trend-chart"
 
 const muted = "text-gray-600 dark:text-gray-400"
 const fmt = new Intl.NumberFormat("zh-TW")
+const linkClass = "underline-offset-2 hover:underline hover:text-primary dark:hover:text-champagne"
 
 function formatTime(iso: string | null): string {
   return iso === null ? "不明" : new Date(iso).toLocaleString("zh-TW")
@@ -100,7 +104,12 @@ function Trends() {
 function GuildList({ guilds }: { guilds: OpsGuild[] }) {
   return (
     <section className="space-y-3">
-      <h2 className="text-lg font-serif">所在伺服器</h2>
+      <div className="flex flex-wrap items-baseline justify-between gap-3">
+        <h2 className="text-lg font-serif">所在伺服器</h2>
+        <Link href={OPS_LOOKUP_PATH} className={`text-sm ${linkClass}`}>
+          ID 查詢
+        </Link>
+      </div>
       {guilds.length === 0 ? (
         <p className="border border-champagne/30 px-4 py-8 text-center">還沒有加入任何伺服器</p>
       ) : (
@@ -116,6 +125,11 @@ function GuildList({ guilds }: { guilds: OpsGuild[] }) {
                 </p>
                 {guild.owner && <OwnerLink owner={guild.owner} />}
               </div>
+              <nav aria-label={`${guild.name} 的操作`} className="ml-auto flex shrink-0 flex-col items-end gap-1 text-xs">
+                <Link href={lookupPath(guild.id)} className={linkClass}>
+                  查詢
+                </Link>
+              </nav>
             </li>
           ))}
         </ul>
