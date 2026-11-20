@@ -26,6 +26,8 @@ export type ForwardAccess = "ok" | "need_domalyze" | "need_discord" | "mod"
 
 export interface ChannelDetail extends ChannelInfo {
   forward_access: ForwardAccess
+  /** 實況主是否開放 mod 協作（mod 進入頻道後台、在聊天室管理指令） */
+  mod_collab_enabled: boolean
   /** 權限問題與暫停的功能（即時判定，不存 DB） */
   health: ChannelHealth
 }

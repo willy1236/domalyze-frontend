@@ -16,6 +16,7 @@ const detail = (state: ChannelDetail["state"]): ChannelDetail => ({
   role: "owner",
   state,
   forward_access: "ok",
+  mod_collab_enabled: true,
   health: { state: "inactive", issues: [], paused_features: [] },
 })
 

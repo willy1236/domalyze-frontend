@@ -20,6 +20,7 @@ const detail: ChannelDetail = {
   role: "owner",
   state: "inactive",
   forward_access: "need_domalyze",
+  mod_collab_enabled: true,
   health: { state: "inactive", issues: [], paused_features: [] },
 }
 const forbidden = new DashboardApiError(403, "channel_forbidden", null, false)
