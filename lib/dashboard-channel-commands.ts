@@ -7,12 +7,13 @@ export const RESPONSE_MAX = 500
 export const COOLDOWN_MAX = 3600
 export const ALIASES_MAX = 10
 
-export type CommandPermission = "everyone" | "subscriber" | "vip" | "mod" | "broadcaster"
+export type CommandPermission = "everyone" | "subscriber" | "regular" | "vip" | "mod" | "broadcaster"
 
 /** 由低到高；觸發者的層級要大於等於指令的權限 */
 export const PERMISSIONS: { value: CommandPermission; label: string }[] = [
   { value: "everyone", label: "所有人" },
   { value: "subscriber", label: "訂閱者" },
+  { value: "regular", label: "常客" },
   { value: "vip", label: "VIP" },
   { value: "mod", label: "mod" },
   { value: "broadcaster", label: "實況主" },
