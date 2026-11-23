@@ -42,6 +42,16 @@ export function CommandRows({ commands, readOnly, busy, onEdit, onToggle }: Rows
             <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
               {commandSummary(command)} · 已使用 {command.use_count} 次
             </p>
+            {command.builtin_conflict?.renamed_from && (
+              <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
+                {`原名 !${command.builtin_conflict.renamed_from}，因與內建指令同名已改名`}
+              </p>
+            )}
+            {command.builtin_conflict?.removed_aliases.map((alias) => (
+              <p key={alias} className="mt-1 text-sm text-gray-600 dark:text-gray-400">
+                {`別名 !${alias} 因與內建指令同名已移除`}
+              </p>
+            ))}
           </div>
           <label className="flex items-center gap-2 text-sm">
             <input

@@ -48,6 +48,7 @@ export interface CommandValues {
 export interface ChannelCommand extends CommandValues {
   use_count: number
   updated_at: string
+  builtin_conflict: { renamed_from: string | null; removed_aliases: string[] } | null
 }
 
 export const EMPTY_COMMAND: CommandValues = {

@@ -24,6 +24,7 @@ const command: ChannelCommand = {
   permission: "mod",
   use_count: 7,
   updated_at: "2026-11-19T04:00:00+00:00",
+  builtin_conflict: { renamed_from: null, removed_aliases: ["title"] },
 }
 
 describe("valuesOf", () => {
