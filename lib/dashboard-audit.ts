@@ -27,6 +27,11 @@ const TARGET_KINDS: Record<string, string> = {
   forward: "轉發",
   channel: "頻道",
   mod_collab: "mod 協作開關",
+  moderation: "聊天室管理設定",
+  blocked_term: "禁字",
+  regular: "常客",
+  stream_info: "實況資訊",
+  enforcement: "執法紀錄",
 }
 
 const CHANNEL_KEYS: Record<string, string> = {
