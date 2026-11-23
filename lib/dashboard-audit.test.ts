@@ -35,6 +35,17 @@ describe("auditLabels", () => {
     expect(auditLabels(entry({ target_kind: "mod_collab", target_key: "enabled" })).target).toBe("mod 協作開關")
     expect(auditLabels(entry({ target_kind: "mod_collab", target_key: "other" })).target).toBe("mod 協作開關：other")
   })
+  it.each([
+    ["moderation", "channel"],
+    ["blocked_term", "test word"],
+    ["regular", "100"],
+    ["stream_info", "title"],
+    ["enforcement", "100"],
+  ])("修改紀錄類別 %s 顯示中文名稱", (target_kind, target_key) => {
+    const { target } = auditLabels(entry({ target_kind, target_key }))
+    expect(target).toMatch(/\p{Script=Han}/u)
+    expect(target).not.toContain(target_kind)
+  })
   it("頻道後台的操作者沒有 id 也能顯示", () => {
     expect(auditLabels(entry({ actor: { platform: "twitch", name: "Ann" } })).actor).toBe("Twitch Ann")
   })
