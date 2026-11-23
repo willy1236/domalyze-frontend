@@ -5,7 +5,7 @@ const item = (key: string) => CHANNEL_NAV.find((i) => i.key === key)!
 
 describe("CHANNEL_NAV", () => {
   it("包含總覽、指令、計時訊息、事件回應、轉發 Discord、修改紀錄、設定", () => {
-    expect(CHANNEL_NAV.map((i) => i.label)).toEqual([
+    expect(CHANNEL_NAV.filter((i) => i !== item("regulars")).map((i) => i.label)).toEqual([
       "總覽",
       "指令",
       "計時訊息",
@@ -15,6 +15,12 @@ describe("CHANNEL_NAV", () => {
       "設定",
     ])
   })
+})
+
+it("常客有自己的頻道導覽入口", () => {
+  const regulars = item("regulars")
+  expect(regulars?.label).toBe("常客")
+  expect(channelSectionHref("7", regulars)).toBe("/dashboard/twitch/7/regulars")
 })
 
 describe("channelSectionHref", () => {
