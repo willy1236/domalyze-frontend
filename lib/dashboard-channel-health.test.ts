@@ -51,6 +51,18 @@ describe("pausedFeatureNames", () => {
   })
 })
 
+describe("C-10 部分暫停清單", () => {
+  it.each([
+    ["chat_moderation", /聊天室管理/],
+    ["permit", /!permit/],
+    ["enforcement_lift", /解除處罰/],
+    ["blocked_terms", /Blocked Terms/i],
+  ] as const)("後端列出 %s 時顯示對應功能名稱", (code, label) => {
+    const [name] = pausedFeatureNames([code])
+    expect(name).toMatch(label)
+  })
+})
+
 describe("healthStatusLabel", () => {
   const health = (state: ChannelHealth["state"]): ChannelHealth => ({ state, issues: [], paused_features: [] })
   it("部分暫停顯示「星羽部分暫停」", () => {

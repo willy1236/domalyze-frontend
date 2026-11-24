@@ -5,7 +5,8 @@ const item = (key: string) => CHANNEL_NAV.find((i) => i.key === key)!
 
 describe("CHANNEL_NAV", () => {
   it("包含總覽、指令、計時訊息、事件回應、轉發 Discord、修改紀錄、設定", () => {
-    expect(CHANNEL_NAV.map((i) => i.label)).toEqual([
+    const others = CHANNEL_NAV.filter((i) => !["regulars", "moderation", "enforcement"].includes(i.key) && i.label !== "實況資訊")
+    expect(others.map((i) => i.label)).toEqual([
       "總覽",
       "指令",
       "計時訊息",
@@ -15,6 +16,30 @@ describe("CHANNEL_NAV", () => {
       "設定",
     ])
   })
+})
+
+it("常客有自己的頻道導覽入口", () => {
+  const regulars = item("regulars")
+  expect(regulars?.label).toBe("常客")
+  expect(channelSectionHref("7", regulars)).toBe("/dashboard/twitch/7/regulars")
+})
+
+it("聊天室管理有自己的頻道導覽入口", () => {
+  const moderation = item("moderation")
+  expect(moderation?.label).toBe("聊天室管理")
+  expect(channelSectionHref("7", moderation)).toBe("/dashboard/twitch/7/moderation")
+})
+
+it("執法紀錄有自己的頻道導覽入口", () => {
+  const enforcement = item("enforcement")
+  expect(enforcement?.label).toBe("執法紀錄")
+  expect(channelSectionHref("7", enforcement)).toBe("/dashboard/twitch/7/enforcement")
+})
+
+it("實況資訊有自己的頻道導覽入口", () => {
+  const stream = CHANNEL_NAV.find((i) => i.label === "實況資訊")
+  expect(stream, "CHANNEL_NAV 缺「實況資訊」").toBeDefined()
+  expect(channelSectionHref("7", stream!)).toBe("/dashboard/twitch/7/stream")
 })
 
 describe("channelSectionHref", () => {

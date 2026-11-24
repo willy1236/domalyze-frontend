@@ -14,6 +14,7 @@ const command = (over: Partial<ChannelCommand> = {}): ChannelCommand => ({
   permission: "everyone",
   use_count: 3,
   updated_at: "2026-11-19T04:00:00+00:00",
+  ...{ builtin_conflict: null },
   ...over,
 })
 
@@ -39,6 +40,38 @@ describe("CommandRows", () => {
     )
     expect(html).toContain("已關閉")
     expect(html).not.toContain("checked")
+  })
+  it("被改名的自訂指令旁顯示原名與改名原因", () => {
+    const renamed = {
+      ...command({ name: "oldcommand", aliases: [] }),
+      builtin_conflict: { renamed_from: "uptime", removed_aliases: [] },
+    }
+    const html = renderToStaticMarkup(
+      <CommandRows commands={[renamed]} readOnly={false} onEdit={noop} onToggle={noop} />,
+    )
+    expect(html).toContain("!oldcommand")
+    expect(html).toContain("原名 !uptime，因與內建指令同名已改名")
+  })
+  it("只有別名被移除時，保留指令名稱並顯示被移除的別名", () => {
+    const withoutAlias = {
+      ...command({ aliases: ["h"] }),
+      builtin_conflict: { renamed_from: null, removed_aliases: ["title"] },
+    }
+    const html = renderToStaticMarkup(
+      <CommandRows commands={[withoutAlias]} readOnly={false} onEdit={noop} onToggle={noop} />,
+    )
+    expect(html).toContain("!hi")
+    expect(html).toContain("別名 !title 因與內建指令同名已移除")
+    expect(html).not.toContain("原名")
+  })
+  it("儲存後重載回傳 null 時不顯示改名提示", () => {
+    const saved = { ...command({ name: "oldcommand" }), builtin_conflict: null }
+    const html = renderToStaticMarkup(
+      <CommandRows commands={[saved]} readOnly={false} onEdit={noop} onToggle={noop} />,
+    )
+    expect(html).toContain("!oldcommand")
+    expect(html).not.toContain("原名")
+    expect(html).not.toContain("因與內建指令同名")
   })
   it("星羽沒啟用時開關與編輯按鈕都停用", () => {
     const html = renderToStaticMarkup(<CommandRows commands={[command()]} readOnly onEdit={noop} onToggle={noop} />)
