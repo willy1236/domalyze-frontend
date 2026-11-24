@@ -42,6 +42,8 @@ type FilterDefinition = {
   numbers?: readonly NumberField[]
 }
 
+const LIST_MAX = 100
+const ENTRY_MAX = 100
 const COUNT_RANGE = [1, 500] as const
 const PERCENT_RANGE = [1, 100] as const
 const DUPLICATE_SECONDS_RANGE = [1, 300] as const
@@ -148,7 +150,12 @@ export function ModerationFilterCard({ filter, endpoint, disabled, onReload }: P
       return
     }
     if (list) {
-      values.params[list.key] = params[list.key].split(/\r?\n/).map((entry) => entry.trim()).filter(Boolean)
+      const entries = params[list.key].split(/\r?\n/).map((entry) => entry.trim()).filter(Boolean)
+      if (entries.length > LIST_MAX || entries.some((entry) => Array.from(entry).length > ENTRY_MAX)) {
+        setProblem(`${list.label}最多 ${LIST_MAX} 項，每項最多 ${ENTRY_MAX} 字。`)
+        return
+      }
+      values.params[list.key] = entries
     }
     for (const { key, label, bounds: [min, max] } of numbers) {
       const value = Number(params[key])
@@ -226,7 +233,7 @@ export function ModerationFilterCard({ filter, endpoint, disabled, onReload }: P
               value={params[list.key]}
               onChange={(event) => setParams({ ...params, [list.key]: event.target.value })}
             />
-            <span className="text-gray-600 dark:text-gray-400">{list.description}</span>
+            <span className="text-gray-600 dark:text-gray-400">{list.description}最多 {LIST_MAX} 項，每項最多 {ENTRY_MAX} 字。</span>
           </label>
         )}
         {numbers.map(({ key, label, bounds: [min, max] }) => (
