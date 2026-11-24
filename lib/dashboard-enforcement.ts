@@ -54,9 +54,9 @@ export function enforcementActionLabel(entry: Pick<EnforcementEntry, "action" | 
   }
 }
 
-/** 只有 timeout 與 ban 有處罰可以解除 */
-export function canLift(entry: Pick<EnforcementEntry, "action">): boolean {
-  return entry.action !== "delete"
+/** 只有執法成功的 timeout 與 ban 有處罰可以解除 */
+export function canLift(entry: Pick<EnforcementEntry, "action" | "status">): boolean {
+  return entry.status === "ok" && (entry.action === "timeout" || entry.action === "ban")
 }
 
 export function fetchOpsEnforcement(
