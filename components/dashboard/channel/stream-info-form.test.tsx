@@ -49,3 +49,27 @@ it("分類未設定時只送修改的標題", async () => {
   const put = fetch.mock.calls.find(([, init]) => init?.method === "PUT")
   expect(JSON.parse(String(put?.[1]?.body))).toEqual({ title: "新標題" })
 })
+
+it("只改分類時保留原標題的空白", async () => {
+  const fetch = vi.fn(async (input: string, init?: RequestInit) => {
+    if (init?.method === "PUT") return new Response(null, { status: 204 })
+    if (input.includes("/categories")) return Response.json({ categories: [{ id: "123", name: "Minecraft" }] })
+    return Response.json({ title: " 舊標題 ", category_id: "", category_name: "", is_live: false, started_at: null, can_edit: true })
+  })
+  vi.stubGlobal("fetch", fetch)
+  await act(async () => root.render(<StreamInfoForm channelId="777" role="owner" readOnly={false} />))
+
+  const search = container.querySelector<HTMLInputElement>('input[aria-label="搜尋分類"]')!
+  await act(async () => {
+    Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value")!.set!.call(search, "Mine")
+    search.dispatchEvent(new Event("input", { bubbles: true }))
+  })
+  const choice = [...container.querySelectorAll("button")].find((button) => button.textContent === "Minecraft")!
+  await act(async () => choice.click())
+  await act(async () => {
+    container.querySelector("form")!.dispatchEvent(new Event("submit", { bubbles: true, cancelable: true }))
+  })
+
+  const put = fetch.mock.calls.find(([, init]) => init?.method === "PUT")
+  expect(JSON.parse(String(put?.[1]?.body))).toEqual({ category_id: "123" })
+})

@@ -57,7 +57,7 @@ export function StreamInfoForm({ channelId, role, readOnly }: { channelId: strin
   }, [data])
 
   const editable = data?.can_edit === true && !readOnly
-  const editedTitle = data && title.trim() !== data.title ? title.trim() : undefined
+  const editedTitle = data && title !== data.title ? title.trim() : undefined
   const editedCategory = chosen && chosen.id !== data?.category_id ? chosen.id : undefined
   const scopeMissing = error instanceof DashboardApiError && error.code === "scope_missing"
   const reauthorize = role === "owner" && (
