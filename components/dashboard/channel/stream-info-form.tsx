@@ -34,7 +34,7 @@ export function StreamInfoForm({ channelId, role, readOnly }: { channelId: strin
   const path = `/dashboard/channels/${encodeURIComponent(channelId)}/stream-info`
   const handleChannelError = useChannelError()
   const fetcher = useCallback((signal: AbortSignal) => dashboardFetch<StreamInfo>(path, {}, { signal }), [path])
-  const { data, failed, reload } = useLoad(fetcher, { onError: handleChannelError })
+  const { data, error, failed, reload } = useLoad(fetcher, { onError: handleChannelError })
   const [title, setTitle] = useState("")
   const [chosen, setChosen] = useState<Category | null>(null)
   const [query, setQuery] = useState("")
@@ -57,6 +57,14 @@ export function StreamInfoForm({ channelId, role, readOnly }: { channelId: strin
   }, [data])
 
   const editable = data?.can_edit === true && !readOnly
+  const editedTitle = data && title.trim() !== data.title ? title.trim() : undefined
+  const editedCategory = chosen && chosen.id !== data?.category_id ? chosen.id : undefined
+  const scopeMissing = error instanceof DashboardApiError && error.code === "scope_missing"
+  const reauthorize = role === "owner" && (
+    <LinkButton variant="outline" href={origin === null ? undefined : enableUrl(channelId, origin)}>
+      重新授權
+    </LinkButton>
+  )
 
   async function search(value: string) {
     setQuery(value)
@@ -76,11 +84,11 @@ export function StreamInfoForm({ channelId, role, readOnly }: { channelId: strin
 
   async function save(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
-    if (busy || !editable || !data || !title.trim()) return
+    if (busy || !editable || editedTitle === "" || (editedTitle === undefined && editedCategory === undefined)) return
     setBusy(true)
     setNotice("")
     try {
-      await dashboardFetch(path, { method: "PUT", json: { title: title.trim(), category_id: chosen?.id ?? data.category_id } })
+      await dashboardFetch(path, { method: "PUT", json: { title: editedTitle, category_id: editedCategory } })
       setQuery("")
       setResults([])
       await reload()
@@ -107,8 +115,17 @@ export function StreamInfoForm({ channelId, role, readOnly }: { channelId: strin
   if (failed) {
     return (
       <div className="border border-champagne/30 px-4 py-6">
-        <p className="mb-4" role="alert">目前無法讀取實況資訊。</p>
-        <Button type="button" onClick={() => void reload()}>重試</Button>
+        {scopeMissing ? (
+          <>
+            <p className="mb-4" role="alert">需要實況主重新授權才能讀取實況資訊。</p>
+            {reauthorize}
+          </>
+        ) : (
+          <>
+            <p className="mb-4" role="alert">目前無法讀取實況資訊。</p>
+            <Button type="button" onClick={() => void reload()}>重試</Button>
+          </>
+        )}
       </div>
     )
   }
@@ -132,11 +149,7 @@ export function StreamInfoForm({ channelId, role, readOnly }: { channelId: strin
       {!data.can_edit && (
         <div role="status" className="border border-champagne/30 px-4 py-3 text-sm space-y-3">
           <p>需要實況主重新授權（啟用 bot）才能修改標題與分類。</p>
-          {role === "owner" && (
-            <LinkButton variant="outline" href={origin === null ? undefined : enableUrl(channelId, origin)}>
-              重新授權
-            </LinkButton>
-          )}
+          {reauthorize}
         </div>
       )}
       <label className="flex flex-col gap-1 text-sm">
@@ -180,7 +193,7 @@ export function StreamInfoForm({ channelId, role, readOnly }: { channelId: strin
         )}
       </div>
       {notice && <p role="status" className="text-sm">{notice}</p>}
-      {editable && <Button type="submit" disabled={busy || !title.trim()}>儲存</Button>}
+      {editable && <Button type="submit" disabled={busy || editedTitle === ""}>儲存</Button>}
     </form>
   )
 }
