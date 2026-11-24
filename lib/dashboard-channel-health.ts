@@ -17,6 +17,10 @@ export const FEATURE_NAMES = {
   gift_forward: "贈訂轉發",
   redemption_forward: "兌換轉發",
   prediction_forward: "預測轉發",
+  chat_moderation: "聊天室管理",
+  permit: "!permit",
+  enforcement_lift: "解除處罰",
+  blocked_terms: "Twitch Blocked Terms",
 } as const
 
 export type ChannelFeature = keyof typeof FEATURE_NAMES
