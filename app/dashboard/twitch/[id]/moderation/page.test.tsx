@@ -42,24 +42,29 @@ afterEach(async () => {
   vi.unstubAllGlobals()
 })
 
-async function openPage(error?: { status: number; code: string }) {
-  let link = { kind: "link", ...original, stages: null, updated_at: null as string | null }
+async function openPage(error?: { status: number; code: string }, linkStages: typeof settings.stages | null = null) {
+  let penalties = settings
+  let link = { kind: "link", ...original, stages: linkStages, updated_at: null as string | null }
   const edits: unknown[] = []
   const fetch = vi.fn(async (input: string, init?: RequestInit) => {
     const path = new URL(input, "https://example.test").pathname
     if (init?.method === "PUT") {
-      expect(path).toBe(url + "/filters/link")
+      expect([url + "/settings", url + "/filters/link"]).toContain(path)
       const body = JSON.parse(String(init.body))
-      edits.push(body)
+      edits.push({ path, ...body })
       if (error) return Response.json({ error: error.code }, { status: error.status })
+      if (path === url + "/settings") {
+        penalties = { ...penalties, ...body.values }
+        return Response.json({ settings: penalties })
+      }
       link = { ...link, ...body.values, updated_at: "2026-11-23T10:00:00Z" }
       return Response.json({ filter: link })
     }
     expect(path).toBe(url)
     return Response.json({
-      settings,
+      settings: penalties,
       filters: kinds.map((kind) =>
-        kind === "link" ? link : { ...link, kind, enabled: false, params: {}, notice: null, silent: false },
+        kind === "link" ? link : { ...link, kind, enabled: false, params: {}, notice: null, silent: false, stages: null },
       ),
     })
   })
@@ -129,7 +134,11 @@ it("mod 可從預設關閉的連結卡開啟過濾並修改豁免層級與靜音
   })
   await save(card)
 
-  expect(edits).toEqual([{ original, values: { ...original, enabled: true, exempt_level: "regular", silent: true } }])
+  expect(edits).toEqual([{
+    path: url + "/filters/link",
+    original: expect.objectContaining(original),
+    values: expect.objectContaining({ ...original, enabled: true, exempt_level: "regular", silent: true }),
+  }])
 })
 
 it.each([
@@ -167,8 +176,55 @@ it("儲存告知遭 AutoMod 拒絕時顯示原因並保留輸入供修改", asyn
   })
   await save(card)
 
-  expect(edits).toEqual([{ original, values: { ...original, notice: draft } }])
+  expect(edits).toEqual([{
+    path: url + "/filters/link",
+    original: expect.objectContaining(original),
+    values: expect.objectContaining({ ...original, notice: draft }),
+  }])
   expect(container.textContent).toMatch(/AutoMod.*擋下|AutoMod.*拒絕/)
   expect(visibleControl<HTMLInputElement | HTMLTextAreaElement>(fields, /告知/, card).value)
     .toBe(draft)
+})
+
+async function setNumber(input: HTMLInputElement, value: string) {
+  await act(async () => {
+    Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value")!.set!.call(input, value)
+    input.dispatchEvent(new Event("input", { bubbles: true }))
+  })
+}
+
+it("處罰設定可修改犯規次數歸零與放行時間", async () => {
+  const edits = await openPage()
+  visibleControl("h2, h3, h4, h5, h6, [role=heading]", /處罰設定/)
+  const reset = visibleControl<HTMLInputElement>("input", /歸零/)
+  const permit = visibleControl<HTMLInputElement>("input", /放行/)
+  expect(reset.value).toBe("60")
+  expect(permit.value).toBe("60")
+
+  await setNumber(reset, "5")
+  await setNumber(permit, "120")
+  await save(reset.form ?? reset.closest("section") ?? container)
+
+  expect(edits).toEqual([{
+    path: url + "/settings",
+    original: expect.objectContaining({ strike_reset_minutes: 60, permit_seconds: 60 }),
+    values: expect.objectContaining({ strike_reset_minutes: 5, permit_seconds: 120 }),
+  }])
+})
+
+it("關閉過濾器自己的處罰階段後，儲存為沿用頻道預設", async () => {
+  const stages = [{ action: "ban", duration: null }]
+  const edits = await openPage(undefined, stages)
+  const card = filterForm(/連結/)
+  const override = visibleControl(toggleSelector, /使用自己的處罰階段/, card)
+  expect(checked(override)).toBe(true)
+
+  await click(override)
+  await save(card)
+
+  expect(edits).toEqual([{
+    path: url + "/filters/link",
+    original: expect.objectContaining({ stages }),
+    values: expect.objectContaining({ stages: null }),
+  }])
 })
