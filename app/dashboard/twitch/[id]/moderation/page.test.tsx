@@ -60,6 +60,7 @@ async function openPage(error?: { status: number; code: string }, linkStages: ty
       link = { ...link, ...body.values, updated_at: "2026-11-23T10:00:00Z" }
       return Response.json({ filter: link })
     }
+    if (path === "/dashboard/channels/777/blocked-terms") return Response.json({ terms: [] })
     expect(path).toBe(url)
     return Response.json({
       settings: penalties,
