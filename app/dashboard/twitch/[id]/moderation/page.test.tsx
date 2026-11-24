@@ -228,3 +228,20 @@ it("關閉過濾器自己的處罰階段後，儲存為沿用頻道預設", asyn
     values: expect.objectContaining({ stages: null }),
   }])
 })
+
+it("處罰設定可將 Raid 後暫停設為零並儲存", async () => {
+  const edits = await openPage()
+  const pause = visibleControl<HTMLInputElement>("input", /Raid 後暫停/)
+  const form = pause.form
+  expect(form).not.toBeNull()
+  visibleControl("h2, h3, h4, h5, h6, [role=heading]", /處罰設定/, form!)
+
+  await setNumber(pause, "0")
+  await save(form!)
+
+  expect(edits).toEqual([{
+    path: url + "/settings",
+    original: expect.objectContaining({ raid_pause_seconds: 120 }),
+    values: expect.objectContaining({ raid_pause_seconds: 0 }),
+  }])
+})
