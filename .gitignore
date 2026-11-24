@@ -42,3 +42,7 @@ yarn-error.log*
 next-env.d.ts
 
 certificates
+
+# local tool artifacts
+.playwright-mcp/
+.impeccable/
