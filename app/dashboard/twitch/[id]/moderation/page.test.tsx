@@ -83,8 +83,8 @@ function labelOf(control: HTMLElement) {
   ].filter(Boolean).join(" ")
 }
 
-function visibleControl<T extends HTMLElement>(selector: string, label: RegExp): T {
-  const control = Array.from(container.querySelectorAll<T>(selector)).find((element) => label.test(labelOf(element)))
+function visibleControl<T extends HTMLElement>(selector: string, label: RegExp, scope: ParentNode = container): T {
+  const control = Array.from(scope.querySelectorAll<T>(selector)).find((element) => label.test(labelOf(element)))
   expect(control, `找不到欄位 ${label}`).toBeDefined()
   return control!
 }
@@ -99,15 +99,23 @@ async function click(control: HTMLElement) {
   await act(async () => control.click())
 }
 
-async function save() {
-  await click(visibleControl<HTMLButtonElement>("button", /儲存/))
+async function save(scope: ParentNode) {
+  await click(visibleControl<HTMLButtonElement>("button", /儲存/, scope))
+}
+
+function filterForm(label: RegExp) {
+  const heading = visibleControl("h2, h3, h4, h5, h6, [role=heading]", label)
+  const form = heading.closest("form")
+  expect(form, `找不到 ${label} 過濾器的表單`).not.toBeNull()
+  return form!
 }
 
 it("mod 可從預設關閉的連結卡開啟過濾並修改豁免層級與靜音", async () => {
   const edits = await openPage()
-  const enabled = visibleControl(toggleSelector, /連結|啟用/)
-  const silent = visibleControl(toggleSelector, /靜音/)
-  const level = visibleControl<HTMLSelectElement>("select", /豁免/)
+  const card = filterForm(/連結/)
+  const enabled = visibleControl(toggleSelector, /啟用/, card)
+  const silent = visibleControl(toggleSelector, /靜音/, card)
+  const level = visibleControl<HTMLSelectElement>("select", /豁免/, card)
   expect(checked(enabled)).toBe(false)
   expect(checked(silent)).toBe(false)
   expect(level.value).toBe("vip")
@@ -119,14 +127,37 @@ it("mod 可從預設關閉的連結卡開啟過濾並修改豁免層級與靜音
     level.value = "regular"
     level.dispatchEvent(new Event("change", { bubbles: true }))
   })
-  await save()
+  await save(card)
 
   expect(edits).toEqual([{ original, values: { ...original, enabled: true, exempt_level: "regular", silent: true } }])
 })
 
+it.each([
+  ["禁字", /禁字/],
+  ["大寫", /大寫/],
+  ["表情", /表情/],
+  ["符號", /^(?!.*表情).*符號/],
+  ["重複內容", /重複內容/],
+  ["訊息過長", /訊息過長|訊息長度/],
+  ["跨訊息重複", /跨訊息重複|重複發言/],
+] as const)("後台可獨立開啟原本關閉的%s過濾器", async (_name, label) => {
+  await openPage()
+  const enabled = visibleControl(toggleSelector, /啟用/, filterForm(label))
+  const link = visibleControl(toggleSelector, /啟用/, filterForm(/連結/))
+  expect(checked(enabled)).toBe(false)
+  expect(checked(link)).toBe(false)
+
+  await click(enabled)
+
+  expect(checked(enabled)).toBe(true)
+  expect(checked(link)).toBe(false)
+})
+
 it("儲存告知遭 AutoMod 拒絕時顯示原因並保留輸入供修改", async () => {
   const edits = await openPage({ status: 422, code: "automod_blocked" })
-  const notice = visibleControl<HTMLInputElement | HTMLTextAreaElement>("input[type=text], input:not([type]), textarea", /告知/)
+  const card = filterForm(/連結/)
+  const fields = "input[type=text], input:not([type]), textarea"
+  const notice = visibleControl<HTMLInputElement | HTMLTextAreaElement>(fields, /告知/, card)
   const prototype = notice instanceof HTMLTextAreaElement ? HTMLTextAreaElement.prototype : HTMLInputElement.prototype
   const draft = "請遵守聊天室規則"
 
@@ -134,10 +165,10 @@ it("儲存告知遭 AutoMod 拒絕時顯示原因並保留輸入供修改", asyn
     Object.getOwnPropertyDescriptor(prototype, "value")!.set!.call(notice, draft)
     notice.dispatchEvent(new Event("input", { bubbles: true }))
   })
-  await save()
+  await save(card)
 
   expect(edits).toEqual([{ original, values: { ...original, notice: draft } }])
   expect(container.textContent).toMatch(/AutoMod.*擋下|AutoMod.*拒絕/)
-  expect(visibleControl<HTMLInputElement | HTMLTextAreaElement>("input[type=text], input:not([type]), textarea", /告知/).value)
+  expect(visibleControl<HTMLInputElement | HTMLTextAreaElement>(fields, /告知/, card).value)
     .toBe(draft)
 })
