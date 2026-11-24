@@ -55,7 +55,7 @@ export function BlockedTerms({ channelId, readOnly }: Props) {
           return
         }
         if (caught.code === "invalid_term") {
-          setNotice("詞需要 2 到 500 個字。")
+          setNotice(typeof caught.body?.reason === "string" ? caught.body.reason : "請檢查這個詞的格式。")
           return
         }
       }
@@ -96,9 +96,13 @@ export function BlockedTerms({ channelId, readOnly }: Props) {
                   value={text}
                   onChange={(event) => setText(event.target.value)}
                   autoComplete="off"
+                  aria-describedby="blocked-term-format"
                   maxLength={500}
                   disabled={busy}
                 />
+                <span id="blocked-term-format" className="text-xs text-gray-600 dark:text-gray-400">
+                  最多 500 字。至少 2 個非空白字元，用 * 時須有至少 3 個，並把 * 放在字詞開頭或結尾。
+                </span>
               </label>
               <Button type="submit" disabled={busy || text.trim().length < 2}>新增</Button>
             </form>
