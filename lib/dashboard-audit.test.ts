@@ -46,6 +46,13 @@ describe("auditLabels", () => {
     expect(target).toMatch(/\p{Script=Han}/u)
     expect(target).not.toContain(target_kind)
   })
+  it("聊天室管理修改紀錄顯示名稱或實際內容", () => {
+    expect(auditLabels(entry({ target_kind: "moderation", target_key: "link" })).target).toBe("聊天室管理設定：連結")
+    expect(auditLabels(entry({ target_kind: "moderation", target_key: "channel" })).target).toBe("聊天室管理設定：頻道處罰設定")
+    expect(auditLabels(entry({ target_kind: "stream_info", target_key: "category" })).target).toBe("實況資訊：分類")
+    expect(auditLabels(entry({ target_kind: "enforcement", target_key: "101", after: { user_name: "Alice" } })).target).toBe("執法紀錄：Alice")
+    expect(auditLabels(entry({ target_kind: "blocked_term", target_key: "term-1", before: { text: "bad*" } })).target).toBe("Twitch 禁用詞：bad*")
+  })
   it("頻道後台的操作者沒有 id 也能顯示", () => {
     expect(auditLabels(entry({ actor: { platform: "twitch", name: "Ann" } })).actor).toBe("Twitch Ann")
   })

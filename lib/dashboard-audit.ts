@@ -1,5 +1,7 @@
 // 頻道設定的修改紀錄：營運入口與頻道後台共用的型別與顯示文字。
 
+import { enforcementFilterLabel } from "./dashboard-enforcement"
+
 export interface AuditEntry {
   id: number
   at: string
@@ -28,7 +30,7 @@ const TARGET_KINDS: Record<string, string> = {
   channel: "頻道",
   mod_collab: "mod 協作開關",
   moderation: "聊天室管理設定",
-  blocked_term: "禁字",
+  blocked_term: "Twitch 禁用詞",
   regular: "常客",
   stream_info: "實況資訊",
   enforcement: "執法紀錄",
@@ -50,13 +52,24 @@ const PLATFORMS: Record<AuditEntry["actor"]["platform"], string> = {
   domalyze: "析域",
 }
 
+const STREAM_KEYS: Record<string, string> = { title: "標題", category: "分類", game: "分類", stream: "標題與分類" }
+
+function targetKey(entry: AuditEntry): string {
+  const { target_kind: kind, target_key: key } = entry
+  if (kind === "channel" && Object.hasOwn(CHANNEL_KEYS, key)) return CHANNEL_KEYS[key]
+  if (kind === "moderation") return key === "channel" || key === "settings" ? "頻道處罰設定" : enforcementFilterLabel(key)
+  if (kind === "stream_info" && Object.hasOwn(STREAM_KEYS, key)) return STREAM_KEYS[key]
+  const snapshot = entry.after ?? entry.before
+  const label = kind === "regular" || kind === "enforcement"
+    ? snapshot?.user_name || snapshot?.user_login
+    : kind === "blocked_term" ? snapshot?.text : undefined
+  return typeof label === "string" && label ? label : key
+}
+
 /** 修改紀錄一列的可讀文字；不認得的代碼直接顯示代碼 */
 export function auditLabels(entry: AuditEntry): { target: string; action: string; source: string; actor: string } {
   const kind = Object.hasOwn(TARGET_KINDS, entry.target_kind) ? TARGET_KINDS[entry.target_kind] : entry.target_kind
-  const key =
-    entry.target_kind === "channel" && Object.hasOwn(CHANNEL_KEYS, entry.target_key)
-      ? CHANNEL_KEYS[entry.target_key]
-      : entry.target_key
+  const key = targetKey(entry)
   // mod 協作開關只有一個 key，不再顯示 key
   const target = entry.target_kind === "mod_collab" && entry.target_key === "enabled" ? kind : `${kind}：${key}`
   return {
