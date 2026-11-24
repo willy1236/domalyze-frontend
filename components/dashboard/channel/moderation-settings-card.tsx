@@ -10,6 +10,7 @@ interface SettingsValues {
   stages: ModerationStage[]
   strike_reset_minutes: number
   permit_seconds: number
+  raid_pause_seconds: number
 }
 
 export interface ModerationSettings extends SettingsValues {
@@ -19,6 +20,7 @@ export interface ModerationSettings extends SettingsValues {
 const TIME_FIELDS = [
   { key: "strike_reset_minutes", label: "犯規次數歸零（分鐘）", min: 1, max: 1440 },
   { key: "permit_seconds", label: "放行時間（秒）", min: 10, max: 600 },
+  { key: "raid_pause_seconds", label: "Raid 後暫停（秒）", min: 0, max: 600 },
 ] as const
 
 interface Props {
@@ -28,14 +30,15 @@ interface Props {
   onReload: () => Promise<void>
 }
 
-function valuesOf({ stages, strike_reset_minutes, permit_seconds }: ModerationSettings): SettingsValues {
-  return { stages, strike_reset_minutes, permit_seconds }
+function valuesOf({ stages, strike_reset_minutes, permit_seconds, raid_pause_seconds }: ModerationSettings): SettingsValues {
+  return { stages, strike_reset_minutes, permit_seconds, raid_pause_seconds }
 }
 
 function timeInputs(values: SettingsValues) {
   return {
     strike_reset_minutes: String(values.strike_reset_minutes),
     permit_seconds: String(values.permit_seconds),
+    raid_pause_seconds: String(values.raid_pause_seconds),
   }
 }
 
