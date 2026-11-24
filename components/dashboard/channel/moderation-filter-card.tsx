@@ -7,17 +7,98 @@ import { useChannelError, useReloadChannel } from "./channel-access-guard"
 
 type ExemptLevel = "subscriber" | "regular" | "vip" | "mod"
 
-interface LinkValues {
+interface FilterValues {
   enabled: boolean
   exempt_level: ExemptLevel
-  params: { whitelist: string[] }
+  params: Record<string, number | string[]>
   notice: string | null
   silent: boolean
 }
 
-export interface LinkFilter extends LinkValues {
-  kind: string
+export interface ModerationFilter extends FilterValues {
+  kind: keyof typeof FILTERS
   updated_at: string | null
+}
+
+type ListField = {
+  key: string
+  label: string
+  description: string
+  placeholder?: string
+}
+
+type NumberField = {
+  key: string
+  label: string
+  defaultValue: number
+  bounds: readonly [number, number]
+}
+
+type FilterDefinition = {
+  title: string
+  list?: ListField
+  numbers?: readonly NumberField[]
+}
+
+const COUNT_RANGE = [1, 500] as const
+const PERCENT_RANGE = [1, 100] as const
+const DUPLICATE_SECONDS_RANGE = [1, 300] as const
+const DUPLICATE_COUNT_RANGE = [2, 100] as const
+
+const FILTERS = {
+  link: {
+    title: "連結過濾",
+    list: {
+      key: "whitelist",
+      label: "白名單",
+      description: "每行一個網域或路徑。",
+      placeholder: "youtube.com\ntwitter.com/abc",
+    },
+  },
+  blocked_word: {
+    title: "禁字過濾",
+    list: { key: "words", label: "禁字清單", description: "每行一項，* 代表任意長度的文字。" },
+  },
+  caps: {
+    title: "大寫過濾",
+    numbers: [
+      { key: "min_count", label: "大寫字母數", defaultValue: 8, bounds: COUNT_RANGE },
+      { key: "min_percent", label: "大寫比例（%）", defaultValue: 70, bounds: PERCENT_RANGE },
+    ],
+  },
+  emote: {
+    title: "表情符號過多",
+    numbers: [{ key: "min_count", label: "表情數", defaultValue: 3, bounds: COUNT_RANGE }],
+  },
+  symbol: {
+    title: "符號過多",
+    numbers: [{ key: "min_count", label: "符號數", defaultValue: 8, bounds: COUNT_RANGE }],
+  },
+  repetition: {
+    title: "重複內容",
+    numbers: [{ key: "min_percent", label: "重複比例（%）", defaultValue: 45, bounds: PERCENT_RANGE }],
+  },
+  length: {
+    title: "訊息過長",
+    numbers: [{ key: "min_length", label: "訊息字元數", defaultValue: 300, bounds: COUNT_RANGE }],
+  },
+  duplicate: {
+    title: "跨訊息重複",
+    numbers: [
+      { key: "window_seconds", label: "比對時間（秒）", defaultValue: 30, bounds: DUPLICATE_SECONDS_RANGE },
+      { key: "min_count", label: "相同訊息則數", defaultValue: 3, bounds: DUPLICATE_COUNT_RANGE },
+    ],
+  },
+} satisfies Record<string, FilterDefinition>
+
+function parameterInputs(definition: FilterDefinition, params: FilterValues["params"]): Record<string, string> {
+  if (definition.list) {
+    const entries = params[definition.list.key]
+    return { [definition.list.key]: Array.isArray(entries) ? entries.join("\n") : "" }
+  }
+  return Object.fromEntries(
+    (definition.numbers ?? []).map(({ key, defaultValue }) => [key, String(params[key] ?? defaultValue)]),
+  )
 }
 
 const LEVELS: Record<ExemptLevel, string> = {
@@ -29,21 +110,23 @@ const LEVELS: Record<ExemptLevel, string> = {
 
 const fieldClass = "w-full border border-champagne/40 bg-transparent px-3 py-2 text-sm disabled:opacity-60"
 
-function valuesOf({ enabled, exempt_level, params, notice, silent }: LinkFilter): LinkValues {
+function valuesOf({ enabled, exempt_level, params, notice, silent }: ModerationFilter): FilterValues {
   return { enabled, exempt_level, params, notice, silent }
 }
 
 interface Props {
-  filter: LinkFilter
+  filter: ModerationFilter
   endpoint: string
   disabled: boolean
   onReload: () => Promise<void>
 }
 
 export function ModerationFilterCard({ filter, endpoint, disabled, onReload }: Props) {
+  const definition: FilterDefinition = FILTERS[filter.kind]
+  const { title, list, numbers = [] } = definition
   const [original, setOriginal] = useState(() => valuesOf(filter))
   const [draft, setDraft] = useState(original)
-  const [whitelist, setWhitelist] = useState(original.params.whitelist.join("\n"))
+  const [params, setParams] = useState(() => parameterInputs(definition, original.params))
   const [saving, setSaving] = useState(false)
   const [status, setStatus] = useState<"idle" | "saved" | "conflict">("idle")
   const [problem, setProblem] = useState("")
@@ -52,22 +135,30 @@ export function ModerationFilterCard({ filter, endpoint, disabled, onReload }: P
 
   async function save(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
-    setSaving(true)
     setStatus("idle")
     setProblem("")
-    const values: LinkValues = {
-      ...draft,
-      params: { whitelist: whitelist.split(/\r?\n/).map((entry) => entry.trim()).filter(Boolean) },
+    const values: FilterValues = { ...draft, params: {} }
+    if (list) {
+      values.params[list.key] = params[list.key].split(/\r?\n/).map((entry) => entry.trim()).filter(Boolean)
     }
+    for (const { key, label, bounds: [min, max] } of numbers) {
+      const value = Number(params[key])
+      if (!Number.isInteger(value) || value < min || value > max) {
+        setProblem(`${label}必須是 ${min} 到 ${max} 的整數。`)
+        return
+      }
+      values.params[key] = value
+    }
+    setSaving(true)
     try {
-      const response = await dashboardFetch<{ filter: LinkFilter }>(endpoint, {
+      const response = await dashboardFetch<{ filter: ModerationFilter }>(endpoint, {
         method: "PUT",
         json: { values, original },
       })
       const saved = valuesOf(response.filter)
       setOriginal(saved)
       setDraft(saved)
-      setWhitelist(saved.params.whitelist.join("\n"))
+      setParams(parameterInputs(definition, saved.params))
       setStatus("saved")
     } catch (error) {
       if (handleChannelError(error)) return
@@ -93,7 +184,7 @@ export function ModerationFilterCard({ filter, endpoint, disabled, onReload }: P
         }
         if (error.handled) return
       }
-      setProblem("無法儲存連結過濾設定，請稍後再試。")
+      setProblem(`無法儲存${title}設定，請稍後再試。`)
     } finally {
       setSaving(false)
     }
@@ -101,12 +192,12 @@ export function ModerationFilterCard({ filter, endpoint, disabled, onReload }: P
 
   return (
     <form onSubmit={(event) => void save(event)} className="max-w-2xl border border-champagne/30 p-5 sm:p-6">
-      <h3 className="mb-4 text-lg font-semibold">連結過濾</h3>
+      <h3 className="mb-4 text-lg font-semibold">{title}</h3>
       <fieldset disabled={disabled || saving} className="space-y-4">
         <label className="flex items-center gap-2 text-sm font-medium">
           <input type="checkbox" checked={draft.enabled}
             onChange={(event) => setDraft({ ...draft, enabled: event.target.checked })} />
-          啟用連結過濾
+          啟用{title}
         </label>
         <label className="block text-sm">
           <span className="mb-1 block font-medium">豁免層級</span>
@@ -115,17 +206,33 @@ export function ModerationFilterCard({ filter, endpoint, disabled, onReload }: P
             {Object.entries(LEVELS).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
           </select>
         </label>
-        <label className="block text-sm">
-          <span className="mb-1 block font-medium">白名單</span>
-          <textarea
-            className={fieldClass}
-            rows={3}
-            placeholder={"youtube.com\ntwitter.com/abc"}
-            value={whitelist}
-            onChange={(event) => setWhitelist(event.target.value)}
-          />
-          <span className="text-gray-600 dark:text-gray-400">每行一個網域或路徑。</span>
-        </label>
+        {list && (
+          <label className="block text-sm">
+            <span className="mb-1 block font-medium">{list.label}</span>
+            <textarea
+              className={fieldClass}
+              rows={3}
+              placeholder={list.placeholder}
+              value={params[list.key]}
+              onChange={(event) => setParams({ ...params, [list.key]: event.target.value })}
+            />
+            <span className="text-gray-600 dark:text-gray-400">{list.description}</span>
+          </label>
+        )}
+        {numbers.map(({ key, label, bounds: [min, max] }) => (
+          <label key={key} className="block text-sm">
+            <span className="mb-1 block font-medium">{label}</span>
+            <Input
+              type="number"
+              min={min}
+              max={max}
+              step={1}
+              required
+              value={params[key]}
+              onChange={(event) => setParams({ ...params, [key]: event.target.value })}
+            />
+          </label>
+        ))}
         <label className="block text-sm">
           <span className="mb-1 block font-medium">告知文字</span>
           <Input type="text" value={draft.notice ?? ""} placeholder="使用預設文字"
@@ -147,7 +254,7 @@ export function ModerationFilterCard({ filter, endpoint, disabled, onReload }: P
           重新載入設定
         </Button>
       )}
-      {status === "saved" && <p className="mt-3 text-sm" role="status">已儲存連結過濾設定。</p>}
+      {status === "saved" && <p className="mt-3 text-sm" role="status">已儲存{title}設定。</p>}
     </form>
   )
 }

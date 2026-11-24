@@ -2,7 +2,7 @@
 
 import { useCallback } from "react"
 import { useChannel, useChannelError } from "@/components/dashboard/channel/channel-access-guard"
-import { ModerationFilterCard, type LinkFilter } from "@/components/dashboard/channel/moderation-filter-card"
+import { ModerationFilterCard, type ModerationFilter } from "@/components/dashboard/channel/moderation-filter-card"
 import { Button } from "@/components/ui"
 import { dashboardFetch } from "@/lib/dashboard-api"
 import { useLoad } from "@/lib/use-load"
@@ -12,10 +12,8 @@ export default function ChannelModerationPage() {
   const handleChannelError = useChannelError()
   const endpoint = `/dashboard/channels/${encodeURIComponent(channel.id)}/moderation`
   const fetcher = useCallback(async (signal: AbortSignal) => {
-    const data = await dashboardFetch<{ filters: LinkFilter[] }>(endpoint, {}, { signal })
-    const filter = data.filters.find((item) => item.kind === "link")
-    if (!filter) throw new Error("找不到連結過濾設定")
-    return filter
+    const data = await dashboardFetch<{ filters: ModerationFilter[] }>(endpoint, {}, { signal })
+    return data.filters
   }, [endpoint])
   const { data, failed, loading, reload } = useLoad(fetcher, { onError: handleChannelError })
   const readOnly = channel.state !== "enabled"
@@ -32,13 +30,17 @@ export default function ChannelModerationPage() {
           <Button type="button" onClick={() => void reload()}>重新載入</Button>
         </div>
       ) : data ? (
-        <ModerationFilterCard
-          key={channel.id + JSON.stringify(data)}
-          filter={data}
-          endpoint={endpoint + "/filters/link"}
-          disabled={readOnly || loading}
-          onReload={reload}
-        />
+        <div className="space-y-4">
+          {data.map((filter) => (
+            <ModerationFilterCard
+              key={channel.id + JSON.stringify(filter)}
+              filter={filter}
+              endpoint={endpoint + "/filters/" + filter.kind}
+              disabled={readOnly || loading}
+              onReload={reload}
+            />
+          ))}
+        </div>
       ) : (
         <p aria-busy="true" role="status">載入中…</p>
       )}
