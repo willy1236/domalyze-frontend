@@ -1,7 +1,7 @@
 import { channelPath } from "./dashboard-channel"
 
 /** 頻道頁的區塊；順序即側欄顯示順序。各區塊頁面完成前先放「尚未開放」。 */
-export type ChannelSectionKey = "overview" | "commands" | "regulars" | "moderation" | "timers" | "events" | "forward" | "audit" | "settings"
+export type ChannelSectionKey = "overview" | "commands" | "regulars" | "moderation" | "enforcement" | "timers" | "events" | "forward" | "audit" | "settings"
 
 export interface ChannelNavItem {
   key: ChannelSectionKey
@@ -15,6 +15,7 @@ export const CHANNEL_NAV: readonly ChannelNavItem[] = [
   { key: "commands", label: "指令", path: "/commands" },
   { key: "regulars", label: "常客", path: "/regulars" },
   { key: "moderation", label: "聊天室管理", path: "/moderation" },
+  { key: "enforcement", label: "執法紀錄", path: "/enforcement" },
   { key: "timers", label: "計時訊息", path: "/timers" },
   { key: "events", label: "事件回應", path: "/events" },
   { key: "forward", label: "轉發 Discord", path: "/forward" },
