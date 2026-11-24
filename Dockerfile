@@ -1,13 +1,15 @@
 # --- 階段 1: Builder (負責編譯) ---
 # 使用 AS builder 標記此階段
-FROM node:20-alpine AS builder
+FROM node:22-alpine AS builder
 
 WORKDIR /app
 
-# 為了確保安裝的版本一致，建議使用 npm ci 而非 npm install
+# 用 --frozen-lockfile 照 pnpm-lock.yaml 安裝，確保版本一致
 # 先複製 package 檔案以利用 Docker Layer 快取
-COPY package.json package-lock.json ./
-RUN npm ci
+ENV COREPACK_ENABLE_DOWNLOAD_PROMPT=0
+RUN corepack enable
+COPY package.json pnpm-lock.yaml ./
+RUN pnpm install --frozen-lockfile
 
 # 複製所有程式碼
 COPY . .
@@ -17,11 +19,11 @@ COPY . .
 # 來源由 docker-compose.yml 的 secrets.env 決定，可放在 build context 之外
 # secret 的內容不計入 layer 快取鍵，改了 env 檔會沿用舊產物；ENV_HASH 由部署端傳入 env 檔的雜湊，值變了這一層才會重建
 ARG ENV_HASH=""
-RUN --mount=type=secret,id=env,target=/app/.env : "$ENV_HASH" && npm run build
+RUN --mount=type=secret,id=env,target=/app/.env : "$ENV_HASH" && pnpm run build
 
 # --- 階段 2: Runner (負責執行) ---
 # 這是最終會跑起來的輕量級映像檔
-FROM node:20-alpine AS runner
+FROM node:22-alpine AS runner
 
 WORKDIR /app
 
@@ -48,6 +50,6 @@ ENV PORT=3000
 # 如果不加這行，Next.js 預設只會監聽 localhost (127.0.0.1)，導致外部無法連線
 ENV HOSTNAME="0.0.0.0"
 
-# Standalone 模式下，直接用 node 執行 server.js 即可，不需 npm start
+# Standalone 模式下，直接用 node 執行 server.js 即可，不需 pnpm start
 # Next.js 的 output: 'standalone' 模式，無論原始碼是 TS 還是 JS，永遠都會生成一個 server.js 檔案 作為啟動入口。
 CMD ["node", "server.js"]
