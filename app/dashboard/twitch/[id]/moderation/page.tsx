@@ -2,6 +2,7 @@
 
 import { useCallback } from "react"
 import { useChannel, useChannelError } from "@/components/dashboard/channel/channel-access-guard"
+import { BlockedTerms } from "@/components/dashboard/channel/blocked-terms"
 import { ModerationFilterCard, type ModerationFilter } from "@/components/dashboard/channel/moderation-filter-card"
 import { ModerationSettingsCard, type ModerationSettings } from "@/components/dashboard/channel/moderation-settings-card"
 import { Button } from "@/components/ui"
@@ -51,6 +52,9 @@ export default function ChannelModerationPage() {
       ) : (
         <p aria-busy="true" role="status">載入中…</p>
       )}
+      <div className="mt-8">
+        <BlockedTerms channelId={channel.id} readOnly={readOnly} />
+      </div>
     </section>
   )
 }
