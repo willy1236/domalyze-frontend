@@ -63,7 +63,7 @@ export function fetchOpsEnforcement(
   channelId: string,
   offset: number,
   signal?: AbortSignal,
-): Promise<EnforcementPage & { channel: { name: string; state: string } }> {
+): Promise<EnforcementPage> {
   return dashboardFetch(`/dashboard/ops/channels/${encodeURIComponent(channelId)}/enforcement?offset=${offset}`, {}, { signal })
 }
 
