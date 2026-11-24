@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, type FormEvent } from "react"
-import { Button, Input } from "@/components/ui"
+import { Button, Input, Select } from "@/components/ui"
 import { DashboardApiError, dashboardFetch } from "@/lib/dashboard-api"
 import { useChannelError, useReloadChannel } from "./channel-access-guard"
 import { FIRST_STAGE, ModerationStageEditor, stageProblem, type ModerationStage } from "./moderation-stage-editor"
@@ -218,10 +218,10 @@ export function ModerationFilterCard({ filter, endpoint, disabled, onReload }: P
         </label>
         <label className="block text-sm">
           <span className="mb-1 block font-medium">豁免層級</span>
-          <select className={fieldClass} value={draft.exempt_level}
+          <Select value={draft.exempt_level}
             onChange={(event) => setDraft({ ...draft, exempt_level: event.target.value as ExemptLevel })}>
             {Object.entries(LEVELS).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
-          </select>
+          </Select>
         </label>
         {list && (
           <label className="block text-sm">

@@ -1,4 +1,4 @@
-import { Button, Input } from "@/components/ui"
+import { Button, Input, Select } from "@/components/ui"
 
 const ACTIONS = {
   delete: "刪除訊息",
@@ -48,8 +48,7 @@ export function ModerationStageEditor({ stages, onChange }: Props) {
           <li key={index} className="flex flex-wrap items-end gap-2">
             <label className="min-w-32 flex-1 text-sm">
               <span className="mb-1 block">第 {index + 1} 段動作</span>
-              <select
-                className="w-full border border-champagne/40 bg-transparent px-3 py-2 text-sm disabled:opacity-60"
+              <Select
                 value={stage.action}
                 onChange={(event) => {
                   const action = event.target.value as ModerationStage["action"]
@@ -59,7 +58,7 @@ export function ModerationStageEditor({ stages, onChange }: Props) {
                 {Object.entries(ACTIONS).map(([action, label]) => (
                   <option key={action} value={action}>{label}</option>
                 ))}
-              </select>
+              </Select>
             </label>
             {stage.action === "timeout" && (
               <label className="w-32 text-sm">
