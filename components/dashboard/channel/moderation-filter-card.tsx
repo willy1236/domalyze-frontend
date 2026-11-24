@@ -208,81 +208,91 @@ export function ModerationFilterCard({ filter, endpoint, disabled, onReload }: P
   }
 
   return (
-    <form onSubmit={(event) => void save(event)} className="max-w-2xl border border-champagne/30 p-5 sm:p-6">
-      <h3 className="mb-4 text-lg font-semibold">{title}</h3>
-      <fieldset disabled={disabled || saving} className="space-y-4">
-        <label className="flex items-center gap-2 text-sm font-medium">
-          <input type="checkbox" checked={draft.enabled}
-            onChange={(event) => setDraft({ ...draft, enabled: event.target.checked })} />
-          啟用{title}
-        </label>
-        <label className="block text-sm">
-          <span className="mb-1 block font-medium">豁免層級</span>
-          <Select value={draft.exempt_level}
-            onChange={(event) => setDraft({ ...draft, exempt_level: event.target.value as ExemptLevel })}>
-            {Object.entries(LEVELS).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
-          </Select>
-        </label>
-        {list && (
-          <label className="block text-sm">
-            <span className="mb-1 block font-medium">{list.label}</span>
-            <textarea
-              className={fieldClass}
-              rows={3}
-              placeholder={list.placeholder}
-              value={params[list.key]}
-              onChange={(event) => setParams({ ...params, [list.key]: event.target.value })}
-            />
-            <span className="text-gray-600 dark:text-gray-400">{list.description}最多 {LIST_MAX} 項，每項最多 {ENTRY_MAX} 字。</span>
-          </label>
-        )}
-        {numbers.map(({ key, label, bounds: [min, max] }) => (
-          <label key={key} className="block text-sm">
-            <span className="mb-1 block font-medium">{label}</span>
-            <Input
-              type="number"
-              min={min}
-              max={max}
-              step={1}
-              required
-              value={params[key]}
-              onChange={(event) => setParams({ ...params, [key]: event.target.value })}
-            />
-          </label>
-        ))}
-        <label className="block text-sm">
-          <span className="mb-1 block font-medium">告知文字</span>
-          <Input type="text" value={draft.notice ?? ""} placeholder="使用預設文字"
-            onChange={(event) => setDraft({ ...draft, notice: event.target.value || null })} />
-          <span className="mt-1 block text-gray-600 dark:text-gray-400">
-            {"可用 {user} 代入觀眾名稱，{filter} 代入過濾器名稱。"}
+    <form onSubmit={(event) => void save(event)} className="max-w-2xl border border-champagne/30">
+      <details className="group">
+        <summary className="flex cursor-pointer list-none items-center [&::-webkit-details-marker]:hidden justify-between gap-3 p-5 sm:px-6">
+          <h3 className="text-lg font-semibold">{title}</h3>
+          <span className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+            {original.enabled ? "已啟用" : "未啟用"}
+            <span aria-hidden className="transition-transform group-open:rotate-90">›</span>
           </span>
-        </label>
-        <label className="flex items-center gap-2 text-sm">
-          <input type="checkbox" checked={draft.silent}
-            onChange={(event) => setDraft({ ...draft, silent: event.target.checked })} />
-          靜音
-        </label>
-        <label className="flex items-center gap-2 text-sm font-medium">
-          <input
-            type="checkbox"
-            checked={useCustomStages}
-            onChange={(event) => setUseCustomStages(event.target.checked)}
-          />
-          使用自己的處罰階段
-        </label>
-        {useCustomStages && (
-          <ModerationStageEditor stages={stages} onChange={(next) => setDraft({ ...draft, stages: next })} />
-        )}
-        <Button type="submit" disabled={status === "conflict"}>{saving ? "儲存中…" : "儲存"}</Button>
-      </fieldset>
-      {problem && <p className="mt-3 text-sm text-red-700 dark:text-red-300" role="alert">{problem}</p>}
-      {status === "conflict" && (
-        <Button type="button" className="mt-3" disabled={disabled} onClick={() => void onReload()}>
-          重新載入設定
-        </Button>
-      )}
-      {status === "saved" && <p className="mt-3 text-sm" role="status">已儲存{title}設定。</p>}
+        </summary>
+        <div className="px-5 pb-5 sm:px-6 sm:pb-6">
+          <fieldset disabled={disabled || saving} className="space-y-4">
+            <label className="flex items-center gap-2 text-sm font-medium">
+              <input type="checkbox" checked={draft.enabled}
+                onChange={(event) => setDraft({ ...draft, enabled: event.target.checked })} />
+              啟用{title}
+            </label>
+            <label className="block text-sm">
+              <span className="mb-1 block font-medium">豁免層級</span>
+              <Select value={draft.exempt_level}
+                onChange={(event) => setDraft({ ...draft, exempt_level: event.target.value as ExemptLevel })}>
+                {Object.entries(LEVELS).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
+              </Select>
+            </label>
+            {list && (
+              <label className="block text-sm">
+                <span className="mb-1 block font-medium">{list.label}</span>
+                <textarea
+                  className={fieldClass}
+                  rows={3}
+                  placeholder={list.placeholder}
+                  value={params[list.key]}
+                  onChange={(event) => setParams({ ...params, [list.key]: event.target.value })}
+                />
+                <span className="text-gray-600 dark:text-gray-400">{list.description}最多 {LIST_MAX} 項，每項最多 {ENTRY_MAX} 字。</span>
+              </label>
+            )}
+            {numbers.map(({ key, label, bounds: [min, max] }) => (
+              <label key={key} className="block text-sm">
+                <span className="mb-1 block font-medium">{label}</span>
+                <Input
+                  type="number"
+                  min={min}
+                  max={max}
+                  step={1}
+                  required
+                  value={params[key]}
+                  onChange={(event) => setParams({ ...params, [key]: event.target.value })}
+                />
+              </label>
+            ))}
+            <label className="block text-sm">
+              <span className="mb-1 block font-medium">告知文字</span>
+              <Input type="text" value={draft.notice ?? ""} placeholder="使用預設文字"
+                onChange={(event) => setDraft({ ...draft, notice: event.target.value || null })} />
+              <span className="mt-1 block text-gray-600 dark:text-gray-400">
+                {"可用 {user} 代入觀眾名稱，{filter} 代入過濾器名稱。"}
+              </span>
+            </label>
+            <label className="flex items-center gap-2 text-sm">
+              <input type="checkbox" checked={draft.silent}
+                onChange={(event) => setDraft({ ...draft, silent: event.target.checked })} />
+              靜音
+            </label>
+            <label className="flex items-center gap-2 text-sm font-medium">
+              <input
+                type="checkbox"
+                checked={useCustomStages}
+                onChange={(event) => setUseCustomStages(event.target.checked)}
+              />
+              使用自己的處罰階段
+            </label>
+            {useCustomStages && (
+              <ModerationStageEditor stages={stages} onChange={(next) => setDraft({ ...draft, stages: next })} />
+            )}
+            <Button type="submit" disabled={status === "conflict"}>{saving ? "儲存中…" : "儲存"}</Button>
+          </fieldset>
+          {problem && <p className="mt-3 text-sm text-red-700 dark:text-red-300" role="alert">{problem}</p>}
+          {status === "conflict" && (
+            <Button type="button" className="mt-3" disabled={disabled} onClick={() => void onReload()}>
+              重新載入設定
+            </Button>
+          )}
+          {status === "saved" && <p className="mt-3 text-sm" role="status">已儲存{title}設定。</p>}
+        </div>
+      </details>
     </form>
   )
 }
