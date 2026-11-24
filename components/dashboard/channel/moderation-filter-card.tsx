@@ -4,6 +4,7 @@ import { useState, type FormEvent } from "react"
 import { Button, Input } from "@/components/ui"
 import { DashboardApiError, dashboardFetch } from "@/lib/dashboard-api"
 import { useChannelError, useReloadChannel } from "./channel-access-guard"
+import { FIRST_STAGE, ModerationStageEditor, stageProblem, type ModerationStage } from "./moderation-stage-editor"
 
 type ExemptLevel = "subscriber" | "regular" | "vip" | "mod"
 
@@ -13,6 +14,7 @@ interface FilterValues {
   params: Record<string, number | string[]>
   notice: string | null
   silent: boolean
+  stages: ModerationStage[] | null
 }
 
 export interface ModerationFilter extends FilterValues {
@@ -110,8 +112,8 @@ const LEVELS: Record<ExemptLevel, string> = {
 
 const fieldClass = "w-full border border-champagne/40 bg-transparent px-3 py-2 text-sm disabled:opacity-60"
 
-function valuesOf({ enabled, exempt_level, params, notice, silent }: ModerationFilter): FilterValues {
-  return { enabled, exempt_level, params, notice, silent }
+function valuesOf({ enabled, exempt_level, params, notice, silent, stages }: ModerationFilter): FilterValues {
+  return { enabled, exempt_level, params, notice, silent, stages }
 }
 
 interface Props {
@@ -126,6 +128,8 @@ export function ModerationFilterCard({ filter, endpoint, disabled, onReload }: P
   const { title, list, numbers = [] } = definition
   const [original, setOriginal] = useState(() => valuesOf(filter))
   const [draft, setDraft] = useState(original)
+  const [useCustomStages, setUseCustomStages] = useState(original.stages !== null)
+  const stages = draft.stages ?? FIRST_STAGE
   const [params, setParams] = useState(() => parameterInputs(definition, original.params))
   const [saving, setSaving] = useState(false)
   const [status, setStatus] = useState<"idle" | "saved" | "conflict">("idle")
@@ -137,7 +141,12 @@ export function ModerationFilterCard({ filter, endpoint, disabled, onReload }: P
     event.preventDefault()
     setStatus("idle")
     setProblem("")
-    const values: FilterValues = { ...draft, params: {} }
+    const values: FilterValues = { ...draft, params: {}, stages: useCustomStages ? stages : null }
+    const invalidStage = values.stages && stageProblem(values.stages)
+    if (invalidStage) {
+      setProblem(invalidStage)
+      return
+    }
     if (list) {
       values.params[list.key] = params[list.key].split(/\r?\n/).map((entry) => entry.trim()).filter(Boolean)
     }
@@ -158,6 +167,7 @@ export function ModerationFilterCard({ filter, endpoint, disabled, onReload }: P
       const saved = valuesOf(response.filter)
       setOriginal(saved)
       setDraft(saved)
+      setUseCustomStages(saved.stages !== null)
       setParams(parameterInputs(definition, saved.params))
       setStatus("saved")
     } catch (error) {
@@ -246,6 +256,17 @@ export function ModerationFilterCard({ filter, endpoint, disabled, onReload }: P
             onChange={(event) => setDraft({ ...draft, silent: event.target.checked })} />
           靜音
         </label>
+        <label className="flex items-center gap-2 text-sm font-medium">
+          <input
+            type="checkbox"
+            checked={useCustomStages}
+            onChange={(event) => setUseCustomStages(event.target.checked)}
+          />
+          使用自己的處罰階段
+        </label>
+        {useCustomStages && (
+          <ModerationStageEditor stages={stages} onChange={(next) => setDraft({ ...draft, stages: next })} />
+        )}
         <Button type="submit" disabled={status === "conflict"}>{saving ? "儲存中…" : "儲存"}</Button>
       </fieldset>
       {problem && <p className="mt-3 text-sm text-red-700 dark:text-red-300" role="alert">{problem}</p>}

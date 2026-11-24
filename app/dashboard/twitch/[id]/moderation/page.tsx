@@ -3,6 +3,7 @@
 import { useCallback } from "react"
 import { useChannel, useChannelError } from "@/components/dashboard/channel/channel-access-guard"
 import { ModerationFilterCard, type ModerationFilter } from "@/components/dashboard/channel/moderation-filter-card"
+import { ModerationSettingsCard, type ModerationSettings } from "@/components/dashboard/channel/moderation-settings-card"
 import { Button } from "@/components/ui"
 import { dashboardFetch } from "@/lib/dashboard-api"
 import { useLoad } from "@/lib/use-load"
@@ -12,8 +13,7 @@ export default function ChannelModerationPage() {
   const handleChannelError = useChannelError()
   const endpoint = `/dashboard/channels/${encodeURIComponent(channel.id)}/moderation`
   const fetcher = useCallback(async (signal: AbortSignal) => {
-    const data = await dashboardFetch<{ filters: ModerationFilter[] }>(endpoint, {}, { signal })
-    return data.filters
+    return dashboardFetch<{ filters: ModerationFilter[]; settings: ModerationSettings }>(endpoint, {}, { signal })
   }, [endpoint])
   const { data, failed, loading, reload } = useLoad(fetcher, { onError: handleChannelError })
   const readOnly = channel.state !== "enabled"
@@ -31,7 +31,14 @@ export default function ChannelModerationPage() {
         </div>
       ) : data ? (
         <div className="space-y-4">
-          {data.map((filter) => (
+          <ModerationSettingsCard
+            key={channel.id + JSON.stringify(data.settings)}
+            settings={data.settings}
+            endpoint={endpoint + "/settings"}
+            disabled={readOnly || loading}
+            onReload={reload}
+          />
+          {data.filters.map((filter) => (
             <ModerationFilterCard
               key={channel.id + JSON.stringify(filter)}
               filter={filter}
